@@ -18,7 +18,7 @@ prerequisites:
     - A build system [GNU Make](https://www.gnu.org/software/make/) or [Ninja](https://ninja-build.org/).
     - A documentation generator [Doxygen](https://www.doxygen.nl/).
 
-author_primary: Arnaud de Grandmaison
+author: Arnaud de Grandmaison
 
 
 ### Tags
@@ -33,6 +33,8 @@ tools_software_languages:
     - Clang
     - CMake
     - GoogleTest
+    - Runbook
+
 operatingsystems:
     - Linux
     - macOS
@@ -42,6 +44,18 @@ shared_between:
     - servers-and-cloud-computing
     - laptops-and-desktops
     - mobile-graphics-and-gaming
+
+further_reading:
+    - resource:
+        title: CMake Tutorial
+        link: https://cmake.org/cmake/help/latest/guide/tutorial/index.html
+        type: documentation
+    - resource:
+        title: Quickstart Building with CMake
+        link: https://google.github.io/googletest/quickstart-cmake.html
+        type: documentation
+
+
 
 ### FIXED, DO NOT MODIFY
 # ================================================================================

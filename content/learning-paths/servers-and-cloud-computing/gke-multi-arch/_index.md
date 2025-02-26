@@ -16,7 +16,7 @@ prerequisites:
     - A computer with [Google Cloud CLI](/install-guides/gcloud) and [kubectl](/install-guides/kubectl/)installed.
     - An existing Google Kubernetes Engine (GKE) cluster with x86-based nodes
 
-author_primary: Pranay Bakre
+author: Pranay Bakre
 
 ### Tags
 skilllevels: Advanced
@@ -28,9 +28,26 @@ armips:
 
 tools_software_languages:
     - Kubernetes
+    - Runbook
 
 operatingsystems:
     - Linux
+
+
+further_reading:
+    - resource:
+        title: Create Arm based clusters and node pools 
+        link: https://cloud.google.com/kubernetes-engine/docs/how-to/create-arm-clusters-nodes
+        type: documentation
+    - resource:
+        title: Configure cluster access to use kubectl
+        link: https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
+        type: documentation
+    - resource:
+        title: GKE documentation
+        link: https://cloud.google.com/kubernetes-engine/docs
+        type: documentation
+
 
 
 ### FIXED, DO NOT MODIFY

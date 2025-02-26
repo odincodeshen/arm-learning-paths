@@ -14,7 +14,7 @@ learning_objectives:
 prerequisites:
     - An Arm Neoverse N1 computer running Linux. A bare metal or cloud metal instance is best because they expose more counters. You can use a virtual machine (VM), but it may offer fewer counters and some commands might not succeed. These instructions have been tested on the `a1.metal` instance type.
 
-author_primary: Jason Andrews
+author: Jason Andrews
 
 ### Tags
 skilllevels: Introductory
@@ -24,9 +24,30 @@ armips:
 tools_software_languages:
     - perf
     - Telemetry
+    - Runbook
+
 
 operatingsystems:
     - Linux
+
+further_reading:
+    - resource:
+        title: "Arm Neoverse N1: Core Performance Analysis Methodology"
+        link: https://armkeil.blob.core.windows.net/developer/Files/pdf/white-paper/neoverse-n1-core-performance-v2.pdf
+        type: documentation
+    - resource:
+        title: "Arm Neoverse N1 PMU Guide"
+        link: https://developer.arm.com/documentation/PJDOC-466751330-547673/r4p1/ 
+        type: documentation
+    - resource:
+        title: "Introduction to Computer Architecture"
+        link: https://www.arm.com/resources/education/education-kits/computer-architecture 
+        type: book
+    - resource:
+        title: "Computer Architecture: A Quantitative Approach"
+        link: https://www.amazon.com/Computer-Architecture-Quantitative-John-Hennessy/dp/012383872X
+        type: documentation
+
 
 ### FIXED, DO NOT MODIFY
 # ================================================================================

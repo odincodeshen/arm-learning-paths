@@ -19,7 +19,7 @@ prerequisites:
     - Familiarity with Arm assembly.
     - A LLVM 19 compiler with runtime library support or GCC 14.
 
-author_primary: Alexandros Lamprineas
+author: Alexandros Lamprineas
 
 ### Tags
 skilllevels: Advanced
@@ -29,6 +29,7 @@ armips:
     - Neoverse
 tools_software_languages:
     - C/C++
+    - Runbook
 operatingsystems:
     - Linux
     - Android
@@ -45,6 +46,13 @@ shared_between:
 # ================================================================================
 #       FIXED, DO NOT MODIFY
 # ================================================================================
+further_reading:
+    - resource:
+        title: Arm C Language Extensions
+        link: https://arm-software.github.io/acle/main/acle.html
+        type: documentation
+
+
 weight: 1                       # _index.md always has weight of 1 to order correctly
 layout: "learningpathall"       # All files under learning paths have this same wrapper
 learning_path_main_page: "yes"  # This should be surfaced when looking for related content. Only set for _index.md of learning path content.

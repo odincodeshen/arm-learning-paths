@@ -15,7 +15,9 @@ prerequisites:
     - Some understanding of the Linux command line.
     - Optionally a basic understanding of Docker and containers.
 
-author_primary: Tom Pilar, Daniel Nguyen
+author: 
+    - Tom Pilar
+    - Daniel Nguyen
 
 ### Tags
 skilllevels: Introductory
@@ -26,8 +28,17 @@ tools_software_languages:
     - Docker
     - FVP
     - Arm Development Studio
+    - Runbook
+
 operatingsystems:
     - Linux
+
+
+further_reading:
+    - resource:
+        title: Neoverse Reference Design Platform Software Documentation
+        link: https://neoverse-reference-design.docs.arm.com/en/latest/index.html
+        type: documentation
 
 
 ### FIXED, DO NOT MODIFY
