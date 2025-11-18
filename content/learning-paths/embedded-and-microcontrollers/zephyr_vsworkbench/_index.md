@@ -1,12 +1,12 @@
 ---
-title: Build Zephyr Projects with Zephyr Workbench in VS Code
+title: Build Zephyr Projects with Workbench for Zephyr in VS Code
 
 minutes_to_complete: 30
 
-who_is_this_for: This Learning Path is for embedded developers targeting Arm-based platforms with Zephyr RTOS using the Zephyr Workbench extension for VS Code. It is ideal for those developing IoT, wearable, or sensor-driven systems seeking a streamlined and modern development workflow.
+who_is_this_for: This Learning Path is for embedded developers targeting Arm-based platforms with Zephyr RTOS using the Workbench for Zephyr extension for VS Code. It is ideal for those developing IoT, wearable, or sensor-driven systems seeking a streamlined and modern development workflow.
 
 learning_objectives:
-    - Install and configure the Zephyr Workbench extension in VS Code
+    - Install and configure the Workbench for Zephyr extension in VS Code
     - Set up a complete Zephyr development environment including SDK and toolchain
     - Create, build, and debug Zephyr applications using hands-on examples
     - Perform memory usage analysis and apply basic optimization techniques
@@ -39,7 +39,7 @@ further_reading:
         link: https://docs.zephyrproject.org/latest/index.html
         type: documentation
     - resource:
-        title: Zephyr Workbench Official Website
+        title: Workbench for Zephyr Official Website
         link: https://zephyr-workbench.com/
         type: website
     - resource:
