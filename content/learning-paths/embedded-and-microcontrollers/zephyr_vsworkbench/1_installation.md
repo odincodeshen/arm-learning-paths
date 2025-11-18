@@ -10,7 +10,7 @@ layout: learningpathall
 
 Setting up a [Zephyr](https://zephyrproject.org/) RTOS development environment from scratch can be challenging—requiring developers to manually install SDKs, configure toolchains, and initialize workspace directories. These steps often vary across operating systems and board vendors, leading to a fragmented and error-prone setup process.
 
-***[Workbench for Zephyr](https://z-workbench.com/)*** is an open-source Visual Studio Code extension that transforms Zephyr RTOS development into a streamlined IDE experience. Created by [Ac6](https://www.ac6.fr/), it automates toolchain setup, project management, and debugging—making Zephyr projects faster to start and easier to scale.
+***[Workbench for Zephyr](https://z-workbench.com/)*** is an open-source Visual Studio Code [extension](https://marketplace.visualstudio.com/items?itemName=Ac6.zephyr-workbench) that transforms Zephyr RTOS development into a streamlined IDE experience. Created by [Ac6](https://www.ac6.fr/), it automates toolchain setup, project management, and debugging—making Zephyr projects faster to start and easier to scale.
 
 In this learning path, you’ll walk through the essential steps to install Workbench for Zephyr and configure a complete development environment on your local machine. Once complete, you’ll be ready to create, build, and debug applications for Arm Cortex-M platforms using Zephyr RTOS.
 
