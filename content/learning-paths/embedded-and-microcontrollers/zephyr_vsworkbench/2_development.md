@@ -13,7 +13,7 @@ In this session, you’ll learn how to create and build your first Zephyr applic
 For demonstration, we will use an [NXP FRDM-MCXN947](https://www.nxp.com/design/design-center/development-boards-and-designs/FRDM-MCXN947) development board as the target device. However, the same steps apply to any Zephyr-supported Arm Cortex-M board. 
 You can find the full list of supported boards in the [Supported Boards](https://docs.zephyrproject.org/latest/boards/#).
 
-Depending on your board, you may need to install a different debug tool. We’ll cover that in the next module.
+Depending on your board, you may need to install a different debug tool aka runner. We’ll cover that in the next module.
 
 ### Create Application
 
@@ -69,11 +69,11 @@ Memory region         Used Size  Region Size  % Used
 
 ```c
 #include <zephyr/kernel.h>
-#include <zephyr/sys/printk.h>
+#include <zephyr/stdio.h>
 
 int main(void)
 {
-    printk("Hello World! %s\n", CONFIG_BOARD); // Prints board name to serial console
+    printk("Hello World! %s\n", CONFIG_BOARD_TARGET); // Prints board name to serial console
     return 0;
 }
 ```

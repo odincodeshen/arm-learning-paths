@@ -155,23 +155,24 @@ Root                                                                            
 ```
 
 
-## Install and Configure Debug Tools
+## Install and Configure Runners
 
-Depending on your board, different debug utilities may be required. Zephyr Workbench integrates several common runners:
-
-Go to **Host Tools > Install Debug Tools** in Zephyr Workbench. Debug tools vary depending on your target board.
+Depending on your board, different debug utilities may be required. Zephyr Workbench integrates and discovers several common runners:
 
 - **OpenOCD**: Generic open-source debugger
 - **LinkServer**: For NXP targets
 - **STM32CubeProgrammer**: For STM32 boards
 - **J-Link**: For SEGGER debug probes
 
-### Install Debug Utilities
+Zephyr Workbench will automatically detect these tools when they are installed in their default locations and available on your system `PATH`. If a tool is installed in a custom location, you can either update your `PATH` or configure your environment so that Zephyr Workbench can find it.
 
-- Go to **Host Tools > Install Debug Tools** in the Zephyr Workbench panel.
-- Select the tools applicable to your board.
+### Install Runners Utilities
 
-![Debug Tools](images/install_debug_tools.png)
+- Go to **Host Tools > Install Runners** in the Zephyr Workbench panel.
+- Select and install the tools applicable to your board.
+- If you install or update tools outside of Zephyr Workbench, click the **Status** refresh icon in the **Install Runners** view to rescan. The status column will then show whether each tool is detected and report the exact version found.
+
+![Debug Runners](images/install_runners.png)
 
 ## Configure Debug Settings
 
