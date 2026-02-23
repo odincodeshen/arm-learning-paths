@@ -18,10 +18,8 @@ prerequisites:
     - Experience building software from source using CMake and make
 
 author:
-    - Odin Shen
-    - Asier Arranz
     - Johnny Nunez
-    - Raymond Lo
+    - Odin Shen
 
 ### Tags
 skilllevels: Advanced
