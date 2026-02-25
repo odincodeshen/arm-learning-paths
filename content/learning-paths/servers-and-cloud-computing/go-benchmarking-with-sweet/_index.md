@@ -19,9 +19,10 @@ author: Geremy Cohen
 ### Tags
 skilllevels: Introductory
 subjects: Performance and Architecture
+cloud_service_providers:
+  - Google Cloud
 armips:
     - Neoverse
-cloud_service_providers: Google Cloud
 tools_software_languages:
     - Go
 operatingsystems:

@@ -20,7 +20,9 @@ author: Dawid Borycki
 ### Tags
 skilllevels: Introductory
 subjects: Containers and Virtualization
-cloud_service_providers: Google Cloud 
+cloud_service_providers:
+  - AWS
+  - Google Cloud
 
 armips:
     - Neoverse
