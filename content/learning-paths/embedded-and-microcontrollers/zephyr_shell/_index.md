@@ -1,0 +1,50 @@
+---
+title: Build a Lightweight Shell on Cortex-M with Zephyr RTOS
+
+minutes_to_complete: 30
+
+who_is_this_for: This learning path is for embedded developers building on Arm Cortex-M microcontrollers who want to create a lightweight, configurable shell (CLI) using Zephyr RTOS—using VS Code with the Workbench for Zephyr extension to build, flash, and debug on real hardware.
+
+learning_objectives:
+    - Enable and tailor Zephyr Shell (Kconfig/prj.conf) to produce a minimal CLI footprint
+    - Build, flash, and debug the shell-enabled Zephyr app on an Arm Cortex-M board (UART/RTT logging, breakpoints)
+
+prerequisites:
+    - Basic familiarity with embedded C programming
+    - Visual Studio Code
+    - A Cortex-M development board
+    - Windows 10+ (64-bit), macOS with Homebrew, or Linux (preferably Ubuntu 20.04+)
+
+author: 
+    - Ayoub Bourjilat
+    - Odin Shen
+
+skilllevels: Introductory
+subjects: RTOS Fundamentals
+armips:
+    - Cortex-M
+operatingsystems:
+    - RTOS
+tools_software_languages:
+    - Zephyr
+    - C
+
+further_reading:
+    - resource:
+        title: Zephyr Project Documentation
+        link: https://docs.zephyrproject.org/latest/index.html
+        type: documentation
+    - resource:
+        title: Workbench for Zephyr Official Website
+        link: https://z-workbench.com/
+        type: website
+    - resource:
+        title: AC6 Zephyr Training
+        link: https://www.ac6-training.com/en/cours.php/cat_oRT/ref_oRT5/zephyr-rtos-programming
+        type: website
+
+# ================================================================================
+weight: 1                       # _index.md always has weight of 1 to order correctly
+layout: "learningpathall"       # All files under learning paths have this same wrapper
+learning_path_main_page: "yes"  # This should be surfaced when looking for related content. Only set for _index.md of learning path content.
+---
