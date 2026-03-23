@@ -3,19 +3,19 @@ title: Scale Robotics Reinforcement Learning Workflows to Manipulation and Multi
 
 minutes_to_complete: 90
 
-who_is_this_for: This advanced topic is intended for robotics developers, simulation engineers, and AI researchers who want to run high-fidelity robotic simulations and reinforcement learning (RL) pipelines using Isaac Sim and Isaac Lab on Arm-based NVIDIA DGX Spark systems powered by the Grace–Blackwell (GB10) architecture.
+who_is_this_for: This advanced topic is intended for robotics software architects, simulation engineers, and AI researchers who want to orchestrate high-fidelity robotic simulations and reinforcement learning (RL) pipelines. It specifically targets those leveraging Isaac Sim and Isaac Lab on Arm-based NVIDIA DGX Spark systems powered by the Grace–Blackwell (GB10) architecture.
 
 learning_objectives:
-    - Describe the roles of Isaac Sim and IsaacLab, and explain how DGX Spark accelerates robotic simulation and learning workloads
-    - Train a reinforcement learning policy for the Unitree H1 humanoid robot using Isaac Lab and the RSL-RL interface
-    - Scale reinforcement learning workloads across multiple tasks and multi-agent environments using Isaac Lab
+    - Describe the roles of Isaac Sim and Isaac Lab, and explain how the Grace-Blackwell control plane accelerates simulation workflow orchestration.
+    - Train a reinforcement learning policy for the Unitree H1 humanoid robot using the RSL-RL interface.
+    - Navigate and select among multiple RL libraries (RSL-RL, rl_games, skrl) to optimize workflows for manipulation, contact-rich, and multi-agent tasks.
+    - Scale RL workloads across multi-agent environments and Adversarial Motion Priors (AMP) for natural humanoid locomotion.
 
 prerequisites:
     - Access to an NVIDIA DGX Spark system with at least 50 GB of free disk space
-    - Familiarity with command-line interfaces and basic Linux operations
+    - Completion of the previous Isaac Sim / Isaac Lab setup on Arm-based systems
     - Experience with Python scripting and virtual environments
     - Basic understanding of reinforcement learning concepts (rewards, policies, episodes)
-    - Experience building software from source using CMake and make
 
 author:
     - Johnny Nunez
@@ -45,12 +45,8 @@ further_reading:
         link: https://isaac-sim.github.io/IsaacLab/main/index.html
         type: documentation
     - resource:
-        title: NVIDIA DGX Spark Playbooks
-        link: https://github.com/NVIDIA/dgx-spark-playbooks
-        type: documentation
-    - resource:
-        title: Isaac Lab Available Environments
-        link: https://isaac-sim.github.io/IsaacLab/main/source/overview/environments.html
+        title: Isaac Sim and Isaac Lab learning path
+        link: https://learn.arm.com/learning-paths/laptops-and-desktops/dgx_spark_isaac_robotics/
         type: website
     - resource:
         title: DGX Spark Isaac Sim and Isaac Lab Playbook
