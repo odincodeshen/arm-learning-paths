@@ -76,9 +76,14 @@ After training, look for the following behaviors:
 
 
 ```bash
+
+
+### Not working
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
     --task=Isaac-Shadow-Hand-Over-Direct-v0
     --num_envs=16
+
+
 ```
 
 ![img5 alt-text#center](demo_5.gif "Figure 5: Shadow-Hand-Over")
@@ -121,6 +126,9 @@ When you run this task, observe the following:
 * Convergence speed and stability differ between algorithms.
 
 ```bash
+
+### Not working
+
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
     --task=Isaac-Cart-Double-Pendulum-Direct-v0
     --num_envs=16

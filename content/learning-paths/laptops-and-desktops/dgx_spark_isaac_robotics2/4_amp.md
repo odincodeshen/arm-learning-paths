@@ -90,6 +90,9 @@ After training, look for the following behaviors:
 * The left and right leg timing resembles a more natural walking pattern.
 
 ```bash
+
+### Not working
+
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
     --task=Isaac-Humanoid-AMP-Walk-Direct-v0
     --num_envs=16
@@ -128,6 +131,8 @@ After training, confirm the following:
 * The motion looks like a recognizable running pattern rather than just aggressive forward movement.
 
 ```bash
+
+### Not working
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
     --task=Isaac-Humanoid-AMP-Run-Direct-v0
     --num_envs=16
@@ -162,6 +167,9 @@ In this kind of task, observe the following:
 * The policy maintains expressive behavior over time instead of quickly collapsing into unstable motion.
 
 ```bash
+
+### Not working
+
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
     --task=Isaac-Humanoid-AMP-Dance-Direct-v0
     --num_envs=16

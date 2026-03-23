@@ -132,7 +132,6 @@ When running these tasks, verify the following:
 * The simulation shows high-precision alignment and contact behavior rather than immediate failure at first contact.
 * The same platform can continue switching between tasks and training workflows without reconfiguring the whole environment.
 
-![img4 alt-text#center](demo_4.gif "Figure 4: Factory PegInsert")
 
 {{% notice Note %}}
 For Factory tasks, high-fidelity contact-force simulation is essential. Whether the agent can respond to sub-millimeter physical feedback directly affects the success rate of insertion, threading, and assembly tasks.
