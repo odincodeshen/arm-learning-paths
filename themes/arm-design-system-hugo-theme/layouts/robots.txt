@@ -1,6 +1,6 @@
 User-agent: *
-Disallow: /install-guides/atp/
-Disallow: /install-guides/asct/
+Disallow:
+Disallow: /stats/content-inventory/
 
 # Explicitly welcome AI crawlers
 User-agent: GPTBot

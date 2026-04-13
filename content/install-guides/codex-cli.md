@@ -195,6 +195,8 @@ To analyze a local codebase, use a `-v` argument to mount a volume to the Arm MC
 
 Replace the path `/Users/yourname01/yourlocalcodebase` with the path to your local codebase.
 
+##### **Option 1: edit the Codex configuration file**
+
 Add the following to your `~/.codex/config.toml` file:
 
 ```toml
@@ -215,6 +217,14 @@ startup_timeout_sec = 60
 The section must be named `mcp_servers` with an underscore. Using `mcp-servers` or `mcpservers` will cause Codex to ignore the configuration.
 {{% /notice %}}
 
+##### **Option 2: add from the Codex CLI**
+
+You can also add the Arm MCP server from the Codex CLI, after starting `codex` run:
+
+```bash
+codex mcp add arm-mcp -- sh -lc 'docker run --rm -i -v "$PWD:/workspace" --name arm-mcp armlimited/arm-mcp:latest'
+```
+
 ### How do I verify the Arm MCP server is working?
 
 Start Codex CLI and list the tools from the MCP server to verify it is working:
@@ -233,6 +243,18 @@ The Arm MCP server is listed in the output. If the arm-mcp server indicates it's
 
 You can also verify the tools are available by asking Codex to list the available Arm MCP tools.
 
+### Use Arm prompt files with the MCP Server
+
+The Arm MCP Server provides a rich set of tools and knowledge base, but to make the best use of it, you should pair it with Arm-specific prompt files. These prompt files supply task-oriented context, best practices, and structured workflows that guide the agent in using MCP tools more effectively across common Arm development tasks.
+
+#### Get the prompt files
+
+Browse the [agent integrations directory for Codex](https://github.com/arm/mcp/tree/main/agent-integrations/codex) to find prompt files for specific use cases:
+
+- **Arm migration** ([arm-migration.md](https://github.com/arm/mcp/blob/main/agent-integrations/codex/arm-migration.md)): Helps the agent systematically migrate applications from x86 to Arm, including dependency analysis, compatibility checks, and optimization recommendations.
+
+Each prompt file is a Markdown configuration that you can reference in your Codex CLI sessions to enable more targeted, task-specific assistance.
+
 If you're facing issues or have questions, reach out to mcpserver@arm.com.
 
-You're now ready to use Codex CLI with Arm-specific development assistance.
+You're now ready to use Codex CLI with the Arm MCP server for Arm-specific development assistance.

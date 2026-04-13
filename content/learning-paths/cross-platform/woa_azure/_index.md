@@ -3,6 +3,8 @@ title: Deploy a Windows on Arm virtual machine on Microsoft Azure
 
 minutes_to_complete: 15
 
+description: Learn how to create and connect to a Windows on Arm virtual machine in Microsoft Azure using the Azure Marketplace and RDP.
+
 who_is_this_for: This is an introductory topic for software developers interested using Windows on Arm in the Azure cloud.
 
 learning_objectives: 
@@ -18,7 +20,8 @@ author: Pareena Verma
 ### Tags
 skilllevels: Introductory
 subjects: Containers and Virtualization
-cloud_service_providers: Microsoft Azure
+cloud_service_providers:
+  - Microsoft Azure
 
 armips:
     - Neoverse

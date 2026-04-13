@@ -22,13 +22,17 @@ author: Pareena Verma
 ### Tags
 skilllevels: Introductory
 subjects: Performance and Architecture
+cloud_service_providers:
+  - AWS
+  - Microsoft Azure
+  - Google Cloud
 armips:
 - Neoverse
 operatingsystems:
 - Linux
 tools_software_languages:
 - SVE2
-- NEON
+- Neon
 - Runbook
 
 further_reading:

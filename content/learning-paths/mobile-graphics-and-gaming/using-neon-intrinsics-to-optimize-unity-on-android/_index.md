@@ -16,7 +16,7 @@ prerequisites:
     - Desktop computer capable of running Unity
     - Unity version compatible with Unity Burst compiler 1.5 or later
 
-author: Arm
+author: Ben Clark, Joshua Marshall-Law
 
 ### Tags
 skilllevels: Advanced
@@ -26,7 +26,7 @@ armips:
     - aarch64
     - arm64
     - arm architecture
-    - NEON
+    - Neon
 tools_software_languages:
     - Unity
     - C#
