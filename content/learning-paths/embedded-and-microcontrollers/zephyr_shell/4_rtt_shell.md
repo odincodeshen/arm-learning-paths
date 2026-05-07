@@ -8,7 +8,7 @@ layout: learningpathall
 
 ## Set up the RTT shell example
 
-In this section, you will build a Zephyr application that enables the RTT shell backend, flash it with Workbench for Zephyr, connect with J-Link RTT Viewer, and run shell commands over the debug connection.
+In this section, you will build a Zephyr application that enables the **Zephyr Shell RTT backend**, flash it with Workbench for Zephyr, connect with **J-Link RTT Viewer**, and run shell commands over the debug connection.
 
 The example uses the **Silicon Labs xG27 Dev Kit (BRD2602A)** because it has an onboard SEGGER J-Link, so a single USB cable handles both flashing and the RTT data channel with no extra hardware. Any other Zephyr-supported board works as well, as long as you can connect a J-Link interface to it. That can be:
 
@@ -19,7 +19,7 @@ The "Switch to a different board" section near the end of this page shows how to
 
 RTT, or Real Time Transfer, is a SEGGER J-Link protocol that transfers data through the debug probe by using a small buffer in target RAM. It is useful for shell access because it does not require UART pins, a USB-to-serial adapter, or a network connection.
 
-The Zephyr RTT shell backend maps shell input and output to SEGGER RTT channel 0.
+The Zephyr Shell RTT backend maps shell input and output to SEGGER RTT channel 0.
 
 ## Create the project
 
@@ -171,4 +171,4 @@ A pristine build is required when you change the board because Workbench for Zep
 
 ## What you accomplished
 
-You built and flashed a Zephyr application that enables the RTT shell backend on the Silicon Labs xG27 Dev Kit. You disabled the UART console, routed shell access through SEGGER RTT, connected with J-Link RTT Viewer, and ran Zephyr shell commands over the debug connection.
+You built and flashed a Zephyr application that enables the Shell RTT backend on the Silicon Labs xG27 Dev Kit. You disabled the UART console, routed shell access through SEGGER RTT, connected with J-Link RTT Viewer, and ran Zephyr shell commands over the debug connection.

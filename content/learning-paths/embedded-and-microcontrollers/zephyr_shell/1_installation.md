@@ -17,14 +17,16 @@ By the end of this section, you will know which boards to use, which host tools 
 
 ## Before you begin
 
-Before you start, make sure you have a working Zephyr development environment configured in Visual Studio Code with the **Workbench for Zephyr** extension.
+Make sure you have a working Zephyr development environment set up in Visual Studio Code using the Workbench for Zephyr extension, including:
 
-If you have not set up Workbench for Zephyr yet, complete [Build Zephyr projects with Workbench for Zephyr in VS Code](/learning-paths/embedded-and-microcontrollers/zephyr_vsworkbench/) first. That Learning Path shows how to install the extension, import the Zephyr SDK toolchain, and initialize a West workspace.
+- The Workbench for Zephyr extension installed
+- A Zephyr SDK toolchain imported in Workbench
+- A West workspace initialized
+
+If you have not done this yet, complete [Build Zephyr projects with Workbench for Zephyr in VS Code learnin path](/learning-paths/embedded-and-microcontrollers/zephyr_vsworkbench/) first.
 
 You also need:
 
-- Visual Studio Code
-- The **Workbench for Zephyr** VS Code extension, with a Zephyr SDK toolchain imported and a West workspace initialized. If you have not done this yet, follow [Build Zephyr projects with Workbench for Zephyr in VS Code](/learning-paths/embedded-and-microcontrollers/zephyr_vsworkbench/).
 - Docker Desktop, Docker Engine, or another Docker-compatible runtime
 - A USB cable for each development board
 
@@ -38,7 +40,7 @@ To check whether another board is supported by Zephyr, refer to the [Zephyr Supp
 
 ## Install SEGGER J-Link tools
 
-For the RTT shell example, install the **SEGGER J-Link Software and Documentation Pack** on your host computer. The package includes **J-Link RTT Viewer**, which you will use to open an interactive shell over the debug connection.
+For the RTT shell example, install the [**SEGGER J-Link Software and Documentation Pack**](https://www.segger.com/products/debug-probes/j-link/) on your host computer. The package includes **J-Link RTT Viewer**, which you will use to open an interactive shell over the debug connection.
 
 Download the installer from [www.segger.com/downloads/jlink](https://www.segger.com/downloads/jlink/) and install the package for your operating system.
 

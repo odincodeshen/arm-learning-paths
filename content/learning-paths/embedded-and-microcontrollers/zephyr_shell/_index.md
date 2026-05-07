@@ -3,7 +3,7 @@ title: Build a Lightweight Shell on Cortex-M with Zephyr RTOS
 
 minutes_to_complete: 30
 
-who_is_this_for: This learning path is for embedded developers building on Arm Cortex-M microcontrollers who want to create a lightweight, configurable shell (CLI) using Zephyr RTOS with the Workbench for Zephyr extension to build, flash, and debug on real hardware.
+who_is_this_for: This learning path is for embedded developers targeting Arm Cortex-M microcontrollers who want a small, configurable command-line shell (CLI) for bring-up, diagnostics, and interactive testing using Zephyr RTOS. You will use VS Code with the Workbench for Zephyr extension to build, flash, and debug on supported boards.
 
 learning_objectives:
     - Enable and tailor Zephyr Shell (Kconfig/prj.conf) to produce a minimal CLI footprint
@@ -12,7 +12,7 @@ learning_objectives:
 prerequisites:
     - Basic familiarity with embedded C programming
     - Visual Studio Code with the Workbench for Zephyr extension installed and configured. Follow the [Build Zephyr projects with Workbench for Zephyr in VS Code](/learning-paths/embedded-and-microcontrollers/zephyr_vsworkbench/) Learning Path if you have not done this yet.
-    - A Cortex-M development board
+    - A Zephyr-supported Arm Cortex-M board (for example, NXP FRDM-MCXN947) 
     - Windows 10+ (64-bit), macOS with Homebrew, or Linux (preferably Ubuntu 20.04+)
 
 author: 

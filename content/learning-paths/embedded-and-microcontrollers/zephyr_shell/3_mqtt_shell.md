@@ -8,15 +8,15 @@ layout: learningpathall
 
 ## Set up the MQTT shell example
 
-In this section, you will build a minimal Zephyr application that enables the MQTT shell backend, run Mosquitto in Docker, and send shell commands to the board with the Mosquitto command-line tools.
+In this section, you will build a minimal Zephyr application that enables the **Zephyr Shell MQTT backend**, run an Eclipse Mosquitto broker in Docker, and send shell commands to the board using the Mosquitto command-line tools.
 
-The example uses the **NXP FRDM-MCXN947** as the development board. Any other Zephyr-supported board with Ethernet works as well, because the MQTT shell backend is selected entirely through Kconfig and the application has no board-specific code. To run the example on a different board, follow the same steps and substitute your board's Zephyr identifier in the wizard. The "Switch to a different board" section near the end of this page shows how to change boards on an existing project without recreating it.
+This example uses the **NXP FRDM-MCXN947** as the development board. Any other Zephyr-supported board with Ethernet works as well, because the MQTT shell backend is selected entirely through Kconfig and the application contains no board-specific code. To run the example on a different board, follow the same steps and substitute your board's Zephyr identifier in the wizard. The "Switch to a different board" section near the end of this page shows how to change boards on an existing project without recreating it.
 
 The application does not need networking code in `main.c`. Zephyr starts the shell, network stack, DHCP client, and MQTT shell backend from configuration options in `prj.conf`.
 
 ## How the MQTT shell backend works
 
-When `CONFIG_SHELL_BACKEND_MQTT=y` is enabled, Zephyr's MQTT shell backend connects to a broker and uses MQTT topics as the shell transport.
+When `CONFIG_SHELL_BACKEND_MQTT=y` is enabled, Zephyr’s MQTT shell backend connects to a broker and uses MQTT topics to carry shell traffic (commands and responses).
 
 The default topic pattern is:
 
@@ -26,6 +26,7 @@ The default topic pattern is:
 | Responses sent from the board | `<device_id>/sh/tx` |
 
 The backend derives `<device_id>` from the hardware device ID, so each board uses a unique topic prefix. You will read this ID from the broker after the board connects for the first time.
+
 
 ## Create the project
 
@@ -85,6 +86,8 @@ CONFIG_NET_BUF_RX_COUNT=32
 ```
 
 Replace `192.168.1.233` with the IP address of the host running Mosquitto, as seen from the board's Ethernet network.
+
+The values in the Resource tuning section are the main knobs you will adjust to keep the shell footprint small on Cortex-M while still allowing the network stack and MQTT client to operate reliably.
 
 ### Use a static IPv4 address
 
