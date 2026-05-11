@@ -76,17 +76,15 @@ After training, look for the following behaviors:
 
 
 ```bash
-
-
-### Not working
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
-    --task=Isaac-Shadow-Hand-Over-Direct-v0
-    --num_envs=16
-
-
+    --task=Isaac-Shadow-Hand-Over-Direct-v0  \
+    --num_envs=1  \
+    --algorithm=MAPPO  \
+    --real-time  \
+    --checkpoint=./logs/skrl/shadow_hand_over/2026-05-11_14-49-44_mappo_torch/checkpoints/best_agent.pt
 ```
 
-![img5 alt-text#center](demo_5.gif "Figure 5: Shadow-Hand-Over")
+![img5 alt-text#center](./multi_agent_hand.gif "Figure 5: Shadow-Hand-Over")
 
 
 ## Task 2: Cart-Double-Pendulum — observing cooperation in a simpler system

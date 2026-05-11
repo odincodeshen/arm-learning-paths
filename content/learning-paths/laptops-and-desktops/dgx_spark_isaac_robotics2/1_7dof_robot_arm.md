@@ -29,7 +29,7 @@ After completing this section, you will be able to:
 
 ## Task 1: Reach — Building Spatial Awareness
 
-The simplest manipulation task is to make the robot **reach** a target position. This requires the robot to understand the spatial relationship between its end-effector and a randomly sampled target point. It is not only a kinematics problem, but also the starting point for spatial awareness. 
+The simplest manipulation task is to make the robot **reach** a target position. This requires the robot to understand the spatial relationship between its end-effector, the attached device at the end of the robot's arm, and a randomly sampled target point. It is not only a kinematics problem, but also the starting point for spatial awareness. 
 
 ### Scenario Goal 
 
@@ -73,12 +73,16 @@ This type of script-level control is well suited to rapid iteration on an Arm-ba
 After training, run the following command to observe the learned policy in simulation:
 
 ```bash
-./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
-    --task=Isaac-Reach-Franka-Play-v0 \
-    --num_envs=16
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py     --task=Isaac-Reach-Franka-Play-v0     --num_envs=2   --checkpoint=logs/rsl_rl/franka_reach/<date_of_training>/model_<iteration_number>.pt
 ```
 
-![img1 alt-text#center](demo_1.gif "Figure 1: Reach")
+{{% notice Tip %}}
+
+To view the Franka arm more clearly, right-click in the viewport and use `W`, `A`, `S`, and `D` to fly the camera around the scene. Use W and S to move closer to or farther from the table, and A and D to move left and right.
+
+{{% /notice %}}
+
+![img1 alt-text#center](./reach.gif "Figure 1: Reach")
 
 You should observe the following:
 
@@ -108,6 +112,55 @@ Train the robotic arm to grasp a cube on the table and lift it to a target heigh
     --num_envs=2048
 ```
 
+{{% notice Please Note %}}
+
+You may find that after the first training run, the end-effector is unable to lift the cube. To resume training, provide the following additional arguments from the script to resume training from a specific checkpoint
+
+```bash
+--resume \
+  --experiment_name=franka_lift \
+  --load_run=<time stamp of run> \
+  --checkpoint=model_<iteration>.pt \
+  --max_iterations=<number of additional iterations>
+```
+
+To have a rough idea of when your model may be converging on a solution, look at the `mean reward` value and see when it is no longer increasing in value. 
+
+{{% /notice %}}
+
+```output
+################################################################################
+                          Learning iteration 902/2650                            
+
+                            Total steps: 37011456 
+                       Steps per second: 68548 
+                        Collection time: 0.600s 
+                          Learning time: 0.117s 
+                        Mean value loss: 2.1550
+                    Mean surrogate loss: -0.0023
+                      Mean entropy loss: 7.1831
+                            Mean reward: 79.76
+                    Mean episode length: 246.64
+                        Mean action std: 0.64
+         Episode_Reward/reaching_object: 0.7022
+          Episode_Reward/lifting_object: 11.2984
+    Episode_Reward/object_goal_tracking: 5.6466
+Episode_Reward/object_goal_tracking_fine_grained: 0.0891
+             Episode_Reward/action_rate: -0.7642
+               Episode_Reward/joint_vel: -1.4792
+                 Curriculum/action_rate: -0.1000
+                   Curriculum/joint_vel: -0.1000
+     Metrics/object_pose/position_error: 0.2638
+  Metrics/object_pose/orientation_error: 0.8218
+           Episode_Termination/time_out: 0.9782
+    Episode_Termination/object_dropping: 0.0218
+--------------------------------------------------------------------------------
+                         Iteration time: 0.72s
+                           Time elapsed: 00:09:59
+                                    ETA: 00:23:11
+```
+
+
 ### What changes in the workflow
 
 Compared with Reach, you do not need to rebuild the project or move to another platform. You only switch the task to enter a new simulation scenario. This is the value of workflow control: with the same Python entry point and the same development environment, you can quickly move across different task logics and training configurations.
@@ -128,10 +181,14 @@ You can use the same way to verify the result.
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
     --task=Isaac-Lift-Cube-Franka-v0 \
-    --num_envs=16
+    --num_envs=2
+    --checkpoint=<path to model*.pt file>
 ```
 
-![img2 alt-text#center](demo_2.gif "Figure 2: Lift")
+![img2 alt-text#center](./reach_and_lift.gif "Figure 2: Lift")
+
+
+
 
 
 ### Why it matters on Arm

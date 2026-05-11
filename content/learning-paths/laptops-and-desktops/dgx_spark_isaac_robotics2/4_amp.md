@@ -66,8 +66,9 @@ Use the **skrl** library together with `--algorithm AMP` to launch training:
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
     --task=Isaac-Humanoid-AMP-Walk-Direct-v0 \
-    --headless \
-    --algorithm AMP
+    --headless \ 
+    --algorithm AMP \
+    --max_iterations=1000
 ```
 
 ### What this script controls
@@ -90,12 +91,12 @@ After training, look for the following behaviors:
 * The left and right leg timing resembles a more natural walking pattern.
 
 ```bash
-
-### Not working
-
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
-    --task=Isaac-Humanoid-AMP-Walk-Direct-v0
-    --num_envs=16
+  --task=Isaac-Humanoid-AMP-Walk-Direct-v0 \
+  --algorithm=AMP \
+  --num_envs=16 \
+  --checkpoint=./logs/skrl/humanoid_amp_walk/<time of training>/checkpoints/best_agent.pt \
+  --real-time
 ```
 
 ![img7 alt-text#center](demo_7.gif "Figure 7: Humanoid AMP Walk")

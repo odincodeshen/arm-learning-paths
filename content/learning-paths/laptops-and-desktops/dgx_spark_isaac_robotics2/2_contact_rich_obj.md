@@ -14,18 +14,6 @@ In real industrial environments, a robot does more than pick up free objects. Dr
 
 This section starts with the **Open-Drawer** task to introduce interaction with articulated objects, and then moves into Isaac Lab's **Factory** environments, where you explore higher-precision industrial assembly workflows.
 
-As in the previous section, this section also highlights the role of Arm-based systems in **workflow control**. Developers can use Python scripts and command-line tools to switch tasks, choose training entry points, and iterate on experiment flows, while the GPU continues to handle the high-load simulation work.
-
-## Learning objectives
-
-After completing this section, you will be able to:
-
-* Work with **articulated objects** in manipulation tasks.
-* Understand why **contact forces** matter in physically realistic robot interaction.
-* Run high-precision industrial assembly tasks in Isaac Lab's **Factory** environments.
-* Compare the technical challenges across different manipulation tasks.
-* Understand how scripts and task switching support contact-rich simulation workflows on an Arm-based system.
-
 ## Task 1: Open-Drawer — interacting with articulated objects
 
 In this task, the Franka arm must grasp a handle and pull a drawer open along its rail. Unlike the Lift task from the previous section, the object here is not a freely moving rigid body. It is an articulated object with mechanical structure and constrained motion.
@@ -41,6 +29,37 @@ Train the robotic arm to approach the drawer handle, establish stable contact, a
     --task=Isaac-Open-Drawer-Franka-v0 \
     --headless \
     --num_envs=2048
+```
+
+```output
+################################################################################
+                           Learning iteration 399/400                            
+
+                            Total steps: 78643200 
+                       Steps per second: 62265 
+                        Collection time: 2.945s 
+                          Learning time: 0.213s 
+                        Mean value loss: 0.0012
+                    Mean surrogate loss: 0.0003
+                      Mean entropy loss: -3.0812
+                            Mean reward: 100.15
+                    Mean episode length: 480.00
+                        Mean action std: 0.17
+      Episode_Reward/approach_ee_handle: 3.9564
+         Episode_Reward/align_ee_handle: 0.1917
+ Episode_Reward/approach_gripper_handle: 0.2473
+Episode_Reward/align_grasp_around_handle: 0.1219
+            Episode_Reward/grasp_handle: 0.0212
+       Episode_Reward/open_drawer_bonus: 5.6417
+ Episode_Reward/multi_stage_open_drawer: 2.3516
+          Episode_Reward/action_rate_l2: -0.0091
+               Episode_Reward/joint_vel: -0.0012
+           Episode_Termination/time_out: 1.0000
+--------------------------------------------------------------------------------
+                         Iteration time: 3.16s
+                           Time elapsed: 00:23:59
+                                    ETA: 00:00:00
+
 ```
 
 ### What this script controls
@@ -74,10 +93,11 @@ After training, confirm the following:
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
     --task=Isaac-Open-Drawer-Franka-v0 \
-    --num_envs=16
+    --num_envs=1 \
+    --checkpoint=logs/rsl_rl/franka_open_drawer/2026-05-11_12-03-08/model_50.pt
 ```
 
-![img3 alt-text#center](demo_3.gif "Figure 3: Open-Drawer")
+![img3 alt-text#center](./open_drawer.gif "Simulation of Open Drawer task using model at 50 iterations (left) and 399 iterations (right). Showing arm struggling to fully open the drawer.")
 
 
 ## Task 2: Factory environments — moving toward sub-millimeter precision
@@ -98,11 +118,31 @@ Note that Factory tasks often use **rl_games** instead of **rsl_rl**. This means
     --task=Isaac-Factory-PegInsert-Direct-v0 \
     --headless
 
-# Nut threading: thread a nut onto a bolt with precise pose and torque control
-./isaaclab.sh -p scripts/reinforcement_learning/rl_games/train.py \
-    --task=Isaac-Factory-NutThread-Direct-v0 \
-    --headless
 ```
+
+```output
+fps step: 416 fps step and policy inference: 409 fps total: 337 epoch: 32/200 frames: 507904
+fps step: 408 fps step and policy inference: 401 fps total: 332 epoch: 33/200 frames: 524288
+saving next best rewards:  [300.05377]
+=> saving checkpoint '/home/kieran/IsaacLab/logs/rl_games/Factory/test/nn/Factory.pth'
+```
+
+We can use the `play.py` script to view the peg insertion in Isaac sim. 
+
+```bash
+./isaaclab.sh -p scripts/reinforcement_learning/rl_games/play.py \
+  --task=Isaac-Factory-PegInsert-Direct-v0 \
+  --checkpoint=logs/rl_games/Factory/test/nn/Factory.pth \
+  --num_envs=1 \
+  --real-time \
+  --seed=-1 \
+  env.episode_length_s=4.0 \
+  env.task.fixed_asset_init_pos_noise=[0.08,0.08,0.02] \
+  env.task.hand_init_pos_noise=[0.03,0.03,0.02]
+```
+
+![img3 alt-text#center](./peg.gif "Simulation of sub-millimeter control of arm to insert peg into a hole. PPO model trained to 50 epochs")
+
 
 ### What changes in the workflow
 
@@ -148,7 +188,6 @@ As tasks evolve from simple reaching to precision assembly, the technical demand
 | Isaac-Reach-Franka-v0 | Reach a target pose | Easy | Learn basic inverse control through RL |
 | Isaac-Open-Drawer-Franka-v0 | Open a drawer | Medium | Contact-rich manipulation with mechanical constraints |
 | Isaac-Factory-NutThread-Direct-v0 | Thread a nut onto a bolt | Hard | Precise torque and pose control |
-| Isaac-Stack-Cube-Franka-v0 | Stack three cubes | Hard | Chaining a long sequence of manipulation skills |
 
 This comparison also helps show that not all manipulation tasks are simple object relocation problems. Once a workflow includes articulated object interaction and industrial assembly, the importance of contact stability, precision, and experiment control rises quickly.
 
