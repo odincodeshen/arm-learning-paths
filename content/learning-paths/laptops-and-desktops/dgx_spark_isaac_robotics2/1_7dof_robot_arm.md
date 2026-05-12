@@ -8,37 +8,24 @@ layout: learningpathall
 
 ## From locomotion to interaction
 
-In the previous [Learning Path](https://learn.arm.com/learning-paths/laptops-and-desktops/dgx_spark_isaac_robotics/), you completed the installation and basic execution of [Isaac Sim](https://developer.nvidia.com/isaac/sim) / [Isaac Lab](https://developer.nvidia.com/isaac/lab) on an Arm-based [DGX Spark](https://www.nvidia.com/en-gb/products/workstations/dgx-spark/) system. This section builds on that foundation and moves into **manipulation-focused** simulation scenarios, taking the next step beyond locomotion and into interaction with the environment.
+In the previous [Learning Path](https://learn.arm.com/learning-paths/laptops-and-desktops/dgx_spark_isaac_robotics/), you installed and ran [Isaac Sim](https://developer.nvidia.com/isaac/sim) and [Isaac Lab](https://developer.nvidia.com/isaac/lab) on an Arm-based [DGX Spark](https://www.nvidia.com/en-gb/products/workstations/dgx-spark/) system. In this section, you move from locomotion to manipulation.
 
-In the earlier learning path, you successfully trained a robot to walk stably across complex terrain. However, locomotion is only the first step. To be useful in real-world settings, robots also need the ability to interact with objects and surroundings.
+You will train a [Franka 7-DOF](https://franka.de/franka-research-3) robotic arm on two tasks:
 
-In this section, you will move into the world of **manipulation**. Using the [Franka 7-DOF](https://franka.de/franka-research-3) robotic arm, you will first train the basic **Reach** task, and then progress to the more advanced **Lift** task, which introduces grasping behavior.
+* **Reach** to build spatial control of the end-effector.
+* **Lift** to add contact, grasping, and stable object motion.
 
-In addition to observing simulation results, this section also highlights the value of Arm-based systems in **workflow control**. By using Python scripts and command-line tools, developers can quickly switch tasks, adjust experiment flows, and drive a GPU-backed simulation workflow on the same platform.
-
-## Learning objectives
-
-After completing this section, you will be able to:
-
-* Understand the control model and coordinate concepts used for a robotic arm in Isaac Lab.
-* Train your first hand-eye coordination policy with the **Reach** task.
-* Run a compound manipulation task that includes grasping behavior with the **Lift** task.
-* Switch between simulation tasks through scripts and command-line execution, and understand the role of the Arm CPU in workflow control.
-* Compare the training characteristics of different robot platforms in Isaac Lab.
+This workflow also shows how DGX Spark maps work across Arm CPU and GPU resources. Python orchestration and task control run on the Grace CPU, while simulation and learning kernels run on the Blackwell GPU.
 
 
 ## Task 1: Reach — Building Spatial Awareness
 
-The simplest manipulation task is to make the robot **reach** a target position. This requires the robot to understand the spatial relationship between its end-effector, the attached device at the end of the robot's arm, and a randomly sampled target point. It is not only a kinematics problem, but also the starting point for spatial awareness. 
-
-### Scenario Goal 
-
-Train the Franka robotic arm to move its end-effector to a randomly sampled target pose.
+The Reach task trains the Franka arm to move its end-effector to a randomly sampled target pose. This is your first manipulation baseline because it teaches position control before adding grasping.
 
 
 ### Run
 
-Follow the previous learning path installation setting, run the following commands in your terminal:
+Use your existing Isaac Lab setup from the previous Learning Path, then run:
 
 ```bash
 cd ~/IsaacLab
@@ -54,13 +41,15 @@ export LD_PRELOAD="$LD_PRELOAD:/lib/aarch64-linux-gnu/libgomp.so.1"
 
 ### What this script controls
 
-This command does more than simply start training. From a workflow perspective, the Python training script controls:
+This command does more than start training. The Python entry point controls:
 
 * which task configuration is loaded
 * which RL training entry point is used
 * runtime behavior such as headless execution and the number of environments
 
-This type of script-level control is well suited to rapid iteration on an Arm-based system, where the CPU handles tooling, task launch, and workflow control, while the GPU handles the simulation workload.
+In Isaac Lab, an **environment** is one simulated instance of the task. For example, one environment includes one Franka arm, one target, and one physics rollout. When you set `--num_envs=2048`, Isaac Lab runs 2048 instances in parallel. PPO then uses trajectories from all environments to update the actor and critic networks each iteration.
+
+This script-level control is well suited to rapid iteration on an Arm-based system. The Arm CPU handles task launch and workflow control, while the GPU handles simulation and learning throughput.
 
 ### Task structure
 
@@ -73,16 +62,19 @@ This type of script-level control is well suited to rapid iteration on an Arm-ba
 After training, run the following command to observe the learned policy in simulation:
 
 ```bash
-./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py     --task=Isaac-Reach-Franka-Play-v0     --num_envs=2   --checkpoint=logs/rsl_rl/franka_reach/<date_of_training>/model_<iteration_number>.pt
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+    --task=Isaac-Reach-Franka-Play-v0 \
+    --num_envs=2 \
+    --checkpoint=logs/rsl_rl/franka_reach/<date_of_training>/model_<iteration_number>.pt
 ```
 
 {{% notice Tip %}}
 
-To view the Franka arm more clearly, right-click in the viewport and use `W`, `A`, `S`, and `D` to fly the camera around the scene. Use W and S to move closer to or farther from the table, and A and D to move left and right.
+To inspect the Franka arm, right-click in the viewport and use `W`, `A`, `S`, and `D` to fly the camera. These are standard industry viewport navigation controls used in many 3D tools.
 
 {{% /notice %}}
 
-![img1 alt-text#center](./reach.gif "Figure 1: Reach")
+![Franka Reach training comparison that shows early and late policy behavior. The left side shows less stable motion around iteration 100, and the right side shows improved target tracking near iteration 999.#center](./reach.gif "Franka 7-DOF arm learning the Reach task. The left panel shows behavior after 100 training iterations, and the right panel shows behavior after 999 iterations.")
 
 You should observe the following:
 
@@ -97,11 +89,7 @@ The Arm value in this example is not about claiming CPU-dominant simulation perf
 
 ## Task 2: Lift — balancing force and precision
 
-Once the robot can reliably reach a target, the next challenge is physical interaction with an object. The **Lift** task requires the robot to combine four skills into a continuous sequence: approach, align, grasp, and lift. 
-
-### Scenario Goal 
-
-Train the robotic arm to grasp a cube on the table and lift it to a target height.
+Once the robot can reach reliably, the next step is physical interaction. In the Lift task, you train the arm to grasp a cube on the table and lift it to a target height. The policy must coordinate approach, alignment, gripper closure, and stable lifting under contact and gravity.
 
 ### Run
 
@@ -114,7 +102,7 @@ Train the robotic arm to grasp a cube on the table and lift it to a target heigh
 
 {{% notice Please Note %}}
 
-You may find that after the first training run, the end-effector is unable to lift the cube. To resume training, provide the following additional arguments from the script to resume training from a specific checkpoint
+After an initial run, the end-effector might still fail to lift consistently. To continue training from a checkpoint, add:
 
 ```bash
 --resume \
@@ -124,9 +112,9 @@ You may find that after the first training run, the end-effector is unable to li
   --max_iterations=<number of additional iterations>
 ```
 
-To have a rough idea of when your model may be converging on a solution, look at the `mean reward` value and see when it is no longer increasing in value. 
-
 {{% /notice %}}
+
+The training log prints a **learning-iteration summary** each cycle. Watch `Mean reward` to judge whether the policy is still improving. You can see jumps and plateaus during PPO training, so short flat periods are normal. Use the broader trend across many iterations, together with ETA, to decide whether to keep training.
 
 ```output
 ################################################################################
@@ -163,9 +151,7 @@ Episode_Reward/object_goal_tracking_fine_grained: 0.0891
 
 ### What changes in the workflow
 
-Compared with Reach, you do not need to rebuild the project or move to another platform. You only switch the task to enter a new simulation scenario. This is the value of workflow control: with the same Python entry point and the same development environment, you can quickly move across different task logics and training configurations.
-
-In the Lift task, the agent must learn how to close the gripper around the cube and lift it to the target height. This means the policy must coordinate approach, grasping, and stable lifting, while beginning to account for gravity and contact behavior.
+Compared with Reach, you do not rebuild the project or switch platforms. You keep the same training entry point and environment, and only change `--task`. That lets you move quickly between manipulation scenarios while keeping the same Arm-based workflow.
 
 ### Verify
 
@@ -181,47 +167,25 @@ You can use the same way to verify the result.
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
     --task=Isaac-Lift-Cube-Franka-v0 \
-    --num_envs=2
+  --num_envs=2 \
     --checkpoint=<path to model*.pt file>
 ```
 
-![img2 alt-text#center](./reach_and_lift.gif "Figure 2: Lift")
+![Franka 7-DOF arm progressing through Reach and Lift. The left panel shows iteration 150, where grasp stability is still developing. The right panel shows around iteration 900, where the policy keeps the end-effector inverted to reduce cube drops during lifting.#center](./reach_and_lift.gif "Franka 7-DOF Reach and Lift training progression. Left: iteration 150. Right: iteration 900. As training progresses, the arm keeps the end-effector more upright, which makes cube retention more stable and reduces drops which incurs a penalty.")
 
 
-
-
-
-### Why it matters on Arm
-
-This type of task switch highlights the practical value of Arm-based systems for robotics development. The CPU side handles scripts, tools, and experiment orchestration, allowing developers to move quickly between simulation workflows on the same platform while continuing to use the GPU for high-load simulation.
 
 
 ## Extended exploration: comparing different locomotion robots
 
-Before moving deeper into more complex manipulation tasks, Isaac Lab also provides a wide range of locomotion environments that let you compare the training characteristics of different robot types.
+Isaac Lab also includes locomotion environments you can switch to with the same script pattern. If you want a quick comparison, run one quadruped task and one biped task to observe convergence differences.
 
-| Environment | Robot | Type | Terrain | Difficulty |
+| Environment | Robot | Type | Terrain | Training difficulty |
 |---|---|---|---|---|
 | Isaac-Velocity-Flat-Unitree-Go2-v0 | Unitree Go2 | Quadruped | Flat | Easy |
 | Isaac-Velocity-Rough-H1-v0 | Unitree H1 | Biped humanoid | Rough | Hard |
-| Isaac-Velocity-Flat-Spot-v0 | BD Spot | Quadruped | Flat | Easy |
-| Isaac-Velocity-Flat-Digit-v0 | Agility Digit | Biped humanoid | Flat | Hard |
 
-{{% notice Tip %}}
-Quadrupeds such as Go2 and Spot are naturally more statically stable, so their policies often converge faster than those of biped humanoids, which must maintain dynamic balance throughout training.
-{{% /notice %}}
-
-The point of this comparison is not only to see which robot is easier to train, but also to understand how the same development platform and the same script entry point can be used to switch quickly across simulation workflows for scenario and task exploration.
-
-
-## Wrap-up
-
-In this section, you completed the first manipulation steps in Isaac Lab:
-
-* Used the **Reach** task to build spatial awareness for the end-effector
-* Used the **Lift** task to introduce contact and grasping behavior
-* Switched between simulation scenarios through the command line and Python training scripts
-* Understood that, in this workflow, the Arm CPU mainly serves as the control plane for development iteration
+Quadrupeds often converge faster because they are more statically stable. Bipeds usually need longer training because balance is harder to learn.
 
 ## Next up
 
