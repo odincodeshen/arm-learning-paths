@@ -1,25 +1,27 @@
 ---
 title: Scale Robotics Reinforcement Learning Workflows to Manipulation and Multi-Agent Tasks with IsaacLab
 
-minutes_to_complete: 90
+minutes_to_complete: 120
 
 who_is_this_for: This advanced topic is intended for robotics software architects, simulation engineers, and AI researchers who want to orchestrate high-fidelity robotic simulations and reinforcement learning (RL) pipelines. It specifically targets those leveraging Isaac Sim and Isaac Lab on Arm-based NVIDIA DGX Spark systems powered by the Grace–Blackwell (GB10) architecture.
 
 learning_objectives:
-    - Describe the roles of Isaac Sim and Isaac Lab, and explain how the Grace-Blackwell control plane accelerates simulation workflow orchestration.
-    - Train a reinforcement learning policy for the Unitree H1 humanoid robot using the RSL-RL interface.
-    - Navigate and select among multiple RL libraries (RSL-RL, rl_games, skrl) to optimize workflows for manipulation, contact-rich, and multi-agent tasks.
-    - Scale RL workloads across multi-agent environments and Adversarial Motion Priors (AMP) for natural humanoid locomotion.
+    - Describe the roles of Isaac Sim and Isaac Lab.
+    - Train a reinforcement learning policy for simulations of the Franka robotic arm and Unitree H1 humanoid robot using the RSL-RL and skrl interface.
+    - Train reinforcement learning policies in multi-agent environments for cooperative robotic systems.
+    - Use Adversarial Motion Priors (AMP) to enable natural humanoid locomotion.
 
 prerequisites:
     - Access to an NVIDIA DGX Spark system with at least 50 GB of free disk space
     - Completion of the previous Isaac Sim / Isaac Lab setup on Arm-based systems
-    - Experience with Python scripting and virtual environments
-    - Basic understanding of reinforcement learning concepts (rewards, policies, episodes)
+    - Experience with Python scripting
+    - Basic understanding of reinforcement learning concepts (rewards, policies, etc.)
 
 author:
     - Johnny Nunez
+    - Kieran Hejmadi
     - Odin Shen
+
 
 ### Tags
 skilllevels: Advanced

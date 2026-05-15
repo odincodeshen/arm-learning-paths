@@ -13,44 +13,11 @@ In the previous section, you used an Arm-based Isaac Sim / Isaac Lab environment
 
 Traditional reinforcement learning can teach a robot to walk, run, or satisfy control objectives, but the resulting motion is often effective rather than natural. For robots that must coexist with people, interact in human environments, or demonstrate expressive behavior, that is usually not enough. Isaac Lab therefore supports **AMP**, which uses reference **motion-capture data** to guide policy learning toward smoother and more realistic movement.
 
+AMP comes from the SIGGRAPH 2021 paper by researchers at UC Berkeley and collaborators: [Adversarial Motion Priors for Stylized Physics-Based Character Control](https://arxiv.org/abs/2104.02180). At a high level, AMP works like a generative adversarial setup. A policy generates simulated motion, while a discriminator compares that motion against an unlabeled set of natural movement clips, often from motion capture. The policy then learns not only to complete the task reward, but also to produce trajectories that look statistically closer to the reference motion.
+
 In this section, you will use the **skrl** library with the `--algorithm AMP` flag to run humanoid walking, running, and dancing tasks.
 
 As in the previous section, the Arm value in this workflow is mainly about **workflow control**. Developers can use Python scripts, task flags, and algorithm options to switch tasks, control training flow, and iterate on experiments, while the GPU continues to support the heavy simulation and training workload.
-
-## Learning objectives
-
-After completing this section, you will be able to:
-
-* Understand the basic idea of AMP and the role of the **discriminator** in training.
-* Use **skrl** to launch AMP training in Isaac Lab.
-* Run humanoid walking, running, and dancing tasks.
-* Compare traditional RL with motion-prior-guided training in terms of motion quality.
-* Understand how scripts and algorithm flags support natural-motion simulation workflows on an Arm-based system.
-
-
-## The core idea behind AMP: guiding policy learning with reference motion
-
-The key idea of AMP is to make **natural motion** part of the training signal.
-
-In a standard RL setup, the agent usually learns only from task-related rewards such as forward velocity, balance, or avoiding falls. A learned policy may therefore complete the task without producing realistic movement. AMP adds a **discriminator** so that the agent is encouraged not only to solve the task, but also to make its state transitions look similar to the reference motion data.
-
-### AMP workflow at a glance
-
-At a high level, AMP training includes three components:
-
-* **Reference motion data** that provides natural walking, running, or dancing priors
-* A **discriminator** that learns to distinguish reference motion from agent-generated motion
-* A **policy network** that tries to solve the task while also producing motion that can fool the discriminator
-
-This design reduces the need to handcraft complex style-related reward functions while still making motion quality part of the optimization target.
-
-### Why AMP matters
-
-AMP is especially useful for:
-
-* humanoid locomotion that needs more natural gait patterns
-* character control tasks that emphasize continuity and rhythm
-* imitation-guided RL workflows that want less reward-engineering complexity
 
 
 ## Task 1: Humanoid Walk — learning a natural gait
@@ -65,21 +32,11 @@ Use the **skrl** library together with `--algorithm AMP` to launch training:
 
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
-    --task=Isaac-Humanoid-AMP-Walk-Direct-v0 \
-    --headless \
-    --algorithm AMP
+  --task=Isaac-Humanoid-AMP-Walk-Direct-v0 \
+  --headless \
+  --algorithm AMP \
+  --max_iterations=1000
 ```
-
-### What this script controls
-
-From a workflow-control perspective, this command does more than start a training job. Within the same development environment, it controls:
-
-* which AMP task is loaded
-* which RL training entry point is used
-* which algorithm mode is enabled (`AMP`)
-* runtime behavior such as headless execution
-
-This type of Python-script and command-line control reflects the practical role of the Arm CPU in this tutorial. The CPU manages tools, task switching, and workflow orchestration, while the GPU handles simulation and training at scale.
 
 ### Verify
 
@@ -90,15 +47,15 @@ After training, look for the following behaviors:
 * The left and right leg timing resembles a more natural walking pattern.
 
 ```bash
-
-### Not working
-
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
-    --task=Isaac-Humanoid-AMP-Walk-Direct-v0
-    --num_envs=16
+  --task=Isaac-Humanoid-AMP-Walk-Direct-v0 \
+  --algorithm=AMP \
+  --num_envs=16 \
+  --checkpoint=./logs/skrl/humanoid_amp_walk/<time of training>/checkpoints/best_agent.pt \
+  --real-time
 ```
 
-![img7 alt-text#center](demo_7.gif "Figure 7: Humanoid AMP Walk")
+![Humanoid AMP walk training comparison. The left panel at iteration 3200 shows less stable gait timing and more rigid motion. The right panel at iteration 11600 shows smoother center-of-mass transfer, better leg coordination, and more natural walking behavior.#center](./walking_humanoid.gif "Humanoid AMP walk progression. Left: iteration 3200. Right: iteration 11600.")
 
 
 ## Task 2: Humanoid Run — adding speed and coordination
@@ -115,7 +72,8 @@ Use human running reference data to train a humanoid robot to maintain a natural
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
     --task=Isaac-Humanoid-AMP-Run-Direct-v0 \
     --headless \
-    --algorithm AMP
+    --algorithm AMP \
+    --max_iterations=1000 
 ```
 
 ### What changes in the workflow
@@ -131,25 +89,36 @@ After training, confirm the following:
 * The motion looks like a recognizable running pattern rather than just aggressive forward movement.
 
 ```bash
-
-### Not working
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
-    --task=Isaac-Humanoid-AMP-Run-Direct-v0
-    --num_envs=16
+  --task=Isaac-Humanoid-AMP-Run-Direct-v0 \
+  --algorithm=AMP \
+  --num_envs=16 \
+  --checkpoint=logs/skrl/humanoid_amp_run/2026-05-12_09-09-58_amp_torch/checkpoints/best_agent.pt \
+  --real-time
 ```
 
-![img8 alt-text#center](demo_8.gif "Figure 8: Humanoid AMP Run")
+{{% notice Tip %}}
 
+If the performance is not enough, run the following command to to resume from a specific checkpoint.
 
-## Task 3: Humanoid Dance — testing expressiveness and style control
+```bash
+./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
+    --task=Isaac-Humanoid-AMP-Run-Direct-v0 \
+    --headless \
+    --algorithm AMP \
+    --max_iterations=<number of additional iterations (Epochs)> \
+    --checkpoint=<path to checkpoint model to resume training from>
+```
 
-Dance tasks often make the benefits of AMP easier to see than walking or running. The goal is not only stability or speed. The motion must also show temporal rhythm, recognizable poses, and style characteristics inherited from the reference data.
+{{% /notice %}}
 
-### Scenario goal
+![img8 alt-text#center](./amp_running.gif "Humanoid trained with AMP with 3000 epochs (left) and 26000 epochs (right). Left shows humanoid immediately stumbling where as at only 26,000 iterations the humanoid begins a skipping like gate to try and match the target velocity of running")
 
-Use human dance reference data to train a humanoid robot to produce rhythmic and expressive continuous motion.
+Try training the model further to see if the skipping-like motion evolves into a run.
 
-### Run
+## Optional task 3: Humanoid Dance
+
+To optionally test style-heavy motion generation, run this AMP dance task:
 
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
@@ -158,28 +127,11 @@ Use human dance reference data to train a humanoid robot to produce rhythmic and
     --algorithm AMP
 ```
 
-### Verify
+{{% notice Please note %}}
 
-In this kind of task, observe the following:
+As of May 2026, training this model with the default number of iterations typically takes several hours on a DGX Spark. A pre-trained checkpoint for this task is not available at this time, so you will need to train the model from scratch.
 
-* Motion unfolds as a continuous sequence rather than isolated single-step actions.
-* Body poses and center-of-mass shifts show visible rhythm.
-* The policy maintains expressive behavior over time instead of quickly collapsing into unstable motion.
-
-```bash
-
-### Not working
-
-./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py \
-    --task=Isaac-Humanoid-AMP-Dance-Direct-v0
-    --num_envs=16
-```
-
-![img8 alt-text#center](demo_9.gif "Figure 9: Humanoid AMP Dance")
-
-### Why this task is interesting
-
-Dance tasks are a strong example of the difference between AMP and standard RL. They show that there can be another optimization target beyond simple task completion: **motion quality**. For humanoids that interact with people, this is not only a visual improvement. It can also affect balance, timing, and the overall predictability of behavior.
+{{% /notice %}}
 
 
 ## AMP task overview
@@ -190,19 +142,8 @@ Dance tasks are a strong example of the difference between AMP and standard RL. 
 | Isaac-Humanoid-AMP-Run-Direct-v0 | Human running capture data | Smoother high-speed running behavior |
 | Isaac-Humanoid-AMP-Dance-Direct-v0 | Human dance capture data | Rhythmic and expressive dance motion |
 
-{{% notice Tip %}}
 For humanoid robots that must coexist with people, the value of AMP is not only that the motion looks more human. It can also improve center-of-mass transfer and dynamic stability, which may improve behavior quality in more complex environments.
-{{% /notice %}}
 
-
-## Wrap-up
-
-In this section, you completed an introduction to natural-motion training in Isaac Lab:
-
-* Learned how AMP uses motion priors and a discriminator to guide policy learning
-* Used `skrl` and `--algorithm AMP` to run walking, running, and dancing tasks
-* Switched between natural-motion scenarios through Python training scripts and command-line execution
-* Understood that, in this workflow, the Arm CPU mainly serves as the control plane for development and iteration
 
 ## Next up
 
