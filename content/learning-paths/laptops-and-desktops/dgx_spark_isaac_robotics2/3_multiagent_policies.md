@@ -1,3 +1,4 @@
+
 ---
 title: Multi-Agent Training
 weight: 4
@@ -64,6 +65,21 @@ To view the trained policy, replace the checkpoint path with your trained model 
 ```
 
 ![Shadow Hand Over training progress showing two dexterous hands coordinating an object transfer. The left panel shows early training (iteration 3600) where motion is uncoordinated and the object is still held. The right panel shows the policy at convergence using the best_agent.pt checkpoint identified by skrl, where the hands smoothly coordinate the handover.#center](./multi_agent_hand.gif "Shadow Hand Over training progression. Left: iteration 3600. Right: best_agent.pt.")
+
+### Optional: Try IPPO and experiment with model size
+
+You can also try training an example using the IPPO (Independent Proximal Policy Optimization) algorithm. To do this, change the `--algorithm` flag to `IPPO` in your training command:
+
+```bash
+./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
+    --task=Isaac-Shadow-Hand-Over-Direct-v0 \
+    --headless \
+    --algorithm IPPO
+```
+
+IPPO treats each agent as independent, which can be useful for tasks where agents have separate roles or limited interaction. For further exploration, try altering the model size or network architecture in your training configuration. Experimenting with different model sizes can help you understand the trade-offs between training speed, memory usage, and policy performance.
+
+For more environments and supported algorithms, see the [comprehensive list of Isaac Lab environments](https://isaac-sim.github.io/IsaacLab/main/source/overview/environments.html#comprehensive-list-of-environments).
 
 ## Core comparison: single-agent vs multi-agent training
 
