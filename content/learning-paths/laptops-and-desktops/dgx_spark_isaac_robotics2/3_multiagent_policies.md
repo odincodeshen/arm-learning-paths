@@ -1,4 +1,3 @@
-
 ---
 title: Multi-Agent Training
 weight: 4
