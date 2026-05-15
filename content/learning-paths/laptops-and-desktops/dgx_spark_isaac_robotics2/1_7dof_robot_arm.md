@@ -10,18 +10,17 @@ layout: learningpathall
 
 In the previous [Learning Path](https://learn.arm.com/learning-paths/laptops-and-desktops/dgx_spark_isaac_robotics/), you installed and ran [Isaac Sim](https://developer.nvidia.com/isaac/sim) and [Isaac Lab](https://developer.nvidia.com/isaac/lab) on an Arm-based [DGX Spark](https://www.nvidia.com/en-gb/products/workstations/dgx-spark/) system. In this section, you move from locomotion to manipulation.
 
-You will train a [Franka 7-DOF](https://franka.de/franka-research-3) robotic arm on two tasks:
+You will train a simulation model of the [Franka 3](https://franka.de/franka-research-3) robotic arm with 7 Degrees-of-freedom (DOF) on two tasks:
 
-* **Reach** to build spatial control of the end-effector.
-* **Lift** to add contact, grasping, and stable object motion.
+* **Reach** - to build spatial control of the arm's end effector, the part that interacts with the environment.
+* **Lift** - to further add contact, grasping, and stable object motion.
 
-This workflow also shows how DGX Spark maps work across Arm CPU and GPU resources. Python orchestration and task control run on the Grace CPU, while simulation and learning kernels run on the Blackwell GPU.
+This workflow also shows how DGX Spark maps work across CPU and GPU resources. DGX Spark provides 128 GB of coherent unified LPDDR5X memory shared by the Arm CPUs (10 Cortex-X925 and 10 Cortex-A725 cores) and the Blackwell GPU, so CPU and GPU can work on the same data without separate host-to-device copies. That can reduce startup overhead, and the unified memory pool can scale to whichever side of the workload needs more memory at a given point.
 
 
 ## Task 1: Reach — Building Spatial Awareness
 
 The Reach task trains the Franka arm to move its end-effector to a randomly sampled target pose. This is your first manipulation baseline because it teaches position control before adding grasping.
-
 
 ### Run
 
@@ -39,6 +38,23 @@ export LD_PRELOAD="$LD_PRELOAD:/lib/aarch64-linux-gnu/libgomp.so.1"
     --num_envs=2048
 ```
 
+
+
+This training flow uses the **RSL-RL PPO** algorithm. The PPO hyperparameters and actor/critic network sizes are defined in the task config file at `source/isaaclab_tasks/isaaclab_tasks/manager_based/manipulation/<task>/config/franka/agents/rsl_rl_ppo_cfg.py`.
+
+In these config files, the example PPO model sizes are:
+
+* Reach actor and critic: `[64, 64]`
+* Lift actor and critic: `[256, 128, 64]`
+
+The default training iterations are:
+
+* Reach: `1000` iterations
+* Lift: `1500` iterations
+
+Training the simple reach task on the DGX Spark will take approximately 10 minutes. 
+
+
 ### What this script controls
 
 This command does more than start training. The Python entry point controls:
@@ -47,9 +63,8 @@ This command does more than start training. The Python entry point controls:
 * which RL training entry point is used
 * runtime behavior such as headless execution and the number of environments
 
-In Isaac Lab, an **environment** is one simulated instance of the task. For example, one environment includes one Franka arm, one target, and one physics rollout. When you set `--num_envs=2048`, Isaac Lab runs 2048 instances in parallel. PPO then uses trajectories from all environments to update the actor and critic networks each iteration.
+In Isaac Lab, an **environment** is one simulated instance of the task. For example, one environment includes one Franka arm, one target, and one physics rollout. When you set `--num_envs=2048`, Isaac Lab runs 2048 instances in parallel to scale to the GPU capacity available. Proximal policy optimization (PPO) then uses trajectories from all environments to update the actor and critic networks each iteration converging quicker to an optimal solution compared to a single environment.
 
-This script-level control is well suited to rapid iteration on an Arm-based system. The Arm CPU handles task launch and workflow control, while the GPU handles simulation and learning throughput.
 
 ### Task structure
 
@@ -59,7 +74,7 @@ This script-level control is well suited to rapid iteration on an Arm-based syst
 
 ### Verify
 
-After training, run the following command to observe the learned policy in simulation:
+After training, run the following command to observe the learned policy in simulation, replace the `--checkpoint` with the PyTorch model file for your desired iteration. We are limiting the number of environments to 2 simply to allow the simulation to load faster but you can increase to observe multiple instances:
 
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
@@ -74,7 +89,7 @@ To inspect the Franka arm, right-click in the viewport and use `W`, `A`, `S`, an
 
 {{% /notice %}}
 
-![Franka Reach training comparison that shows early and late policy behavior. The left side shows less stable motion around iteration 100, and the right side shows improved target tracking near iteration 999.#center](./reach.gif "Franka 7-DOF arm learning the Reach task. The left panel shows behavior after 100 training iterations, and the right panel shows behavior after 999 iterations.")
+![Franka Reach training comparison that shows early and late policy behavior. The left side shows less stable motion around iteration 100, and the right side shows improved target tracking near iteration 999.#center](./reach.gif "Franka reach training comparison that shows early and late policy behavior. The left side shows less stable motion around iteration 100, and the right side shows improved target tracking near iteration 999")
 
 You should observe the following:
 
@@ -84,14 +99,12 @@ You should observe the following:
 
 ### Why it matters on Arm
 
-The Arm value in this example is not about claiming CPU-dominant simulation performance. Instead, it demonstrates the **Arm CPU as a control plane**: on an Arm-based development system, you can switch tasks, launch experiments, and evaluate policies directly through scripts, enabling fast iteration for robotics simulation workflows.
+The coherent unified memory lets you quickly start and stop training with little data transfer overhead and flexibly scale memory for large environments. The Arm CPU orchestrates training, enabling rapid experimentation and iteration.
 
 
 ## Task 2: Lift — balancing force and precision
 
-Once the robot can reach reliably, the next step is physical interaction. In the Lift task, you train the arm to grasp a cube on the table and lift it to a target height. The policy must coordinate approach, alignment, gripper closure, and stable lifting under contact and gravity.
-
-### Run
+Once the robot can reach reliably, the next step is physical interaction. In the Lift task, you train the arm to grasp a cube on the table and lift it to a target height. The policy must coordinate approach, alignment, gripper closure, and stable lifting under contact and gravity. Run the following command to train the `Isaac-Lift-Cube-Franka-v0` task with the PPO algorithm from the `rsl_rl` library.
 
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
@@ -102,19 +115,25 @@ Once the robot can reach reliably, the next step is physical interaction. In the
 
 {{% notice Please Note %}}
 
-After an initial run, the end-effector might still fail to lift consistently. To continue training from a checkpoint, add:
+After an initial run, the end-effector might still fail to lift consistently. To continue training from a checkpoint rerun with the additional arguments shown below:
 
 ```bash
---resume \
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/train.py \
+  --task=Isaac-Lift-Cube-Franka-v0 \
+  --headless \
+  --num_envs=2048 \
+  --resume \
   --experiment_name=franka_lift \
-  --load_run=<time stamp of run> \
+  --load_run=<run_timestamp_folder> \
   --checkpoint=model_<iteration>.pt \
-  --max_iterations=<number of additional iterations>
+  --max_iterations=<additional_iterations>
 ```
+
+Use the run folder format `YYYY-MM-DD_HH-MM-SS` for `--load_run` (note the underscore between date and time), for example `2026-05-15_09-24-13`.
 
 {{% /notice %}}
 
-The training log prints a **learning-iteration summary** each cycle. Watch `Mean reward` to judge whether the policy is still improving. You can see jumps and plateaus during PPO training, so short flat periods are normal. Use the broader trend across many iterations, together with ETA, to decide whether to keep training.
+The training log prints a **learning-iteration summary** each cycle. Watch `Episode_Reward/lifting_object` to assess whether the policy is learning to lift the cube without the needing to explicitly run a visual simulation of the model. You can see jumps and plateaus during PPO training, so short flat periods are normal. Use the broader trend across many iterations, together with ETA, to decide whether to keep training.
 
 ```output
 ################################################################################
@@ -151,7 +170,7 @@ Episode_Reward/object_goal_tracking_fine_grained: 0.0891
 
 ### What changes in the workflow
 
-Compared with Reach, you do not rebuild the project or switch platforms. You keep the same training entry point and environment, and only change `--task`. That lets you move quickly between manipulation scenarios while keeping the same Arm-based workflow.
+Compared with Reach, you do not rebuild the project or switch platforms. You keep the same training entry point and environment, and only change `--task`. That lets you move quickly between manipulation scenarios while keeping the same workflow.
 
 ### Verify
 
@@ -162,18 +181,16 @@ After training, confirm the following:
 * The cube is lifted off the table rather than slipping away or bouncing after collision.
 
 
-You can use the same way to verify the result.
+You can use the command below to verify the result.
 
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
     --task=Isaac-Lift-Cube-Franka-v0 \
-  --num_envs=2 \
+    --num_envs=2 \
     --checkpoint=<path to model*.pt file>
 ```
 
-![Franka 7-DOF arm progressing through Reach and Lift. The left panel shows iteration 150, where grasp stability is still developing. The right panel shows around iteration 900, where the policy keeps the end-effector inverted to reduce cube drops during lifting.#center](./reach_and_lift.gif "Franka 7-DOF Reach and Lift training progression. Left: iteration 150. Right: iteration 900. As training progresses, the arm keeps the end-effector more upright, which makes cube retention more stable and reduces drops which incurs a penalty.")
-
-
+![Franka 7-DOF arm progressing through Reach and Lift. The left panel shows iteration 150, where grasp stability is still developing. The right panel shows around iteration 900, where the policy keeps the end-effector inverted to reduce cube drops during lifting.#center](./reach_and_lift.gif "Franka 7-DOF arm progressing through Reach and Lift. The left panel shows iteration 150, where grasp stability is still developing. The right panel shows around iteration 900, where the policy keeps the end-effector inverted to reduce cube drops during lifting")
 
 
 ## Extended exploration: comparing different locomotion robots

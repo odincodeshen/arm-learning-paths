@@ -13,9 +13,7 @@ In the previous section, you used an Arm-based Isaac Sim / Isaac Lab environment
 
 Traditional reinforcement learning can teach a robot to walk, run, or satisfy control objectives, but the resulting motion is often effective rather than natural. For robots that must coexist with people, interact in human environments, or demonstrate expressive behavior, that is usually not enough. Isaac Lab therefore supports **AMP**, which uses reference **motion-capture data** to guide policy learning toward smoother and more realistic movement.
 
-AMP comes from the SIGGRAPH 2021 paper by researchers at UC Berkeley and collaborators: [Adversarial Motion Priors for Stylized Physics-Based Character Control](https://arxiv.org/abs/2104.02180).
-
-At a high level, AMP works like a generative adversarial setup. A policy generates simulated motion, while a discriminator compares that motion against an unlabeled set of natural movement clips, often from motion capture. The policy then learns not only to complete the task reward, but also to produce trajectories that look statistically closer to the reference motion.
+AMP comes from the SIGGRAPH 2021 paper by researchers at UC Berkeley and collaborators: [Adversarial Motion Priors for Stylized Physics-Based Character Control](https://arxiv.org/abs/2104.02180). At a high level, AMP works like a generative adversarial setup. A policy generates simulated motion, while a discriminator compares that motion against an unlabeled set of natural movement clips, often from motion capture. The policy then learns not only to complete the task reward, but also to produce trajectories that look statistically closer to the reference motion.
 
 In this section, you will use the **skrl** library with the `--algorithm AMP` flag to run humanoid walking, running, and dancing tasks.
 
@@ -34,10 +32,10 @@ Use the **skrl** library together with `--algorithm AMP` to launch training:
 
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
-    --task=Isaac-Humanoid-AMP-Walk-Direct-v0 \
-    --headless \ 
-    --algorithm AMP \
-    --max_iterations=1000
+  --task=Isaac-Humanoid-AMP-Walk-Direct-v0 \
+  --headless \
+  --algorithm AMP \
+  --max_iterations=1000
 ```
 
 ### Verify
@@ -101,7 +99,7 @@ After training, confirm the following:
 
 {{% notice Tip %}}
 
-If the performance is not enough, append the following command-line argument to the `train.py` script to resume from a specific checkpoint.
+If the performance is not enough, run the following command to to resume from a specific checkpoint.
 
 ```bash
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/train.py \
@@ -116,6 +114,7 @@ If the performance is not enough, append the following command-line argument to 
 
 ![img8 alt-text#center](./amp_running.gif "Humanoid trained with AMP with 3000 epochs (left) and 26000 epochs (right). Left shows humanoid immediately stumbling where as at only 26,000 iterations the humanoid begins a skipping like gate to try and match the target velocity of running")
 
+Try training the model further to see if the skipping-like motion evolves into a run.
 
 ## Optional task 3: Humanoid Dance
 
@@ -130,7 +129,7 @@ To optionally test style-heavy motion generation, run this AMP dance task:
 
 {{% notice Please note %}}
 
-This model will typically take several hours to train on a DGX Spark with the default number of iterations.
+As of May 2026, training this model with the default number of iterations typically takes several hours on a DGX Spark. A pre-trained checkpoint for this task is not available at this time, so you will need to train the model from scratch.
 
 {{% /notice %}}
 
@@ -143,10 +142,7 @@ This model will typically take several hours to train on a DGX Spark with the de
 | Isaac-Humanoid-AMP-Run-Direct-v0 | Human running capture data | Smoother high-speed running behavior |
 | Isaac-Humanoid-AMP-Dance-Direct-v0 | Human dance capture data | Rhythmic and expressive dance motion |
 
-{{% notice Tip %}}
 For humanoid robots that must coexist with people, the value of AMP is not only that the motion looks more human. It can also improve center-of-mass transfer and dynamic stability, which may improve behavior quality in more complex environments.
-{{% /notice %}}
-
 
 
 ## Next up
