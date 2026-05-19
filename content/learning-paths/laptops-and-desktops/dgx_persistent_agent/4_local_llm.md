@@ -5,236 +5,377 @@ layout: "learningpathall"
 ---
 
 ## Add Local LLM Inference
-## Introduction
 
-- Introduce local LLM inference in persistent AI runtimes
+In this section, you will connect Hermes Agent to Ollama.
 
-- Explain how GPUs accelerate model inference
+The runtime already watches `workspace/inbox/` and reacts when a file is created. You will now extend that workflow so Hermes sends file content to a local language model and prints an AI-generated summary.
 
-- Explain how orchestration runtimes coordinate inference workflows
+The workflow becomes:
 
----
+```text
+[New document]
+       |
+       v
+[Filesystem event]
+       |
+       v
+[Hermes orchestration]
+       |
+       v
+[Ollama local inference]
+       |
+       v
+[AI summary]
+```
+
+This introduces the first GPU-accelerated step in the persistent runtime.
 
 ## Configure Ollama Runtime Access
 
-- Connect Hermes to the Ollama runtime
+Hermes reaches Ollama through the Docker Compose network.
 
-- Configure local inference endpoints
+In the Hermes Compose service, this environment variable was added earlier:
 
-- Verify container networking between Hermes and Ollama
+```yaml
+environment:
+  - OLLAMA_HOST=http://ollama:11434
+```
 
----
+Inside the Docker network, the service name `ollama` resolves to the Ollama container. Hermes uses this URL when it creates the Ollama Python client.
 
-## Pull Local Language Models
+Verify that the Ollama container is running:
 
-- Pull a local instruction-tuned model
+```bash
+cd ~/dgx-hermes-agent/compose
+docker ps
+```
 
-- Verify model availability inside Ollama
+You should see:
 
-Example models:
+```text
+ollama
+hermes
+```
 
-- `qwen2.5:7b`
+## Verify the Local Language Model
 
-- `gemma`
+The fixed language model for this Learning Path is:
 
-- `llama3`
+```text
+qwen2.5:7b
+```
 
----
+If you have not already pulled the model, open a shell in the Ollama container:
 
-## Verify Local Inference
+```bash
+docker exec -it ollama bash
+```
 
-- Run local inference directly from Ollama
+Pull the model:
 
-- Verify model execution
+```bash
+ollama pull qwen2.5:7b
+```
 
-- Verify GPU usage during inference
+Run a quick inference test:
 
----
+```bash
+ollama run qwen2.5:7b
+```
+
+Enter a short prompt:
+
+```text
+Summarize persistent AI runtimes in one sentence.
+```
+
+Exit the model session and container shell when finished.
 
 ## Add Inference Support to Hermes
 
-- Import the Ollama Python SDK
+Open the Hermes agent:
 
-- Configure the Ollama client
-
-- Create reusable inference functions
-
----
-
-## Implement AI Summarization
-
-- Add document summarization workflows
-
-- Send workspace content to the local LLM
-
-- Generate concise AI summaries
-
-Example workflow:
-
-```text
-
-new document
-
-→ local inference
-
-→ AI summary
-
+```bash
+nano ~/dgx-hermes-agent/hermes/agent.py
 ```
 
----
+Replace the file with the following version:
 
-## Configure Summarization Prompts
+```python
+import os
+import time
+import ollama
 
-- Add system prompts
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
-- Define summarization behavior
+WATCH_DIR = "/workspace/inbox"
 
-- Limit context size for runtime efficiency
+OLLAMA_HOST = os.getenv(
+    "OLLAMA_HOST",
+    "http://ollama:11434"
+)
 
----
+client = ollama.Client(host=OLLAMA_HOST)
 
-## Add Runtime Logging
+class WorkspaceHandler(FileSystemEventHandler):
 
-- Log inference execution
+    def on_created(self, event):
 
-- Log summarization results
+        if event.is_directory:
+            return
 
-- Track orchestration workflow progress
+        print(f"\n[Agent] New file detected:")
+        print(event.src_path)
 
-Example logs:
+        summarize_file(event.src_path)
 
-```text
+def summarize_file(path):
 
-[Agent] Running summarization inference...
+    try:
 
+        with open(path, "r") as f:
+            content = f.read()
+
+        print("\n[Agent] Running local inference...")
+
+        response = client.chat(
+            model="qwen2.5:7b",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a local AI workspace assistant. "
+                        "Summarize the document in 3 concise bullet points."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": content[:4000]
+                }
+            ]
+        )
+
+        summary = response["message"]["content"]
+
+        print("\n[Agent] AI Summary:")
+        print(summary)
+
+    except Exception as e:
+
+        print(f"[Agent] Error: {e}")
+
+if __name__ == "__main__":
+
+    print("\n[Hermes Agent] Starting workspace watcher...")
+    print(f"[Hermes Agent] Monitoring: {WATCH_DIR}")
+
+    observer = Observer()
+
+    observer.schedule(
+        WorkspaceHandler(),
+        WATCH_DIR,
+        recursive=False
+    )
+
+    observer.start()
+
+    try:
+
+        while True:
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+
+        observer.stop()
+
+    observer.join()
 ```
 
----
+## Code Trace
+
+This version adds the Ollama Python SDK:
+
+```python
+import ollama
+```
+
+Hermes reads the Ollama endpoint from the runtime environment:
+
+```python
+OLLAMA_HOST = os.getenv(
+    "OLLAMA_HOST",
+    "http://ollama:11434"
+)
+```
+
+The client connects to the Ollama service:
+
+```python
+client = ollama.Client(host=OLLAMA_HOST)
+```
+
+The file content is sent to the local model:
+
+```python
+response = client.chat(
+    model="qwen2.5:7b",
+    messages=[
+        {
+            "role": "system",
+            "content": (
+                "You are a local AI workspace assistant. "
+                "Summarize the document in 3 concise bullet points."
+            )
+        },
+        {
+            "role": "user",
+            "content": content[:4000]
+        }
+    ]
+)
+```
+
+The runtime limits the input to the first 4000 characters:
+
+```python
+"content": content[:4000]
+```
+
+This keeps the initial workflow simple and avoids sending very large files to the model.
+
+## Rebuild Hermes
+
+Rebuild the Hermes container:
+
+```bash
+cd ~/dgx-hermes-agent/compose
+docker compose build hermes
+```
+
+Restart the runtime:
+
+```bash
+docker compose up -d
+```
+
+Follow the Hermes logs:
+
+```bash
+docker logs -f hermes
+```
+
+Expected startup output:
+
+```text
+[Hermes Agent] Starting workspace watcher...
+[Hermes Agent] Monitoring: /workspace/inbox
+```
+
+## Validate AI Summarization
+
+Create a new file in the inbox:
+
+```bash
+cat > ~/dgx-hermes-agent/workspace/inbox/ai-runtime-note.txt <<'EOF'
+Persistent AI systems are not only prompt-response applications.
+They run as long-lived local services that monitor events, coordinate
+runtime workflows, store memory, and use GPU acceleration when model
+inference is required.
+EOF
+```
+
+Return to the Hermes logs. You should see output similar to:
+
+```text
+[Agent] New file detected:
+/workspace/inbox/ai-runtime-note.txt
+
+[Agent] Running local inference...
+
+[Agent] AI Summary:
+```
+
+The generated summary text will vary because it is produced by the local model.
 
 ## Verify GPU-accelerated Inference
 
-- Open the Ollama container
+To observe GPU activity during inference, use three terminals.
 
-- Monitor GPU activity
+In terminal 1, follow Hermes logs:
 
-- Verify inference acceleration using `nvidia-smi`
+```bash
+docker logs -f hermes
+```
 
----
+In terminal 2, monitor the GPU:
+
+```bash
+watch -n 1 nvidia-smi
+```
+
+In terminal 3, create a new file:
+
+```bash
+cat > ~/dgx-hermes-agent/workspace/inbox/gpu-inference-test.txt <<'EOF'
+DGX Spark combines Arm CPU orchestration with NVIDIA GPU acceleration.
+The CPU coordinates persistent services, while the GPU accelerates local
+language model inference and summarization workloads.
+EOF
+```
+
+During summarization, `nvidia-smi` should show activity from the Ollama container or model runtime. This confirms that the GPU is accelerating local inference while Hermes coordinates the workflow.
 
 ## Runtime Responsibilities
 
-### Hermes Runtime
+The runtime now has a clear separation of responsibilities.
 
-Responsible for:
+Hermes is responsible for:
 
-- orchestration
+- Filesystem monitoring
+- Reading workspace files
+- Preparing prompts
+- Calling the Ollama API
+- Printing runtime logs
+- Coordinating the workflow lifecycle
 
-- prompt preparation
+Ollama is responsible for:
 
-- runtime coordination
-
-- inference scheduling
-
----
-
-### Ollama Runtime
-
-Responsible for:
-
-- token generation
-
-- model execution
-
-- summarization inference
-
----
+- Loading the local model
+- Running token generation
+- Returning the generated summary
 
 ## CPU and GPU Responsibilities
 
-### Arm Grace CPU
+The Arm Grace CPU coordinates the workflow:
 
-- orchestration
+- Watches the workspace
+- Receives filesystem events
+- Reads file content
+- Prepares model requests
+- Sends API calls to Ollama
+- Logs runtime progress
 
-- workflow coordination
-
-- runtime scheduling
-
-- document preprocessing
-
----
-
-### Blackwell GPU
-
-- local LLM inference
-
-- token generation
-
-- AI summarization
-
----
-
-## Event-driven Inference Workflow
-
-Example runtime pipeline:
-
-```text
-
-filesystem event
-
-→ document parsing
-
-→ inference request
-
-→ local LLM execution
-
-→ AI summary
-
-```
-
----
-
-## Key Concepts
+The Blackwell GPU accelerates the model workload:
 
 - Local LLM inference
+- Token generation
+- AI summarization
 
-- GPU-accelerated inference
-
-- Runtime orchestration
-
-- Event-driven summarization
-
-- CPU/GPU workload coordination
-
----
+This pattern is repeated throughout the Learning Path. Hermes orchestrates; Ollama executes model inference.
 
 ## Summary
 
-Readers should understand:
+You extended Hermes with local LLM inference.
 
-- how local LLM inference integrates into persistent runtimes
+You added:
 
-- how Hermes orchestrates inference workflows
+- Ollama Python SDK usage
+- Runtime access to `OLLAMA_HOST`
+- Local summarization with `qwen2.5:7b`
+- Event-driven AI summarization
+- GPU activity validation with `nvidia-smi`
 
-- how Ollama executes GPU-accelerated inference
+The runtime can now watch the workspace and automatically summarize new files using a local model.
 
-- how Arm CPUs coordinate runtime scheduling and preprocessing
-
-- how local AI summarization operates continuously on DGX Spark
-
----
-
-## Next Steps
-
-Proceed to:
-
-# Build Persistent Semantic Memory
-
-Add:
-
-- embeddings generation
-
-- vector storage
-
-- semantic memory pipelines
-
-- persistent contextual memory
+Next, you will add persistent semantic memory with embeddings and Qdrant.

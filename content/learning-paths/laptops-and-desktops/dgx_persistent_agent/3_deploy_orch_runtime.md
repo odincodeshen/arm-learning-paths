@@ -6,268 +6,396 @@ layout: "learningpathall"
 
 ## Deploy Hermes Orchestration Runtime
 
-## Introduction
+In this section, you will add Hermes Agent to the runtime stack.
 
-- Introduce Hermes as the orchestration runtime
+Hermes is the CPU-side orchestration runtime. It runs continuously, watches the shared workspace, and reacts when new files are created. This is the first step toward a persistent local AI agent.
 
-- Explain the role of orchestration in persistent AI systems
+In this section, Hermes does not call a language model yet. You will first build the event-driven runtime foundation:
 
-- Introduce event-driven runtime workflows
+```text
+[New file]
+       |
+       v
+[Filesystem event]
+       |
+       v
+[Hermes watcher]
+       |
+       v
+[Document preview]
+```
 
----
+Later sections add local inference, persistent memory, semantic retrieval, and autonomous cognition.
 
 ## Create the Hermes Runtime Directory
 
-- Create the Hermes project directory
+Return to the project root:
 
-- Organize runtime source files
+```bash
+cd ~/dgx-hermes-agent
+```
 
-- Prepare the orchestration runtime workspace
+Create the Hermes source directory:
 
----
+```bash
+mkdir -p hermes
+```
+
+The project structure now includes a source directory for the orchestration runtime:
+
+```text
+dgx-hermes-agent/
+|-- compose/
+|-- hermes/
+|-- models/
+|-- qdrant/
+`-- workspace/
+```
 
 ## Create the Hermes Container Image
 
-- Create the Hermes Dockerfile
+Create the Dockerfile:
 
-- Install runtime dependencies
+```bash
+nano ~/dgx-hermes-agent/hermes/Dockerfile
+```
 
-- Configure the orchestration runtime environment
+Add the following content:
 
-Dependencies include:
+```dockerfile
+FROM python:3.11-slim
 
-- watchdog
+WORKDIR /app
 
-- qdrant-client
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-- ollama
+RUN pip install --no-cache-dir \
+    ollama \
+    qdrant-client \
+    watchdog \
+    sentence-transformers \
+    pypdf \
+    python-dotenv
 
-- pypdf
+COPY . /app
 
-- sentence-transformers
+CMD ["python", "-u", "agent.py"]
+```
 
----
+This image installs the dependencies used throughout the Learning Path. Some packages, such as `ollama` and `qdrant-client`, are used in later sections. Installing them now keeps the Hermes container image consistent as the runtime gains capabilities.
 
-## Configure Runtime Logging
+The command uses `python -u`:
 
-- Enable unbuffered Python logging
+```dockerfile
+CMD ["python", "-u", "agent.py"]
+```
 
-- Configure runtime observability
+The `-u` option enables unbuffered output. This is important for a persistent service because log messages appear immediately when you run:
 
-- Verify container log visibility
-
----
+```bash
+docker logs -f hermes
+```
 
 ## Create the Hermes Runtime Service
 
-- Create the initial orchestration runtime
+Create the first version of the Hermes agent:
 
-- Configure filesystem monitoring
-
-- Configure event-driven processing
-
----
-
-## Configure Workspace Monitoring
-
-- Define the workspace watch directory
-
-- Configure filesystem watchers
-
-- Monitor runtime events
-
-Example:
-
-```text
-
-/workspace/inbox
-
+```bash
+nano ~/dgx-hermes-agent/hermes/agent.py
 ```
 
----
+Add the following content:
 
-## Add File Event Handling
+```python
+import os
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
-- Detect newly created files
+WATCH_DIR = "/workspace/inbox"
 
-- Ignore unsupported files
+class WorkspaceHandler(FileSystemEventHandler):
 
-- Filter hidden and temporary files
+    def on_created(self, event):
 
-Supported examples:
+        if event.is_directory:
+            return
 
-- `.txt`
+        print(f"\n[Agent] New file detected:")
+        print(event.src_path)
 
-- `.md`
+        summarize_file(event.src_path)
 
-- `.log`
+def summarize_file(path):
 
----
+    try:
 
-## Configure Runtime Filtering
+        with open(path, "r") as f:
+            content = f.read()
 
-- Ignore hidden files
+        print("\n[Agent] File content preview:")
+        print(content[:500])
 
-- Ignore unsupported extensions
+    except Exception as e:
 
-- Prevent ingestion of temporary files
+        print(f"[Agent] Error reading file: {e}")
 
----
+if __name__ == "__main__":
+
+    print("\n[Hermes Agent] Starting workspace watcher...")
+    print(f"[Hermes Agent] Monitoring: {WATCH_DIR}")
+
+    observer = Observer()
+
+    observer.schedule(
+        WorkspaceHandler(),
+        WATCH_DIR,
+        recursive=False
+    )
+
+    observer.start()
+
+    try:
+
+        while True:
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+
+        observer.stop()
+
+    observer.join()
+```
+
+This first agent performs three important orchestration tasks:
+
+- Starts a long-running runtime process
+- Watches `/workspace/inbox`
+- Handles file creation events
+
+The `summarize_file()` function does not use an LLM yet. For now, it reads and prints the first 500 characters of the file. This validates the filesystem event pipeline before adding model inference.
+
+## Code Trace
+
+The runtime starts by defining the watched directory:
+
+```python
+WATCH_DIR = "/workspace/inbox"
+```
+
+The event handler receives filesystem events:
+
+```python
+class WorkspaceHandler(FileSystemEventHandler):
+
+    def on_created(self, event):
+```
+
+Directory events are ignored:
+
+```python
+if event.is_directory:
+    return
+```
+
+New file events are passed into the document processing function:
+
+```python
+summarize_file(event.src_path)
+```
+
+The observer keeps the runtime active:
+
+```python
+while True:
+    time.sleep(1)
+```
+
+This is the core pattern for persistent AI orchestration. The CPU keeps the service running, watches for events, and triggers work when the runtime state changes.
 
 ## Update Docker Compose
 
-- Add Hermes runtime service
+Open the Compose file:
 
-- Configure shared workspace mounts
+```bash
+nano ~/dgx-hermes-agent/compose/docker-compose.yml
+```
 
-- Configure runtime networking
+Add the Hermes service under `services:`:
 
-- Connect Hermes to Ollama and Qdrant
+```yaml
+  hermes:
+    build:
+      context: ../hermes
 
----
+    container_name: hermes
+
+    volumes:
+      - ../workspace:/workspace
+
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - QDRANT_HOST=qdrant
+
+    depends_on:
+      - ollama
+      - qdrant
+
+    restart: unless-stopped
+```
+
+The final service structure should be:
+
+```text
+services:
+  ollama:
+  qdrant:
+  open-webui:
+  hermes:
+```
+
+Hermes mounts the same shared workspace as the other services. It also receives environment variables for Ollama and Qdrant, which are used in later sections.
 
 ## Build the Hermes Runtime
 
-- Build the Hermes container image
+Build the Hermes container:
 
-- Verify runtime dependencies
+```bash
+cd ~/dgx-hermes-agent/compose
+docker compose build hermes
+```
 
-- Verify runtime startup
+The first build installs the Python dependencies listed in the Dockerfile.
 
-Commands:
+Start the stack:
 
-- `docker compose build hermes`
+```bash
+docker compose up -d
+```
 
-- `docker compose up -d`
+Verify that the Hermes container is running:
 
----
+```bash
+docker ps
+```
+
+You should see:
+
+```text
+hermes
+```
+
+alongside the existing runtime services:
+
+```text
+ollama
+qdrant
+open-webui
+```
 
 ## Verify Hermes Runtime Logs
 
-- Verify runtime startup
+Follow the Hermes logs:
 
-- Verify workspace monitoring
-
-- Verify orchestration logs
+```bash
+docker logs -f hermes
+```
 
 Expected output:
 
 ```text
-
 [Hermes Agent] Starting workspace watcher...
-
+[Hermes Agent] Monitoring: /workspace/inbox
 ```
 
----
+This confirms that Hermes started and is watching the shared inbox directory.
 
 ## Validate Event-driven Processing
 
-- Create test files in the workspace
+Open a second terminal on the host and create a new test file:
 
-- Trigger filesystem events
-
-- Verify runtime detection
-
-Example workflow:
-
-```text
-
-new file
-
-→ filesystem event
-
-→ Hermes orchestration
-
+```bash
+echo "Hermes watches the workspace and reacts to new files." \
+> ~/dgx-hermes-agent/workspace/inbox/runtime-test.txt
 ```
 
----
+Return to the terminal that is following Hermes logs. You should see output similar to:
+
+```text
+[Agent] New file detected:
+/workspace/inbox/runtime-test.txt
+
+[Agent] File content preview:
+Hermes watches the workspace and reacts to new files.
+```
+
+This validates the event-driven pipeline:
+
+```text
+[New file]
+       |
+       v
+[Filesystem event]
+       |
+       v
+[Hermes orchestration]
+       |
+       v
+[File processing]
+```
 
 ## Verify Shared Workspace Access
 
-- Verify mounted workspace visibility
+Hermes sees the host file path through the mounted container path:
 
-- Verify container access to shared files
+| Host path | Container path |
+|---|---|
+| `~/dgx-hermes-agent/workspace/inbox` | `/workspace/inbox` |
 
-- Verify runtime persistence
-
----
+This shared mount is what allows the host, Hermes, Ollama, and later memory workflows to operate on the same persistent runtime state.
 
 ## Runtime Responsibilities
 
-### Hermes Runtime
+Hermes is now responsible for:
 
-Responsible for:
+- Filesystem monitoring
+- Runtime lifecycle management
+- Event handling
+- File reading
+- Workflow triggering
 
-- filesystem monitoring
-
-- orchestration
-
-- event scheduling
-
-- workflow coordination
-
-- persistent runtime lifecycle
-
----
+At this stage, Hermes is not performing inference, generating embeddings, or storing vectors. Those capabilities are added incrementally so you can validate each layer of the runtime.
 
 ## CPU Orchestration Responsibilities
 
-Introduce the role of the Arm Grace CPU in runtime orchestration:
+This section demonstrates the CPU-side work required by persistent AI systems.
 
-- filesystem events
+The Arm CPU is coordinating:
 
-- background services
+- A long-running service process
+- Filesystem event monitoring
+- Runtime scheduling
+- File processing
+- Containerized service lifecycle
 
-- scheduling
-
-- orchestration coordination
-
-- runtime lifecycle management
-
----
-
-## Key Concepts
-
-- Event-driven orchestration
-
-- Persistent runtime services
-
-- Filesystem-triggered AI workflows
-
-- Runtime filtering
-
-- Shared workspace coordination
-
----
+This is the foundation for the rest of the Learning Path. The GPU becomes important when model inference is added, but the persistent runtime itself is coordinated by CPU-side orchestration.
 
 ## Summary
 
-Readers should understand:
+You added Hermes Agent to the DGX Spark runtime stack.
 
-- how Hermes orchestrates persistent AI workflows
+You created:
 
-- how filesystem-triggered runtimes operate
+- A Hermes source directory
+- A Hermes Dockerfile
+- A persistent Python agent
+- A filesystem watcher
+- A Docker Compose service for Hermes
 
-- how event-driven orchestration works
+You also verified that a new file in `workspace/inbox/` triggers Hermes logs.
 
-- how runtime filtering improves orchestration stability
-
-- how Arm CPUs coordinate persistent runtime workflows
-
----
-
-## Next Steps
-
-Proceed to:
-
-# Add Local LLM Inference
-
-Integrate:
-
-- Ollama inference
-
-- AI summarization
-
-- GPU-accelerated local inference
-
-- runtime orchestration with model execution
+Next, you will connect Hermes to Ollama for local LLM summarization.
