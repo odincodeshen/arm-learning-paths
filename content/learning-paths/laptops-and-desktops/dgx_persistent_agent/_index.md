@@ -5,7 +5,7 @@ description: Learn how to build a persistent local AI agent on NVIDIA DGX Spark 
 
 minutes_to_complete: 90
 
-who_is_this_for: This is an advanced topic for developers interested in persistent local AI systems, semantic memory architectures, and heterogeneous AI computing on NVIDIA DGX Spark. You'll learn how Arm-based Grace CPUs orchestrate long-running AI workflows including filesystem monitoring, semantic retrieval, runtime scheduling, and autonomous cognition, while Blackwell GPUs accelerate local language model inference and embeddings generation using Ollama. This Learning Path is a great fit if you want to understand how persistent AI runtimes operate continuously using coordinated CPU and GPU workloads.
+who_is_this_for: This is an advanced topic for developers interested in persistent local AI agent systems, semantic memory architectures, and heterogeneous AI computing on NVIDIA DGX Spark. You'll learn how Arm-based Grace CPUs orchestrate long-running AI workflows including filesystem monitoring, semantic retrieval, runtime scheduling, and autonomous cognition, while Blackwell GPUs accelerate local language model inference and embeddings generation using Ollama. This Learning Path is a great fit if you want to understand how persistent AI runtimes operate continuously using coordinated CPU and GPU workloads.
 
 learning_objectives:
     - Describe how persistent AI runtimes combine orchestration, semantic memory, and local inference

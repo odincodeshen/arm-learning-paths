@@ -6,9 +6,9 @@ layout: "learningpathall"
 
 ## Add Local LLM Inference
 
-In this section, you will connect Hermes Agent to Ollama.
+In this section, you will connect ***Hermes Agent*** to ***Ollama***.
 
-The runtime already watches `workspace/inbox/` and reacts when a file is created. You will now extend that workflow so Hermes sends file content to a local language model and prints an AI-generated summary.
+The runtime already watches `workspace/inbox/` and reacts when a file is created. You will now extend that workflow so Hermes sends file content to a ***local language model*** and prints an AI-generated summary.
 
 The workflow becomes:
 
@@ -93,11 +93,7 @@ Exit the model session and container shell when finished.
 
 ## Add Inference Support to Hermes
 
-Open the Hermes agent:
-
-```bash
-nano ~/dgx-hermes-agent/hermes/agent.py
-```
+Open and edit the file `~/dgx-hermes-agent/hermes/agent.py`.
 
 Replace the file with the following version:
 
@@ -366,16 +362,8 @@ This pattern is repeated throughout the Learning Path. Hermes orchestrates; Olla
 
 ## Summary
 
-You extended Hermes with local LLM inference.
+You extended Hermes with ***local LLM inference*** through the Ollama Python SDK and the `OLLAMA_HOST` runtime setting. New files in the workspace can now trigger summarization with `qwen2.5:7b`, and GPU activity can be validated with `nvidia-smi`.
 
-You added:
-
-- Ollama Python SDK usage
-- Runtime access to `OLLAMA_HOST`
-- Local summarization with `qwen2.5:7b`
-- Event-driven AI summarization
-- GPU activity validation with `nvidia-smi`
-
-The runtime can now watch the workspace and automatically summarize new files using a local model.
+The runtime has moved from simple file detection to ***event-driven AI summarization***.
 
 Next, you will add persistent semantic memory with embeddings and Qdrant.

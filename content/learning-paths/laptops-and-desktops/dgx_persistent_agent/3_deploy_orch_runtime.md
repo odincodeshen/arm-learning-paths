@@ -6,9 +6,9 @@ layout: "learningpathall"
 
 ## Deploy Hermes Orchestration Runtime
 
-In this section, you will add Hermes Agent to the runtime stack.
+In this section, you will add ***Hermes Agent*** to the runtime stack.
 
-Hermes is the CPU-side orchestration runtime. It runs continuously, watches the shared workspace, and reacts when new files are created. This is the first step toward a persistent local AI agent.
+Hermes is the ***CPU-side orchestration runtime***. It runs continuously, watches the shared workspace, and reacts when new files are created. This is the first step toward a ***persistent local AI agent***.
 
 In this section, Hermes does not call a language model yet. You will first build the event-driven runtime foundation:
 
@@ -54,11 +54,7 @@ dgx-hermes-agent/
 
 ## Create the Hermes Container Image
 
-Create the Dockerfile:
-
-```bash
-nano ~/dgx-hermes-agent/hermes/Dockerfile
-```
+Create and edit the file `~/dgx-hermes-agent/hermes/Dockerfile`.
 
 Add the following content:
 
@@ -102,11 +98,7 @@ docker logs -f hermes
 
 ## Create the Hermes Runtime Service
 
-Create the first version of the Hermes agent:
-
-```bash
-nano ~/dgx-hermes-agent/hermes/agent.py
-```
+Create and edit the file `~/dgx-hermes-agent/hermes/agent.py`.
 
 Add the following content:
 
@@ -219,11 +211,7 @@ This is the core pattern for persistent AI orchestration. The CPU keeps the serv
 
 ## Update Docker Compose
 
-Open the Compose file:
-
-```bash
-nano ~/dgx-hermes-agent/compose/docker-compose.yml
-```
+Open and edit the file `~/dgx-hermes-agent/compose/docker-compose.yml`.
 
 Add the Hermes service under `services:`:
 
@@ -386,16 +374,8 @@ This is the foundation for the rest of the Learning Path. The GPU becomes import
 
 ## Summary
 
-You added Hermes Agent to the DGX Spark runtime stack.
+You added ***Hermes Agent*** to the DGX Spark runtime stack as a persistent Python service. The runtime now has a Hermes container, a filesystem watcher, and a Docker Compose service that mounts the shared workspace.
 
-You created:
-
-- A Hermes source directory
-- A Hermes Dockerfile
-- A persistent Python agent
-- A filesystem watcher
-- A Docker Compose service for Hermes
-
-You also verified that a new file in `workspace/inbox/` triggers Hermes logs.
+You also verified that creating a new file in `workspace/inbox/` triggers Hermes logs, which confirms that the ***event-driven orchestration*** path is working.
 
 Next, you will connect Hermes to Ollama for local LLM summarization.

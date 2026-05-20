@@ -6,9 +6,9 @@ layout: "learningpathall"
 
 ## Add Autonomous Workspace Cognition
 
-In this section, you will add autonomous workspace cognition to Hermes Agent.
+In this section, you will add ***autonomous workspace cognition*** to Hermes Agent.
 
-The runtime can already ingest documents, build semantic memory, and answer questions using retrieved context. You will now add a periodic cognition workflow that reviews stored memory and generates a workspace-level summary.
+The runtime can already ingest documents, build semantic memory, and answer questions using retrieved context. You will now add a ***periodic cognition workflow*** that reviews stored memory and generates a workspace-level summary.
 
 The workflow becomes:
 
@@ -53,11 +53,7 @@ Create the configuration directory if it does not already exist:
 mkdir -p ~/dgx-hermes-agent/workspace/config
 ```
 
-Create the runtime policy file:
-
-```bash
-nano ~/dgx-hermes-agent/workspace/config/runtime.json
-```
+Create and edit the file `~/dgx-hermes-agent/workspace/config/runtime.json`.
 
 Add the following content:
 
@@ -87,11 +83,7 @@ The verified code in this section keeps semantic retrieval at `limit=3`, matchin
 
 ## Add Autonomous Cognition to Hermes
 
-Open the Hermes agent:
-
-```bash
-nano ~/dgx-hermes-agent/hermes/agent.py
-```
+Open and edit the file `~/dgx-hermes-agent/hermes/agent.py`.
 
 Replace the file with the following version:
 
@@ -634,11 +626,7 @@ This confirms that autonomous cognition was added without removing the query wor
 
 ## Validate Runtime Policy Reload
 
-Edit the runtime policy:
-
-```bash
-nano ~/dgx-hermes-agent/workspace/config/runtime.json
-```
+Open and edit the file `~/dgx-hermes-agent/workspace/config/runtime.json`.
 
 Change the supported extensions so Hermes only ingests Markdown files:
 
@@ -703,11 +691,7 @@ Restore the original policy when you are done:
 
 For validation, you can temporarily reduce the summary interval.
 
-Edit:
-
-```bash
-nano ~/dgx-hermes-agent/workspace/config/runtime.json
-```
+Open and edit the file `~/dgx-hermes-agent/workspace/config/runtime.json`.
 
 Set a very small interval:
 
@@ -868,15 +852,6 @@ For validation, use new filenames. Existing files or file modifications may not 
 
 ## Summary
 
-You completed the persistent autonomous local AI runtime.
+You completed the ***persistent autonomous local AI runtime***. Hermes now combines event-driven workspace ingestion, local summarization and embedding generation, persistent semantic memory, contextual retrieval, autonomous workspace summaries, and dynamic runtime policy.
 
-Hermes now combines four core capabilities:
-
-- Event-driven workspace ingestion
-- Local summarization and embedding generation
-- Persistent semantic memory with contextual retrieval
-- Autonomous workspace summaries with dynamic runtime policy
-
-This Learning Path demonstrates that persistent AI systems are distributed orchestration systems, not just single inference calls.
-
-You have built a local-first AI runtime on DGX Spark using Arm CPU orchestration, GPU-accelerated inference, semantic memory, and autonomous workspace cognition.
+This Learning Path demonstrates that persistent AI systems are ***distributed orchestration systems***, not just single inference calls. You have built a local-first AI runtime on DGX Spark using Arm CPU orchestration, GPU-accelerated inference, semantic memory, and autonomous workspace cognition.

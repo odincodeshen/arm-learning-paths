@@ -6,9 +6,9 @@ layout: "learningpathall"
 
 ## Add Semantic Retrieval and Contextual Reasoning
 
-In this section, you will add semantic retrieval to Hermes Agent.
+In this section, you will add ***semantic retrieval*** to Hermes Agent.
 
-The runtime can already ingest documents, summarize them, generate embeddings, and store semantic memory in Qdrant. You will now add a query workflow so Hermes can search memory and use retrieved context to answer questions.
+The runtime can already ingest documents, summarize them, generate embeddings, and store semantic memory in Qdrant. You will now add a ***query workflow*** so Hermes can search memory and use retrieved context to answer questions.
 
 The workflow becomes:
 
@@ -62,11 +62,7 @@ When the file exists, Hermes reads the question, deletes the query file, searche
 
 ## Add Retrieval Functions to Hermes
 
-Open the Hermes agent:
-
-```bash
-nano ~/dgx-hermes-agent/hermes/agent.py
-```
+Open and edit the file `~/dgx-hermes-agent/hermes/agent.py`.
 
 Replace the file with the following version:
 
@@ -608,17 +604,8 @@ nomic-embed-text
 
 ## Summary
 
-You added semantic retrieval and contextual reasoning to Hermes Agent.
+You added ***semantic retrieval*** and ***contextual reasoning*** to Hermes Agent. The runtime now turns a question into an embedding, searches Qdrant with `query_points(...)`, assembles retrieved memory, and sends that context to `qwen2.5:7b`.
 
-You implemented:
-
-- Query embedding generation
-- Qdrant semantic search with `query_points(...)`
-- Result payload parsing
-- Retrieved memory assembly
-- Query-driven local reasoning with `qwen2.5:7b`
-- File-based interactive queries using `/workspace/query.txt`
-
-The runtime can now store memory and reason over it.
+The runtime can now store memory and reason over it through the local `/workspace/query.txt` workflow.
 
 Next, you will add autonomous workspace cognition.

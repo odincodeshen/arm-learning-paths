@@ -6,9 +6,9 @@ layout: "learningpathall"
 
 ## Build Persistent Semantic Memory
 
-In this section, you will add persistent semantic memory to Hermes Agent.
+In this section, you will add ***persistent semantic memory*** to Hermes Agent.
 
-The runtime can already monitor files and generate summaries with a local language model. You will now generate embeddings for workspace content and store them in Qdrant.
+The runtime can already monitor files and generate summaries with a local language model. You will now generate ***embeddings*** for workspace content and store them in ***Qdrant***.
 
 The workflow becomes:
 
@@ -77,11 +77,7 @@ The embedding model converts text into vectors. Qdrant stores those vectors and 
 
 ## Add Persistent Memory to Hermes
 
-Open the Hermes agent:
-
-```bash
-nano ~/dgx-hermes-agent/hermes/agent.py
-```
+Open and edit the file `~/dgx-hermes-agent/hermes/agent.py`.
 
 Replace the file with the following version:
 
@@ -511,17 +507,8 @@ nomic-embed-text
 
 ## Summary
 
-You added persistent semantic memory to Hermes Agent.
+You added ***persistent semantic memory*** to Hermes Agent by connecting it to Qdrant, creating the `workspace_memory` collection, generating local embeddings with Ollama, and storing vectors with document metadata.
 
-You implemented:
-
-- A Qdrant client connection
-- Automatic collection creation
-- Local embedding generation with Ollama
-- Vector storage in Qdrant
-- Document metadata payloads
-- Runtime filtering for supported file types
-
-The runtime can now ingest documents, summarize them, generate embeddings, and store persistent vector memory.
+The runtime can now ingest documents, summarize them, generate embeddings, and preserve that context as ***persistent vector memory***.
 
 Next, you will add semantic retrieval and contextual question answering.
