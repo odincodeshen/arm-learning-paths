@@ -1,5 +1,6 @@
 ---
 title: Run Confidential Containers with encrypted images using Arm CCA and Trustee
+description: Learn how to deploy Confidential Containers from encrypted images inside Arm CCA Realms using Trustee services for attestation-based authorization on an FVP with RME support.
 
 minutes_to_complete: 60
 
@@ -12,7 +13,7 @@ learning_objectives:
 
 prerequisites:
   - An AArch64 or x86_64 computer running Linux or macOS. Cloud-based instances can also be used; see the [Arm cloud service providers](/learning-paths/servers-and-cloud-computing/csp/)
-  - Completion of the [Run an end-to-end Attestation with Arm CCA and Trustee](/learning-paths/servers-and-cloud-computing/cca-trustee) Learning Path
+  - Completion of the [Run an end-to-end Attestation with Arm CCA and Trustee](/learning-paths/servers-and-cloud-computing/cca-trustee/) Learning Path
 
 author:
   - Anton Antonov

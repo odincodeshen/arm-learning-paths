@@ -5,13 +5,15 @@ minutes_to_complete: 20
 
 who_is_this_for: This is an introductory topic for software developers who want to create a Retrieval-Augmented Generation (RAG) application on Arm servers.
 
+description: Build a Retrieval-Augmented Generation (RAG) application on Arm servers using Zilliz Cloud for vector search and llama.cpp for LLM inference.
+
 learning_objectives: 
-    - Create a simple RAG application using Zilliz Cloud.
-    - Launch an LLM service on Arm servers.
+    - Create a simple RAG application using Zilliz Cloud
+    - Launch an LLM service on Arm servers
 
 prerequisites:
     - A basic understanding of a RAG pipeline.
-    - An AWS Graviton3 C7g.2xlarge instance, or any [Arm-based instance](/learning-paths/servers-and-cloud-computing/csp) from a cloud service provider or an on-premise Arm server.
+    - An AWS Graviton3 C7g.2xlarge instance, or any [Arm-based instance](/learning-paths/servers-and-cloud-computing/csp/) from a cloud service provider or an on-premise Arm server.
     - A [Zilliz account](https://zilliz.com/cloud?utm_source=partner&utm_medium=referral&utm_campaign=2024-10-24_web_arm-dev-hub-data-loading_arm), which you can sign up for with a free trial.
 
 author: Chen Zhang

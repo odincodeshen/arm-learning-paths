@@ -1,5 +1,6 @@
 ---
 title: 'Deploy an application to Azure Kubernetes Service'
+description: Learn how to create an Azure Kubernetes Service cluster with Arm64 virtual machines and deploy a containerized application to AKS.
 
 minutes_to_complete: 45
 
@@ -11,7 +12,7 @@ learning_objectives:
 
 prerequisites:
     - 'Azure subscription. Use this link to sign up for a free account: https://azure.microsoft.com/en-us/free/.'
-    - 'Complete the [first](/learning-paths/servers-and-cloud-computing/from-iot-to-the-cloud-part1) and [second](/learning-paths/servers-and-cloud-computing/from-iot-to-the-cloud-part2) learning paths of this series.'
+    - 'Complete the [first](/learning-paths/servers-and-cloud-computing/from-iot-to-the-cloud-part1/) and [second](/learning-paths/servers-and-cloud-computing/from-iot-to-the-cloud-part2/) learning paths of this series.'
   
 author: Dawid Borycki
 

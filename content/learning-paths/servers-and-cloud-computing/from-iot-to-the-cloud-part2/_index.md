@@ -1,5 +1,6 @@
 ---
 title: 'Deploy a containerized application using Azure Container Instances'
+description: Learn how to create and run Docker containers on Azure Container Instances for Arm64-based containerized application deployment.
 
 minutes_to_complete: 30
 
@@ -12,7 +13,7 @@ learning_objectives:
 
 prerequisites:
     - 'Azure subscription. Use this link to sign up for a free account: https://azure.microsoft.com/en-us/free/.'
-    - 'Complete the [first learning path](/learning-paths/servers-and-cloud-computing/from-iot-to-the-cloud-part1) of this series.'  
+    - 'Complete the [first learning path](/learning-paths/servers-and-cloud-computing/from-iot-to-the-cloud-part1/) of this series.'  
 
 author: Dawid Borycki
 
