@@ -828,3 +828,5 @@ You completed the ***persistent autonomous local AI runtime*** on DGX Spark. The
 This Learning Path uses DGX Spark as the reference platform, but the architecture is reusable beyond this specific system. The same pattern can be adapted to other Arm platforms that can run containerized services, local inference backends, vector memory, and a CPU-side orchestration runtime.
 
 The key idea is that persistent AI systems are ***distributed orchestration systems***, not just single inference calls. Hermes coordinates workspace ingestion, semantic memory, retrieval, autonomous summaries, and runtime policy, while the inference and memory services remain replaceable implementation choices.
+
+This implementation is intentionally a minimal MVP. It validates the end-to-end architecture, but it does not yet handle production concerns such as repeated updates to the same file, deduplication, re-indexing, versioned memory records, or file modification events. Those hardening steps are natural extensions once the core runtime pattern is working.
