@@ -8,21 +8,17 @@ layout: "learningpathall"
 
 In this section, you will add ***Hermes Agent*** to the runtime stack.
 
+The purpose of Hermes Agent is to act as the ***orchestration layer*** for the local AI runtime. It watches the workspace, detects runtime events, and coordinates the next action without requiring a user to manually run each step.
+
 Hermes is the ***CPU-side orchestration runtime***. It runs continuously, watches the shared workspace, and reacts when new files are created. This is the first step toward a ***persistent local AI agent***.
 
 In this section, Hermes does not call a language model yet. You will first build the event-driven runtime foundation:
 
 ```text
-[New file]
-       |
-       v
-[Filesystem event]
-       |
-       v
-[Hermes watcher]
-       |
-       v
-[Document preview]
+workspace/inbox
+    -> Filesystem event
+    -> Hermes event handler
+    -> Content preview
 ```
 
 Later sections add local inference, persistent memory, semantic retrieval, and autonomous cognition.
@@ -90,7 +86,7 @@ The command uses `python -u`:
 CMD ["python", "-u", "agent.py"]
 ```
 
-The `-u` option enables unbuffered output. This is important for a persistent service because log messages appear immediately when you run:
+The `-u` option enables unbuffered output. This is important for a persistent service because log messages appear immediately when you run the following command later.
 
 ```bash
 docker logs -f hermes
@@ -271,18 +267,14 @@ Verify that the Hermes container is running:
 docker ps
 ```
 
-You should see:
+You should see ***hermes*** alongside the existing runtime services: 
 
 ```text
-hermes
-```
-
-alongside the existing runtime services:
-
-```text
-ollama
-qdrant
-open-webui
+CONTAINER ID   IMAGE                                COMMAND                CREATED         STATUS                 PORTS                                                             NAMES
+8439b1e36b6c   compose-hermes                       "python -u agent.py"   2 seconds ago   Up 2 seconds                                                                             hermes
+8cb62495cb7b   ghcr.io/open-webui/open-webui:main   "bash start.sh"        3 hours ago     Up 3 hours (healthy)   0.0.0.0:3000->8080/tcp, [::]:3000->8080/tcp                       open-webui
+367b013fd34c   ollama/ollama:latest                 "/bin/ollama serve"    3 hours ago     Up 3 hours             0.0.0.0:11434->11434/tcp, [::]:11434->11434/tcp                   ollama
+e770401a4a0f   qdrant/qdrant:latest                 "./entrypoint.sh"      3 hours ago     Up 3 hours             0.0.0.0:6333-6334->6333-6334/tcp, [::]:6333-6334->6333-6334/tcp   qdrant
 ```
 
 ## Verify Hermes Runtime Logs
@@ -304,7 +296,7 @@ This confirms that Hermes started and is watching the shared inbox directory.
 
 ## Validate Event-driven Processing
 
-Open a second terminal on the host and create a new test file:
+Open a second terminal on the host and create a new test file. Use a filename that does not already exist so the `on_created()` event is triggered.
 
 ```bash
 echo "Hermes watches the workspace and reacts to new files." \
@@ -324,16 +316,10 @@ Hermes watches the workspace and reacts to new files.
 This validates the event-driven pipeline:
 
 ```text
-[New file]
-       |
-       v
-[Filesystem event]
-       |
-       v
-[Hermes orchestration]
-       |
-       v
-[File processing]
+Host file write
+    -> Container receives filesystem event
+    -> Hermes on_created() handler
+    -> File content preview
 ```
 
 ## Verify Shared Workspace Access
