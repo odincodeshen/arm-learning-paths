@@ -8,24 +8,20 @@ layout: "learningpathall"
 
 In this section, you will add ***autonomous workspace cognition*** to Hermes Agent.
 
+In the previous section, Hermes could answer a question by retrieving relevant memory on demand. This section adds proactive behavior: Hermes will periodically review stored workspace memory, identify recurring themes, and write a summary without waiting for a user query.
+
+For example, if the workspace contains notes about CPU orchestration, GPU inference, and semantic memory, Hermes can generate a scheduled workspace summary that explains those themes and how they relate to the current local AI runtime.
+
 The runtime can already ingest documents, build semantic memory, and answer questions using retrieved context. You will now add a ***periodic cognition workflow*** that reviews stored memory and generates a workspace-level summary.
 
 The workflow becomes:
 
 ```text
-[Persistent semantic memory]
-       |
-       v
-[Runtime scheduling]
-       |
-       v
-[Workspace cognition]
-       |
-       v
-[Autonomous analysis]
-       |
-       v
-[Workspace summary]
+stored workspace memory
+    -> scheduled cognition loop
+    -> Hermes aggregates summaries
+    -> Ollama analyzes recurring themes
+    -> workspace-summary.txt
 ```
 
 This is the final stage of the Learning Path. Hermes becomes a persistent autonomous local AI runtime that can monitor, remember, retrieve, and periodically reason about workspace state.
@@ -95,7 +91,6 @@ import time
 import ollama
 
 from datetime import datetime
-
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
@@ -107,35 +102,28 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 WATCH_DIR = "/workspace/inbox"
-
 CONFIG_PATH = "/workspace/config/runtime.json"
+COLLECTION_NAME = "workspace_memory"
 
 OLLAMA_HOST = os.getenv(
     "OLLAMA_HOST",
     "http://ollama:11434"
 )
-
 QDRANT_HOST = os.getenv(
     "QDRANT_HOST",
     "qdrant"
 )
 
-COLLECTION_NAME = "workspace_memory"
-
 client = ollama.Client(host=OLLAMA_HOST)
-
 qdrant = QdrantClient(
     host=QDRANT_HOST,
     port=6333
 )
 
 def ensure_collection():
-
     collections = qdrant.get_collections().collections
     names = [c.name for c in collections]
-
     if COLLECTION_NAME not in names:
-
         qdrant.create_collection(
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(
@@ -143,47 +131,34 @@ def ensure_collection():
                 distance=Distance.COSINE
             )
         )
-
         print(f"[Memory] Created collection: {COLLECTION_NAME}")
 
 def load_runtime_config():
-
     with open(CONFIG_PATH, "r") as f:
-
         return json.load(f)
 
 class WorkspaceHandler(FileSystemEventHandler):
-
     def on_created(self, event):
-
         if event.is_directory:
             return
-
         filename = os.path.basename(event.src_path)
-
         # Ignore hidden files
         if filename.startswith("."):
             return
-
         ext = os.path.splitext(filename)[1]
-
         config = load_runtime_config()
-
         supported_extensions = config.get(
             "supported_extensions",
             [".txt"]
         )
-
         if ext not in supported_extensions:
             return
 
         print(f"\n[Agent] New file detected:")
         print(event.src_path)
-
         process_file(event.src_path)
 
 def generate_summary(content):
-
     response = client.chat(
         model="qwen2.5:7b",
         messages=[
@@ -200,22 +175,17 @@ def generate_summary(content):
             }
         ]
     )
-
     return response["message"]["content"]
 
 def generate_embedding(content):
-
     response = client.embed(
         model="nomic-embed-text",
         input=content[:4000]
     )
-
     return response["embeddings"][0]
 
 def store_memory(path, content, summary, embedding):
-
     point_id = str(uuid.uuid4())
-
     qdrant.upsert(
         collection_name=COLLECTION_NAME,
         points=[
@@ -230,15 +200,11 @@ def store_memory(path, content, summary, embedding):
             )
         ]
     )
-
     print(f"[Memory] Stored document: {path}")
 
 def search_memory(query):
-
     print("\n[Memory] Searching semantic memory...")
-
     embedding = generate_embedding(query)
-
     results = qdrant.query_points(
         collection_name=COLLECTION_NAME,
         query=embedding,
@@ -246,27 +212,20 @@ def search_memory(query):
     ).points
 
     memories = []
-
     for result in results:
-
         payload = result.payload
-
         memories.append({
             "path": payload.get("path"),
             "summary": payload.get("summary")
         })
-
     return memories
 
 def query_workspace(question):
-
     memories = search_memory(question)
-
     context = "\n\n".join([
         f"Document: {m['path']}\nSummary:\n{m['summary']}"
         for m in memories
     ])
-
     response = client.chat(
         model="qwen2.5:7b",
         messages=[
@@ -286,9 +245,7 @@ def query_workspace(question):
             }
         ]
     )
-
     answer = response["message"]["content"]
-
     print("\n[Workspace Query]")
     print(question)
 
@@ -299,27 +256,19 @@ def query_workspace(question):
     print(answer)
 
 def generate_workspace_summary():
-
     print("\n[Cognition] Generating workspace summary...")
-
     results = qdrant.scroll(
         collection_name=COLLECTION_NAME,
         limit=10,
         with_payload=True
     )[0]
-
     summaries = []
-
     for result in results:
-
         payload = result.payload
-
         summaries.append(
             payload.get("summary", "")
         )
-
     combined = "\n\n".join(summaries)
-
     response = client.chat(
         model="qwen2.5:7b",
         messages=[
@@ -337,93 +286,66 @@ def generate_workspace_summary():
             }
         ]
     )
-
     workspace_summary = response["message"]["content"]
-
     config = load_runtime_config()
-
     output_path = config.get(
         "summary_output",
         "/workspace/memory/workspace-summary.txt"
     )
-
     with open(output_path, "w") as f:
-
         f.write(
             f"Workspace Summary\n"
             f"Generated: {datetime.now()}\n\n"
         )
-
         f.write(workspace_summary)
-
     print("\n[Cognition] Workspace summary updated:")
     print(output_path)
 
 def process_file(path):
-
     try:
-
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
-
         print("\n[Agent] Running summarization inference...")
-
         summary = generate_summary(content)
 
         print("\n[Agent] AI Summary:")
         print(summary)
 
         print("\n[Agent] Generating embeddings...")
-
         embedding = generate_embedding(content)
-
         store_memory(
             path,
             content,
             summary,
             embedding
         )
-
     except Exception as e:
-
         print(f"[Agent] Error: {e}")
 
 if __name__ == "__main__":
-
     print("\n[Hermes Agent] Starting workspace watcher...")
     print(f"[Hermes Agent] Monitoring: {WATCH_DIR}")
 
     ensure_collection()
-
     observer = Observer()
-
     observer.schedule(
         WorkspaceHandler(),
         WATCH_DIR,
         recursive=False
     )
-
     observer.start()
-
     last_summary_time = 0
-
     try:
-
         while True:
-
             time.sleep(5)
-
             config = load_runtime_config()
-
             summary_interval_hours = config.get(
                 "summary_interval_hours",
                 8
             )
-
             interval_seconds = (
                 summary_interval_hours * 3600
             )
-
             current_time = time.time()
 
             # Periodic autonomous cognition
@@ -431,25 +353,18 @@ if __name__ == "__main__":
                 current_time - last_summary_time
                 > interval_seconds
             ):
-
                 generate_workspace_summary()
-
                 last_summary_time = current_time
 
             # Interactive semantic retrieval
             if os.path.exists("/workspace/query.txt"):
-
                 with open("/workspace/query.txt", "r") as f:
                     question = f.read().strip()
-
                 os.remove("/workspace/query.txt")
-
                 query_workspace(question)
 
     except KeyboardInterrupt:
-
         observer.stop()
-
     observer.join()
 ```
 
@@ -463,9 +378,7 @@ CONFIG_PATH = "/workspace/config/runtime.json"
 
 ```python
 def load_runtime_config():
-
     with open(CONFIG_PATH, "r") as f:
-
         return json.load(f)
 ```
 
@@ -568,9 +481,30 @@ Expected structure:
 
 ```text
 Workspace Summary
-Generated: 2026-...
+Generated: 2026-05-20 22:53:29.539079
 
-...
+### Recurring Themes and Insights:
+
+1. **Semantic Memory in Persistent AI Systems:**
+   - Semantic memory utilizes a vector database to store embeddings and metadata.
+   - This approach allows for context-based retrieval rather than relying solely on exact keyword matching.
+   - The system can recall relevant past contexts based on meaning, enhancing its reasoning capabilities.
+
+2. **GPU Utilization:**
+   - NVIDIA GPUs are crucial for speeding up local model inference processes.
+   - They enhance tasks such as token generation, summarization, and embedding generation.
+   - These GPUs also improve the performance of contextual reasoning workloads locally.
+
+3. **Arm CPUs in Persistent AI Runtimes:**
+   - Arm CPUs handle orchestration by managing various operational tasks including:
+     - Filesystem events
+     - Runtime scheduling
+     - Container services
+   - They also process document parsing, metadata handling, and vector database operations.
+   - These tasks are essential for maintaining the overall functionality and efficiency of the persistent AI runtime.
+
+### Summary:
+The key insights from the workspace summaries revolve around how semantic memory enables context-based recall in AI systems, the role of NVIDIA GPUs in accelerating model inference tasks, and the multifaceted responsibilities of Arm CPUs in orchestrating various operational aspects of a persistent AI environment. These themes highlight the interdependence of different hardware components and their specific roles in enhancing the performance and effectiveness of AI systems.
 ```
 
 The summary content will vary because it is generated by the local model from stored memory.
@@ -594,13 +528,21 @@ Expected Hermes logs:
 /workspace/inbox/autonomous-runtime-note.txt
 
 [Agent] Running summarization inference...
+
+[Agent] AI Summary:
+- Autonomous workspace cognition enables an ongoing AI analysis of stored data at scheduled intervals.
+- The system uses this analysis to detect recurring themes and summarize activities within the workspace.
+- It maintains real-time awareness of the current state of the workspace environment.
+
 [Agent] Generating embeddings...
-[Memory] Stored document:
+[Memory] Stored document: /workspace/inbox/autonomous-runtime-note.txt
 ```
 
 The new document is added to semantic memory and can be included in future workspace summaries.
 
 ## Validate Semantic Retrieval Still Works
+
+Autonomous cognition adds scheduling and workspace-level summaries, but it should not break the interactive retrieval workflow from the previous section. Validate semantic retrieval again to confirm that Hermes can still process `/workspace/query.txt` while the cognition loop is enabled.
 
 Create a query:
 
@@ -618,13 +560,33 @@ Expected logs:
 What is autonomous workspace cognition?
 
 [Retrieved Memories]
+Document: /workspace/inbox/autonomous-runtime-note.txt
+Summary:
+- Autonomous workspace cognition enables an ongoing AI analysis of stored data at scheduled intervals.
+- The system uses this analysis to detect recurring themes and summarize activities within the workspace.
+- It maintains real-time awareness of the current state of the workspace environment.
+
+Document: /workspace/inbox/memory-test.txt
+Summary:
+- Persistent AI runtimes require memory to incorporate past workspace activities into future reasoning.
+- Semantic memory in AI systems retains embeddings and metadata to store relevant context.
+- This stored information allows for retrieval of pertinent context, enhancing the runtime's ability to reason effectively.
+
+Document: /workspace/inbox/cpu-orchestration-note.txt
+Summary:
+- Arm CPUs manage orchestration in persistent AI runtimes.
+- They handle filesystem events, runtime scheduling, and container services.
+- Additionally, they process document parsing, metadata handling, and vector database operations.
 
 [AI Response]
+Autonomous workspace cognition is a feature that enables an ongoing AI analysis of stored data at scheduled intervals. This system uses the analysis to detect recurring themes and summarize activities within the workspace. It maintains real-time awareness of the current state of the workspace environment, allowing for continuous monitoring and adaptive response based on the latest information available.
 ```
 
 This confirms that autonomous cognition was added without removing the query workflow from the previous section.
 
 ## Validate Runtime Policy Reload
+
+Runtime policy reload is important because persistent AI systems should be configurable without rebuilding containers or restarting the full stack. In this validation, you temporarily change the supported file extensions and confirm that Hermes applies the new policy during its normal runtime loop.
 
 Open and edit the file `~/dgx-hermes-agent/workspace/config/runtime.json`.
 
@@ -668,6 +630,13 @@ Expected logs:
 ```text
 [Agent] New file detected:
 /workspace/inbox/accepted-policy-test.md
+
+[Agent] Running summarization inference...
+
+[Agent] AI Summary:
+- The document discusses key strategies for enhancing local business support through AI technologies.
+- It highlights the importance of personalized customer experiences as enabled by advanced data analysis and machine learning techniques.
+- Recommendations include integrating chatbots and virtual assistants to improve communication efficiency and customer service.
 ```
 
 This validates that Hermes reloads runtime configuration dynamically.
@@ -708,7 +677,9 @@ Set a very small interval:
 }
 ```
 
-This is approximately 3.6 seconds.
+This is approximately 3.6 seconds. With this setting, Hermes repeatedly triggers the cognition loop after only a short pause. In the logs, you should see `[Cognition] Generating workspace summary...` and `[Cognition] Workspace summary updated:` appear again and again while the runtime is active.
+
+This fast interval is useful for validation, but it is intentionally aggressive. Leave it enabled only long enough to confirm that scheduling works, then restore the interval to a larger value.
 
 Follow the logs:
 
@@ -768,11 +739,7 @@ Verify that the summary file still exists:
 ls ~/dgx-hermes-agent/workspace/memory/
 ```
 
-You should see:
-
-```text
-workspace-summary.txt
-```
+You should see `workspace-summary.txt`.
 
 This confirms that the runtime state persists across container restarts.
 
@@ -812,35 +779,37 @@ The Blackwell GPU accelerates:
 
 The result is a heterogeneous local AI system where the CPU coordinates persistent workflows and the GPU accelerates model execution.
 
-## Runtime Compatibility Notes
+## Runtime Behavior Notes
 
-This final runtime uses the current Ollama embedding API:
+The final runtime still uses the Ollama and Qdrant APIs introduced in the previous sections. The notes below focus on runtime behavior that is specific to autonomous cognition and policy-driven orchestration.
+
+Runtime configuration is reloaded inside the main loop:
 
 ```python
-client.embed(...)
+config = load_runtime_config()
 ```
 
-and reads embeddings from:
+This means changes to `/workspace/config/runtime.json` can affect behavior without rebuilding the Hermes container. If the JSON file is malformed, Hermes will fail when it tries to reload the policy, so validate the file syntax after editing.
+
+Workspace cognition reads stored memory using Qdrant `scroll(...)`:
 
 ```python
-response["embeddings"][0]
-```
-
-Semantic retrieval uses the current Qdrant client API:
-
-```python
-qdrant.query_points(
+results = qdrant.scroll(
     collection_name=COLLECTION_NAME,
-    query=embedding,
-    limit=3
-).points
+    limit=10,
+    with_payload=True
+)[0]
 ```
 
-Qdrant result payloads are read from:
+This is different from semantic search. `scroll(...)` is used here to collect recent stored summaries for workspace-level analysis, while `query_points(...)` is still used for question-driven semantic retrieval.
+
+On startup, the first cognition cycle runs immediately because `last_summary_time` starts at `0`:
 
 ```python
-payload = result.payload
+last_summary_time = 0
 ```
+
+This behavior is expected. It validates that Hermes can read memory, call Ollama, and write the configured summary output path.
 
 The current implementation primarily handles file creation events through:
 
@@ -850,8 +819,12 @@ on_created()
 
 For validation, use new filenames. Existing files or file modifications may not trigger ingestion. File modification handling is a natural next improvement for a hardened runtime.
 
+The `retrieval_limit` value is present in `runtime.json`, but the verified retrieval code in this section still uses `limit=3` inside `search_memory()`. Treat the policy value as a visible configuration placeholder for later hardening.
+
 ## Summary
 
-You completed the ***persistent autonomous local AI runtime***. Hermes now combines event-driven workspace ingestion, local summarization and embedding generation, persistent semantic memory, contextual retrieval, autonomous workspace summaries, and dynamic runtime policy.
+You completed the ***persistent autonomous local AI runtime*** on DGX Spark. The finished system demonstrates how an Arm CPU can coordinate long-running AI workflows while a GPU accelerates summarization, embedding generation, contextual reasoning, and workspace-level cognition.
 
-This Learning Path demonstrates that persistent AI systems are ***distributed orchestration systems***, not just single inference calls. You have built a local-first AI runtime on DGX Spark using Arm CPU orchestration, GPU-accelerated inference, semantic memory, and autonomous workspace cognition.
+This Learning Path uses DGX Spark as the reference platform, but the architecture is reusable beyond this specific system. The same pattern can be adapted to other Arm platforms that can run containerized services, local inference backends, vector memory, and a CPU-side orchestration runtime.
+
+The key idea is that persistent AI systems are ***distributed orchestration systems***, not just single inference calls. Hermes coordinates workspace ingestion, semantic memory, retrieval, autonomous summaries, and runtime policy, while the inference and memory services remain replaceable implementation choices.
