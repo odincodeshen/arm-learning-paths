@@ -8,24 +8,18 @@ layout: "learningpathall"
 
 In this section, you will add ***persistent semantic memory*** to Hermes Agent.
 
+In the previous section, Hermes became an ***inference orchestrator***: it watched the workspace, sent document content to Ollama, and printed an AI summary. This section extends that workflow so the summary and source content are no longer just log output. Hermes will encode the document as an embedding and store it in Qdrant as reusable memory.
+
 The runtime can already monitor files and generate summaries with a local language model. You will now generate ***embeddings*** for workspace content and store them in ***Qdrant***.
 
 The workflow becomes:
 
 ```text
-[New document]
-       |
-       v
-[Summarization]
-       |
-       v
-[Embedding generation]
-       |
-       v
-[Qdrant vector storage]
-       |
-       v
-[Persistent semantic memory]
+workspace/inbox document
+    -> Hermes summarizes with Ollama
+    -> Hermes generates embedding
+    -> Hermes stores vector + payload in Qdrant
+    -> persistent semantic memory
 ```
 
 This turns Hermes from an event-driven summarizer into a local AI runtime with long-term memory.
@@ -52,6 +46,8 @@ The fixed embedding configuration is:
 | Distance metric | Cosine |
 
 The vector dimension must match the output size of the embedding model. For `nomic-embed-text`, the collection is created with a vector size of `768`.
+
+For example, a document about CPU orchestration is first summarized by `qwen2.5:7b`. Hermes then sends the same document text to `nomic-embed-text`, receives a 768-dimensional embedding, and stores that vector in Qdrant with metadata such as the file path, generated summary, and source content excerpt. Later, a query about "runtime scheduling" can retrieve this memory even if the document does not contain the exact same words.
 
 ## Pull the Embedding Model
 
@@ -121,10 +117,8 @@ qdrant = QdrantClient(
 )
 
 def ensure_collection():
-
     collections = qdrant.get_collections().collections
     names = [c.name for c in collections]
-
     if COLLECTION_NAME not in names:
 
         qdrant.create_collection(
@@ -134,29 +128,23 @@ def ensure_collection():
                 distance=Distance.COSINE
             )
         )
-
         print(f"[Memory] Created collection: {COLLECTION_NAME}")
 
 class WorkspaceHandler(FileSystemEventHandler):
-
     def on_created(self, event):
-
         if event.is_directory:
             return
 
         filename = os.path.basename(event.src_path)
-
         if filename.startswith("."):
             return
 
         ext = os.path.splitext(filename)[1]
-
         if ext not in SUPPORTED_EXTENSIONS:
             return
 
         print(f"\n[Agent] New file detected:")
         print(event.src_path)
-
         process_file(event.src_path)
 
 def generate_summary(content):
@@ -177,7 +165,6 @@ def generate_summary(content):
             }
         ]
     )
-
     return response["message"]["content"]
 
 def generate_embedding(content):
@@ -186,13 +173,11 @@ def generate_embedding(content):
         model="nomic-embed-text",
         input=content[:4000]
     )
-
     return response["embeddings"][0]
 
 def store_memory(path, content, summary, embedding):
 
     point_id = str(uuid.uuid4())
-
     qdrant.upsert(
         collection_name=COLLECTION_NAME,
         points=[
@@ -207,36 +192,27 @@ def store_memory(path, content, summary, embedding):
             )
         ]
     )
-
     print(f"[Memory] Stored document: {path}")
 
 def process_file(path):
 
     try:
-
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
-
         print("\n[Agent] Running summarization inference...")
-
         summary = generate_summary(content)
-
         print("\n[Agent] AI Summary:")
         print(summary)
-
         print("\n[Agent] Generating embeddings...")
 
         embedding = generate_embedding(content)
-
         store_memory(
             path,
             content,
             summary,
             embedding
         )
-
     except Exception as e:
-
         print(f"[Agent] Error: {e}")
 
 if __name__ == "__main__":
@@ -245,26 +221,18 @@ if __name__ == "__main__":
     print(f"[Hermes Agent] Monitoring: {WATCH_DIR}")
 
     ensure_collection()
-
     observer = Observer()
-
     observer.schedule(
         WorkspaceHandler(),
         WATCH_DIR,
         recursive=False
     )
-
     observer.start()
-
     try:
-
         while True:
             time.sleep(1)
-
     except KeyboardInterrupt:
-
         observer.stop()
-
     observer.join()
 ```
 
@@ -410,6 +378,11 @@ Watch the Hermes logs. Expected output includes:
 /workspace/inbox/memory-test.txt
 
 [Agent] Running summarization inference...
+
+[Agent] AI Summary:
+- Persistent AI runtimes require memory to incorporate past workspace activities into future reasoning.
+- Semantic memory in AI systems retains embeddings and metadata to store relevant context.
+- This stored information allows for retrieval of pertinent context, enhancing the runtime's ability to reason effectively.
 ```
 
 Then:
@@ -429,18 +402,28 @@ Open the Qdrant dashboard:
 http://localhost:6333/dashboard
 ```
 
-Confirm that the collection exists:
+Confirm that the `workspace_memory` collection exists:
 
-```text
-workspace_memory
-```
+![img2 alt-text#center](qdrant_dashboard_2.png "Qdrant Dashboard")
 
-Open the collection and verify that points are being stored. Each point should contain:
+The dashboard should show the `workspace_memory` collection after Hermes starts and runs `ensure_collection()`. If the collection does not appear, check the Hermes logs for Qdrant connection errors and confirm that the `qdrant` container is running.
+
+Open the collection and verify that points are being stored. Each point represents one ingested workspace document and should contain:
 
 - A 768-dimensional vector
 - A `path` payload field
 - A `summary` payload field
 - A `content` payload field
+
+![img3 alt-text#center](qdrant_dashboard_3.png "Qdrant workspace_memory ")
+
+Use this view to confirm that Qdrant has stored both the vector and payload metadata. The payload fields are important because later retrieval steps need the path and summary to assemble useful context for the LLM.
+
+You can also inspect collection storage and memory usage:
+
+![img4 alt-text#center](qdrant_dashboard_4.png "Qdrant workspace_memory ")
+
+The memory usage view confirms that Qdrant is maintaining persistent collection state on disk. This matters because the vector memory should survive container restarts as long as the `../qdrant:/qdrant/storage` volume remains mounted.
 
 You can also inspect collections from the host:
 
@@ -475,13 +458,15 @@ Qdrant stores the results as persistent memory.
 
 ## Runtime Compatibility Notes
 
-Use the current Ollama embedding API:
+The following compatibility notes apply to the code you added in `~/dgx-hermes-agent/hermes/agent.py`.
+
+Use the current Ollama embedding API inside the `generate_embedding()` function:
 
 ```python
 client.embed(...)
 ```
 
-Read the embedding from:
+Read the embedding from the `embeddings` list returned by Ollama:
 
 ```python
 response["embeddings"][0]
@@ -493,17 +478,18 @@ Do not use older examples that call:
 client.embeddings(...)
 ```
 
-The Qdrant vector dimension must match the embedding model output size. For this Learning Path, use:
+The Qdrant vector dimension must match the embedding model output size. For this Learning Path, use ***768*** with: ***nomic-embed-text***
 
-```text
-768
+This dimension is configured in `ensure_collection()`:
+
+```python
+vectors_config=VectorParams(
+    size=768,
+    distance=Distance.COSINE
+)
 ```
 
-with:
-
-```text
-nomic-embed-text
-```
+If you change the embedding model later, update the Qdrant collection dimension to match the new model output. If the dimensions do not match, Qdrant will reject the inserted vectors.
 
 ## Summary
 

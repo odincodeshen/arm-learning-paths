@@ -478,7 +478,7 @@ After the model responds, exit the interactive model session and the container s
 You can also monitor GPU activity from another terminal while the model is running:
 
 ```bash
-watch -n 1 nvidia-smi
+nvtop
 ```
 
 This validates that local inference is available before Hermes begins calling Ollama programmatically.
@@ -536,11 +536,11 @@ cat /workspace/inbox/test.txt
 You should see:
 
 ```text
-inbox
-memory
-logs
-processed
-config
+drwxrwxr-x 2 1001 1001 4096 May 20 18:16 config
+drwxrwxr-x 2 1001 1001 4096 May 20 18:37 inbox
+drwxrwxr-x 2 1001 1001 4096 May 20 18:16 logs
+drwxrwxr-x 2 1001 1001 4096 May 20 18:16 memory
+drwxrwxr-x 2 1001 1001 4096 May 20 18:16 processed
 ```
 
 And the file content:
