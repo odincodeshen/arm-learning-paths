@@ -507,7 +507,7 @@ Open the Qdrant dashboard:
 http://localhost:6333/dashboard
 ```
 
-![img1 alt-text#center](qdrant_dashboard.png "Qdrant Dashboard")
+![Qdrant dashboard running locally before the workspace_memory collection is created#center](qdrant_dashboard.png "Qdrant Dashboard")
 
 Qdrant is running, but it does not contain the `workspace_memory` collection yet. Hermes creates that collection later when you add persistent memory.
 

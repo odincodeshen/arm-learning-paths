@@ -241,15 +241,18 @@ Expected startup output:
 
 ## Validate AI Summarization
 
-Create a new file in another terminal:
+Create a new file in another terminal. Write the file outside the inbox first, then move it into `workspace/inbox/` so Hermes sees a completed file.
 
 ```bash
-cat > ~/dgx-hermes-agent/workspace/inbox/ai-runtime-note.txt <<'EOF'
+cat > /tmp/ai-runtime-note.txt <<'EOF'
 Persistent AI systems are not only prompt-response applications.
 They run as long-lived local services that monitor events, coordinate
 runtime workflows, store memory, and use GPU acceleration when model
 inference is required.
 EOF
+
+mv /tmp/ai-runtime-note.txt \
+~/dgx-hermes-agent/workspace/inbox/ai-runtime-note.txt
 ```
 
 Return to the Hermes logs. You should see output similar to:
@@ -283,11 +286,14 @@ In terminal 2, schedule a new file to be created after a short delay, then start
 ```bash
 (
 sleep 5
-cat > ~/dgx-hermes-agent/workspace/inbox/gpu-inference-test.txt <<'EOF'
+cat > /tmp/gpu-inference-test.txt <<'EOF'
 DGX Spark combines Arm CPU orchestration with NVIDIA GPU acceleration.
 The CPU coordinates persistent services, while the GPU accelerates local
 language model inference and summarization workloads.
 EOF
+
+mv /tmp/gpu-inference-test.txt \
+~/dgx-hermes-agent/workspace/inbox/gpu-inference-test.txt
 ) &
 nvtop
 ```

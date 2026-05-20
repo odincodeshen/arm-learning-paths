@@ -361,14 +361,17 @@ You should also see:
 
 ## Validate Memory Ingestion
 
-Create a new document in the inbox:
+Create a new document. Write it outside the inbox first, then move the completed file into `workspace/inbox/` so Hermes processes a fully written document.
 
 ```bash
-cat > ~/dgx-hermes-agent/workspace/inbox/memory-test.txt <<'EOF'
+cat > /tmp/memory-test.txt <<'EOF'
 Persistent AI runtimes need memory so that previous workspace activity
 can influence future reasoning. Semantic memory stores embeddings and
 metadata so the runtime can retrieve relevant context later.
 EOF
+
+mv /tmp/memory-test.txt \
+~/dgx-hermes-agent/workspace/inbox/memory-test.txt
 ```
 
 Watch the Hermes logs. Expected output includes:
@@ -404,7 +407,7 @@ http://localhost:6333/dashboard
 
 Confirm that the `workspace_memory` collection exists:
 
-![img2 alt-text#center](qdrant_dashboard_2.png "Qdrant Dashboard")
+![Qdrant dashboard showing the workspace_memory collection#center](qdrant_dashboard_2.png "Qdrant Dashboard")
 
 The dashboard should show the `workspace_memory` collection after Hermes starts and runs `ensure_collection()`. If the collection does not appear, check the Hermes logs for Qdrant connection errors and confirm that the `qdrant` container is running.
 
@@ -415,13 +418,13 @@ Open the collection and verify that points are being stored. Each point represen
 - A `summary` payload field
 - A `content` payload field
 
-![img3 alt-text#center](qdrant_dashboard_3.png "Qdrant workspace_memory ")
+![Qdrant workspace_memory collection showing stored vectors and payload fields#center](qdrant_dashboard_3.png "Qdrant workspace_memory")
 
 Use this view to confirm that Qdrant has stored both the vector and payload metadata. The payload fields are important because later retrieval steps need the path and summary to assemble useful context for the LLM.
 
 You can also inspect collection storage and memory usage:
 
-![img4 alt-text#center](qdrant_dashboard_4.png "Qdrant workspace_memory ")
+![Qdrant collection storage view showing persistent memory usage#center](qdrant_dashboard_4.png "Qdrant workspace_memory")
 
 The memory usage view confirms that Qdrant is maintaining persistent collection state on disk. This matters because the vector memory should survive container restarts as long as the `../qdrant:/qdrant/storage` volume remains mounted.
 

@@ -1,7 +1,7 @@
 ---
-title: Build a Persistent Local AI Agent on DGX Spark
+title: Orchestrate a Persistent Local AI Agent with Hermes on DGX Spark
 
-description: Learn how to build a persistent local AI agent on NVIDIA DGX Spark using event-driven orchestration, semantic memory, and heterogeneous Arm CPU + GPU workloads. You'll combine Hermes Agent, Ollama, and Qdrant to create a continuously running local AI runtime capable of real-time document ingestion, contextual retrieval, and autonomous workspace cognition.
+description: Learn how to build a persistent local AI agent on NVIDIA DGX Spark using event-driven orchestration, semantic memory, and heterogeneous Arm CPU + GPU workloads. You'll combine Hermes Agent, Ollama, and Qdrant to create a continuously running local AI runtime capable of event-driven document ingestion, contextual retrieval, and scheduled workspace cognition.
 
 minutes_to_complete: 90
 
@@ -28,11 +28,11 @@ operatingsystems:
 tools_software_languages:
     - Python
     - Docker 
-    - ollama
+    - Ollama
 
 further_reading:
     - resource:
-        title: Nvidia DGX Spark
+        title: NVIDIA DGX Spark
         link: https://www.nvidia.com/en-gb/products/workstations/dgx-spark/
         type: website
     - resource:

@@ -387,33 +387,44 @@ Expected startup output:
 
 Before testing retrieval, create a few new documents so Qdrant contains useful semantic memory.
 
+For each document, write the file in `/tmp` first and then move it into `workspace/inbox/`. This gives Hermes a completed file when the `on_created()` event fires.
+
 Create a document about CPU orchestration:
 
 ```bash
-cat > ~/dgx-hermes-agent/workspace/inbox/cpu-orchestration-note.txt <<'EOF'
+cat > /tmp/cpu-orchestration-note.txt <<'EOF'
 Arm CPUs are responsible for orchestration in persistent AI runtimes.
 They coordinate filesystem events, runtime scheduling, container services,
 document parsing, metadata handling, and vector database operations.
 EOF
+
+mv /tmp/cpu-orchestration-note.txt \
+~/dgx-hermes-agent/workspace/inbox/cpu-orchestration-note.txt
 ```
 
 Create a document about GPU inference:
 
 ```bash
-cat > ~/dgx-hermes-agent/workspace/inbox/gpu-inference-note.txt <<'EOF'
+cat > /tmp/gpu-inference-note.txt <<'EOF'
 NVIDIA GPUs accelerate local model inference, token generation,
 summarization, embedding generation, and contextual reasoning workloads.
 EOF
+
+mv /tmp/gpu-inference-note.txt \
+~/dgx-hermes-agent/workspace/inbox/gpu-inference-note.txt
 ```
 
 Create a document about semantic memory:
 
 ```bash
-cat > ~/dgx-hermes-agent/workspace/inbox/semantic-memory-note.txt <<'EOF'
+cat > /tmp/semantic-memory-note.txt <<'EOF'
 Semantic memory stores embeddings and metadata in a vector database.
 This allows persistent AI systems to retrieve relevant prior context
 based on meaning instead of exact keyword matching.
 EOF
+
+mv /tmp/semantic-memory-note.txt \
+~/dgx-hermes-agent/workspace/inbox/semantic-memory-note.txt
 ```
 
 Watch the Hermes logs until each document is summarized, embedded, and stored.

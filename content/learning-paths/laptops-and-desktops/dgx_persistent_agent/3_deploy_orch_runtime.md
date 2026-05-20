@@ -1,5 +1,5 @@
 ---
-title: Deploy Hermes Orchestration Runtime 
+title: Deploy Hermes Orchestration Runtime
 weight: 4
 layout: "learningpathall"
 ---
@@ -298,9 +298,14 @@ This confirms that Hermes started and is watching the shared inbox directory.
 
 Open a second terminal on the host and create a new test file. Use a filename that does not already exist so the `on_created()` event is triggered.
 
+Create the file outside the inbox first, then move the completed file into `workspace/inbox/`. This avoids triggering the filesystem event before the file content has finished writing.
+
 ```bash
 echo "Hermes watches the workspace and reacts to new files." \
-> ~/dgx-hermes-agent/workspace/inbox/runtime-test.txt
+> /tmp/runtime-test.txt
+
+mv /tmp/runtime-test.txt \
+~/dgx-hermes-agent/workspace/inbox/runtime-test.txt
 ```
 
 Return to the terminal that is following Hermes logs. You should see output similar to:
