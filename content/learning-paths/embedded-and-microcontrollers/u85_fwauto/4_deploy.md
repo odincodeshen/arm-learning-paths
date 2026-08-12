@@ -32,7 +32,7 @@ Key source files:
 
 In a manual firmware deployment workflow, you identify the correct project settings, build commands, and deployment procedures yourself. This means inspecting the repository structure, reading any available documentation, and executing a series of commands by hand.
 
-The `.fwauto/config.toml` configuration file starts out empty when you first clone the repository. In a manual workflow, you populate this file yourself or pass all the required details as command-line arguments. You also determine the correct firmware directory, CMake target, binary output path, serial port, and board target on your own.
+The `.fwauto/config.toml` configuration file is pre-configured in the repository. In a manual workflow, you can either use the existing configuration or override the values by passing them as command-line arguments. You determine the correct firmware directory, CMake target, binary output path, serial port, and board target on your own.
 
 ### Build the firmware (manual)
 
@@ -49,6 +49,10 @@ cd alif_slm_r/alif_vscode-template
 cmake --build tmp --target stories260k_runner.debug+E8-HE
   {{< /tab >}}
 {{< /tabpane >}}
+
+{{% notice Note %}}
+The `tmp` directory is the CMake build tree. It is created by the project's build system when you first run the build command shown above. If the build fails because `tmp` does not exist, check that you have run `git clone --recursive` so the CMSIS board-library submodule is present.
+{{% /notice %}}
 
 This compiles the firmware for the [Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) HE core. The build produces:
 
@@ -79,18 +83,24 @@ The MRAM usage line shows that the firmware (model weights and code) occupies ab
 
 Navigate back to the project root and run the deploy script:
 
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="Windows (PowerShell)" language="powershell" >}}
 cd ..
 python deploy_setools.py "alif_vscode-template/out/stories260k_runner/E8-HE/debug/stories260k_runner.bin" --com COM3
-```
+  {{< /tab >}}
+{{< /tabpane >}}
 
-Replace `COM3` with your actual serial port:
+Replace `COM3` with the serial port assigned to your board:
 
-| Operating system | Serial port format | Example |
-|---|---|---|
-| Windows | `COMn` | `COM3` |
-| Linux | `/dev/ttyACMn` | `/dev/ttyACM0` |
-| macOS | `/dev/cu.usbmodemn` | `/dev/cu.usbmodem1101` |
+| How to find your port | |
+|---|---|
+| Windows | Device Manager > Ports (COM & LPT) > J-Link CDC UART |
+| Linux | `/dev/ttyACM0` |
+| macOS | `/dev/cu.usbmodem1101` |
+
+{{% notice Important %}}
+The deploy script `deploy_setools.py` uses the Alif Security Toolkit (SETOOLS). Make sure you have installed SETOOLS and that the board firmware version is compatible with the toolkit version. See the [Alif Security Toolkit](https://alifsemi.com/support/kits/ensemble-e8devkit/) page for the latest release and version compatibility notes.
+{{% /notice %}}
 
 The board's EN/DIS switch stays in the **EN** position -- the script enters SE maintenance mode automatically over UART.
 
@@ -201,14 +211,13 @@ Inspect this repository and generate the firmware update workflow for the Alif S
 
 This prompt is effective because:
 
-- It tells FWAuto that the `.fwauto/config.toml` file is initially empty, so it generates a full configuration rather than assuming one already exists.
-- It asks FWAuto to inspect the current repository, preventing assumptions about external or predefined project structures.
+- It tells FWAuto to inspect the current repository, preventing assumptions about external or predefined project structures.
 - It tells FWAuto to use the local repository as the definitive source for project details.
 - It asks FWAuto to explain why each configuration value is needed, which helps you understand the project before executing anything.
 - It directs FWAuto to generate executable commands for building and deploying the firmware.
 
 {{% notice Note %}}
-The configuration file is intentionally empty at the start of this workflow. This makes it easier to show how FWAuto discovers the required updates instead of relying on pre-filled settings.
+The repository includes a pre-configured `.fwauto/config.toml`. If you want to start from scratch, delete the `.fwauto/` directory before running the prompt above.
 {{% /notice %}}
 
 ## Review the generated configuration updates

@@ -154,11 +154,15 @@ Email: your.email@example.com
 
 ## Clone the project repository
 
-Clone the project:
+Clone the project with `--recursive` to pull the CMSIS board-library submodule:
 
 ```bash
-git clone https://github.com/masonkuomeow/alif_slm_r.git
+git clone --recursive https://github.com/masonkuomeow/alif_slm_r.git
 ```
+
+{{% notice Important %}}
+The `--recursive` flag is required. Without it the CMSIS board-library submodule is not downloaded and the build will fail.
+{{% /notice %}}
 
 Navigate into the project directory:
 
@@ -172,31 +176,28 @@ Install the Python dependencies for the web server:
 pip install flask pyserial
 ```
 
-## Initialize FWAuto in the project
+## Verify the FWAuto configuration
 
-Navigate to the project root and run any FWAuto command to start the setup wizard:
+The repository already includes a `.fwauto/` directory with a pre-configured `config.toml`. You do not need to run the setup wizard.
+
+Verify the configuration is present:
 
 ```bash
-fwauto build
+cat .fwauto/config.toml
 ```
 
-The wizard asks you to configure:
+You should see build and deploy settings that reference the `alif_vscode-template` firmware directory, the `stories260k_runner.debug+E8-HE` build target, and the deploy script.
 
-1. **SDK Configuration** -- press Enter to accept the default path
-2. **Build Configuration** -- select `command` and enter the CMake build command
-3. **Deploy Configuration** -- select `command` and enter the deploy command
+Open `.fwauto/config.toml` in a text editor and confirm the serial port matches your board. Replace the default port with your actual port:
 
-After the wizard completes, a `.fwauto/` directory is created:
-
-```console
-.fwauto/
-  config.toml     # Project configuration
-  build/          # Build scripts
-  logs/           # Log directory
-```
+| Operating system | Serial port format | Example |
+|---|---|---|
+| Windows | `COMn` | `COM3` |
+| Linux | `/dev/ttyACMn` | `/dev/ttyACM0` |
+| macOS | `/dev/cu.usbmodemn` | `/dev/cu.usbmodem1101` |
 
 {{% notice Note %}}
-If the wizard does not appear, check that you are inside the `alif_slm_r` directory. FWAuto searches upward for a `.fwauto/` directory.
+If `.fwauto/config.toml` is missing or empty, run `fwauto build` to start the setup wizard. When prompted, select `command` for both Build Configuration and Deploy Configuration, then enter the appropriate CMake build command and deploy script path.
 {{% /notice %}}
 
 ## Verify your setup
