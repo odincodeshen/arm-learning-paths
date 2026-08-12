@@ -9,13 +9,13 @@ layout: "learningpathall"
 
 Before installing FWAuto, prepare the [Alif E8 DevKit](https://alifsemi.com/support/kits/ensemble-e8devkit/) hardware.
 
-The Alif E8 DevKit features an [Arm Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) microcontroller with integrated MRAM and SRAM. The board exposes a JLINK USB port for programming and debugging, and an EN/DIS switch for power control.
+The Alif E8 DevKit features an [Arm Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) microcontroller with integrated MRAM and SRAM. The board exposes a PRG USB port for programming and debugging, and an EN/DIS switch for power control.
 
-![Alif E8 DevKit board with annotations showing the Cortex-M55 HE, MRAM, SRAM, JLINK USB port, and EN/DIS switch#center](e8_image.jpg "Alif E8 DevKit board overview with key components annotated")
+![Alif E8 DevKit board with annotations showing the Cortex-M55 HE, MRAM, SRAM, PRG USB port, and EN/DIS switch#center](e8_image.jpg "Alif E8 DevKit board overview with key components annotated")
 
-1. Connect a USB cable from your computer to the port labeled **JLINK** on the Alif E8 DevKit. This port provides both J-Link debug and a virtual COM port.
+1. Connect a USB cable from your computer to the port labeled **PRG USB** on the Alif E8 DevKit. This port provides both J-Link debug and a virtual COM port.
 
-![USB cable connected to the JLINK port on the Alif E8 DevKit#center](prg_usb.jpg "USB cable connected to the JLINK port")
+![USB cable connected to the PRG USB port on the Alif E8 DevKit#center](prg_usb.jpg "USB cable connected to the PRG USB port")
 
 2. Locate the **EN/DIS switch** on the board. Set it to **EN**.
 
@@ -203,7 +203,7 @@ If the wizard does not appear, check that you are inside the `alif_slm_r` direct
 
 Before proceeding, verify that:
 
-- Alif E8 board is connected via USB (JLINK port)
+- Alif E8 board is connected via USB (PRG USB port)
 - Board is detected (COM port on Windows, `/dev/ttyACM*` on Linux, `/dev/cu.usbmodem*` on macOS)
 - EN/DIS switch is set to EN
 - Python 3.10 or later is installed and on PATH

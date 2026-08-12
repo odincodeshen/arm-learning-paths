@@ -137,7 +137,7 @@ This simulates board responses with realistic timing. It is useful for UI develo
 
 **Server shows "No board detected"**
 
-- Check that the board is connected via USB (JLINK port)
+- Check that the board is connected via USB (PRG USB port)
 - Verify the serial port:
   - Windows: check **Device Manager** under Ports (COM & LPT)
   - Linux: check `/dev/ttyACM*`
