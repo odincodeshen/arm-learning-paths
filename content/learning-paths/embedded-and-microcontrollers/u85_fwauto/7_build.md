@@ -1,7 +1,7 @@
 ---
 title: Build the firmware
 description: Compile the stories260K firmware for the Alif E8 Cortex-M55 HE core using CMake and the Arm GNU Toolchain.
-weight: 5
+weight: 7
 layout: "learningpathall"
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: Flash and verify the firmware
 description: Flash the compiled firmware to the Alif E8 DevKit with SETOOLS and verify the board is running by reading serial output.
-weight: 6
+weight: 8
 layout: "learningpathall"
 ---
 

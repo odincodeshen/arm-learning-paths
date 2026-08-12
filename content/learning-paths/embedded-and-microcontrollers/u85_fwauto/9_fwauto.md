@@ -1,7 +1,7 @@
 ---
 title: Use FWAuto for a closed-loop workflow
 description: Replace the manual build-and-flash workflow with FWAuto's AI-assisted inspection, configuration, and slash-command automation.
-weight: 7
+weight: 9
 layout: "learningpathall"
 ---
 

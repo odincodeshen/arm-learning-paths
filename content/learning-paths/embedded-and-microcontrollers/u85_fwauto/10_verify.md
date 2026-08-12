@@ -1,7 +1,7 @@
 ---
 title: Verify the deployment in the browser
 description: Start the Flask web server, open the browser dashboard, send prompts to the stories260K model on the Alif E8 DevKit, and view real-time inference results.
-weight: 8
+weight: 10
 layout: "learningpathall"
 ---
 
