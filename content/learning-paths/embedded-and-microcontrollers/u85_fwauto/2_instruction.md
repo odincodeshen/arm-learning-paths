@@ -143,7 +143,7 @@ JLinkExe --version
 
 ## Install build tools
 
-The firmware build needs [CMake](https://cmake.org/), [Ninja](https://ninja-build.org/), and the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/gnu-rm).
+The firmware build needs [CMake](https://cmake.org/) 3.31.5 or later, [Ninja](https://ninja-build.org/) 1.12.0 or later, the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/gnu-rm), and the [CMSIS-Toolbox](https://github.com/Open-CMSIS-Pack/cmsis-toolbox).
 
 **Install CMake:**
 
@@ -181,12 +181,38 @@ On macOS, you can also use `brew install ninja` if you have Homebrew installed.
 
 Go to [developer.arm.com/downloads](https://developer.arm.com/downloads/-/gnu-rm) and download the installer for your operating system. On Windows, select **"Add to PATH"** during installation. On Linux and macOS, extract the archive and add the `bin` directory to your `PATH`.
 
-Verify all three tools:
+**Install the CMSIS-Toolbox:**
+
+The [CMSIS-Toolbox](https://github.com/Open-CMSIS-Pack/cmsis-toolbox) manages CMSIS software packs and the build flow. Download the latest release from the [Arm Tools Artifactory](https://artifactory.keil.arm.com/artifactory/cmsis-toolbox/) for your platform and extract it to a directory such as `C:\cmsis-toolbox`.
+
+Add the `bin` directory to your `PATH` and register the compiler:
+
+{{< tabpane code=true >}}
+  {{< tab header="Windows (PowerShell)" language="powershell" >}}
+# Add CMSIS-Toolbox to PATH (current session)
+$env:PATH += ";C:\cmsis-toolbox\bin"
+
+# Register GCC toolchain (adjust version and path to match your installation)
+$env:GCC_TOOLCHAIN_14_2_1 = "C:\Program Files\Arm GNU Toolchain arm-none-eabi\14.2\bin"
+
+# Initialize the pack index
+cpackget init https://www.keil.com/pack/index.pidx
+  {{< /tab >}}
+
+  {{< tab header="macOS and Linux" language="bash" >}}
+export PATH=~/cmsis-toolbox/bin:$PATH
+export GCC_TOOLCHAIN_14_2_1=/opt/gcc-arm-none-eabi/bin
+cpackget init https://www.keil.com/pack/index.pidx
+  {{< /tab >}}
+{{< /tabpane >}}
+
+Verify all four tools:
 
 ```bash
 cmake --version
 ninja --version
 arm-none-eabi-gcc --version
+cbuild --version
 ```
 
 ## Verify your setup

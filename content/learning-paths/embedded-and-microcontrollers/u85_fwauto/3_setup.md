@@ -9,17 +9,17 @@ layout: "learningpathall"
 
 Before installing FWAuto, prepare the [Alif E8 DevKit](https://alifsemi.com/support/kits/ensemble-e8devkit/) hardware.
 
-The Alif E8 DevKit features an [Arm Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) microcontroller with integrated MRAM and SRAM. The board exposes a PRG USB port for programming and debugging, and an EN/DIS switch for power control.
+The Alif E8 DevKit features the [Alif Ensemble E8](https://alifsemi.com/support/kits/ensemble-e8devkit/) fusion processor, which integrates two [Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) CPU cores (one HP and one HE), two [Cortex-A32](https://developer.arm.com/Processors/Cortex-A32) MPU cores, two [Ethos-U55](https://developer.arm.com/Processors/Ethos-U55) NPU cores, one [Ethos-U85](https://developer.arm.com/Processors/Ethos-U85) NPU core, 4 MB MRAM, and 4 MB SRAM. This Learning Path uses the Cortex-M55 HE core for inference. The board exposes a PRG USB port for programming and debugging, and a UART selector switch (SW4) for choosing between SEUART, UART2, and UART4.
 
-![Alif E8 DevKit board with annotations showing the Cortex-M55 HE, MRAM, SRAM, PRG USB port, and EN/DIS switch#center](e8_image.jpg "Alif E8 DevKit board overview with key components annotated")
+![Alif E8 DevKit board with annotations showing the Cortex-M55 HE, MRAM, SRAM, PRG USB port, and SW4 UART selector#center](e8_image.jpg "Alif E8 DevKit board overview with key components annotated")
 
 1. Connect a USB cable from your computer to the port labeled **PRG USB** on the Alif E8 DevKit. This port provides both J-Link debug and a virtual COM port.
 
 ![USB cable connected to the PRG USB port on the Alif E8 DevKit#center](prg_usb.jpg "USB cable connected to the PRG USB port")
 
-2. Locate the **EN/DIS switch** on the board. Set it to **EN**.
+2. Locate the **SW4 UART selector switch** on the board. Leave it in the default **SEUART** position.
 
-   Leave this switch in the EN position at all times. The flashing process enters SE maintenance mode automatically through software -- you never change this switch.
+   The SETOOLS flash script communicates with the Secure Enclave over SEUART. If you change this switch to UART2 or UART4, the deploy script cannot reach the board.
 
 3. Verify the board is detected:
 
@@ -206,7 +206,7 @@ Before proceeding, verify that:
 
 - Alif E8 board is connected via USB (PRG USB port)
 - Board is detected (COM port on Windows, `/dev/ttyACM*` on Linux, `/dev/cu.usbmodem*` on macOS)
-- EN/DIS switch is set to EN
+- SW4 UART selector switch is in the default SEUART position
 - Python 3.10 or later is installed and on PATH
 - Node.js 20 or later is installed and on PATH
 - uv is installed

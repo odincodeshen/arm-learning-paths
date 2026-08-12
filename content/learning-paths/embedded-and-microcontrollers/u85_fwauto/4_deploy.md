@@ -99,10 +99,10 @@ Replace `COM3` with the serial port assigned to your board:
 | macOS | `/dev/cu.usbmodem1101` |
 
 {{% notice Important %}}
-The deploy script `deploy_setools.py` uses the Alif Security Toolkit (SETOOLS). Make sure you have installed SETOOLS and that the board firmware version is compatible with the toolkit version. See the [Alif Security Toolkit](https://alifsemi.com/support/kits/ensemble-e8devkit/) page for the latest release and version compatibility notes.
+The deploy script `deploy_setools.py` uses the [Alif Security Toolkit (SETOOLS)](https://alifsemi.com/support/software-tools/ensemble/). Download **SETOOLS V1.110.000 or later** for your platform. After downloading, open a terminal in the SETOOLS directory and run `updateSystemPackage.exe -d` to initialize the toolkit and update the board firmware if needed.
 {{% /notice %}}
 
-The board's EN/DIS switch stays in the **EN** position -- the script enters SE maintenance mode automatically over UART.
+Leave the SW4 UART selector switch in the default **SEUART** position -- the script enters SE maintenance mode automatically over UART.
 
 The script:
 
