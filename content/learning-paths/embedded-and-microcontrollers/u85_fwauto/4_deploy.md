@@ -1,12 +1,13 @@
 ---
-title: Deploy SLM
+title: Deploy the SLM firmware
+description: Understand the Alif SLM project structure, build the firmware manually or with FWAuto, flash it to the Alif E8 DevKit, and verify the board is running.
 weight: 4
 layout: "learningpathall"
 ---
 
 ## Understand the project structure
 
-Before building and deploying, it is helpful to understand the key directories and files within the `alif_slm_r` repository. This knowledge is essential for a manual workflow, where you need to locate specific build scripts and binaries yourself.
+Before building and deploying, it helps to understand the key directories and files within the `alif_slm_r` repository. This knowledge is essential for a manual workflow, where you need to locate specific build scripts and binaries yourself.
 
 The project contains two firmware implementations:
 
@@ -29,27 +30,25 @@ Key source files:
 
 ## Understand the manual workflow
 
-In a manual firmware deployment workflow, you are responsible for identifying the correct project settings, build commands, and deployment procedures. This means inspecting the repository structure, reading any available documentation, and executing a series of commands by hand.
+In a manual firmware deployment workflow, you identify the correct project settings, build commands, and deployment procedures yourself. This means inspecting the repository structure, reading any available documentation, and executing a series of commands by hand.
 
-The `.fwauto/config.toml` configuration file starts out empty when you first clone the repository. In a manual workflow, you would need to populate this file yourself or pass all the required details as command-line arguments. You also need to determine the correct firmware directory, CMake target, binary output path, serial port, and board target on your own.
+The `.fwauto/config.toml` configuration file starts out empty when you first clone the repository. In a manual workflow, you populate this file yourself or pass all the required details as command-line arguments. You also determine the correct firmware directory, CMake target, binary output path, serial port, and board target on your own.
 
 ### Build the firmware (manual)
 
-Open a terminal, navigate to the project root, and build:
+Open a terminal, navigate to the firmware directory, and build:
 
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
 cd alif_slm_r/alif_vscode-template
-```
-
-Then build the firmware:
-
-```bash
 cmake --build tmp --target stories260k_runner.debug+E8-HE
-```
+  {{< /tab >}}
 
-{{% notice Note %}}
-On Windows, use `cd alif_slm_r\alif_vscode-template` (backslash) or `cd alif_slm_r/alif_vscode-template` (forward slash also works in PowerShell and Command Prompt).
-{{% /notice %}}
+  {{< tab header="Windows (PowerShell)" language="powershell" >}}
+cd alif_slm_r/alif_vscode-template
+cmake --build tmp --target stories260k_runner.debug+E8-HE
+  {{< /tab >}}
+{{< /tabpane >}}
 
 This compiles the firmware for the [Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) HE core. The build produces:
 
@@ -74,7 +73,7 @@ MRAM: 1149296 B / 2 MB (54.80%)
 [5/5] Completed 'stories260k_runner.debug+E8-HE'
 ```
 
-The MRAM usage line shows that the firmware (model weights plus code) occupies about 55% of the available 2 MB MRAM.
+The MRAM usage line shows that the firmware (model weights and code) occupies about 55% of the available 2 MB MRAM.
 
 ### Flash the firmware (manual)
 
@@ -82,11 +81,6 @@ Navigate back to the project root and run the deploy script:
 
 ```bash
 cd ..
-```
-
-Then run the deploy script:
-
-```bash
 python deploy_setools.py "alif_vscode-template/out/stories260k_runner/E8-HE/debug/stories260k_runner.bin" --com COM3
 ```
 
@@ -131,23 +125,19 @@ After flashing, the board reboots automatically and runs the new firmware.
 
 Open a serial terminal to check the board output.
 
-On Linux:
-
-```bash
-screen /dev/ttyACM0 115200
-```
-
-On macOS:
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS" language="bash" >}}
 screen /dev/cu.usbmodem1101 115200
-```
+  {{< /tab >}}
 
-On Windows (PowerShell):
+  {{< tab header="Linux" language="bash" >}}
+screen /dev/ttyACM0 115200
+  {{< /tab >}}
 
-```bash
+  {{< tab header="Windows (PowerShell)" language="powershell" >}}
 powershell -Command "$p = New-Object System.IO.Ports.SerialPort('COM3',115200,'None',8,'One'); $p.ReadTimeout=5000; $p.Open(); Start-Sleep -Seconds 3; $d=$p.ReadExisting(); $p.Close(); Write-Host $d"
-```
+  {{< /tab >}}
+{{< /tabpane >}}
 
 You should see output similar to:
 
@@ -195,15 +185,15 @@ In a manual workflow, you are the feedback path. The loop breaks at every point 
 | Which board, probe, and port | Flash stops and waits for you -- the second break |
 | That these stay in sync | The model goes stale, and the system runs steadily toward the wrong result |
 
-## Use fwauto to inspect the project
+## Use FWAuto to inspect the project
 
-Instead of manually inspecting the repository, you can ask `fwauto` to do it for you. `fwauto` reads the project structure, identifies the build system, locates the firmware directories, and determines the required configuration values -- all from the repository itself.
+Instead of manually inspecting the repository, you can ask FWAuto to do it for you. FWAuto reads the project structure, identifies the build system, locates the firmware directories, and determines the required configuration values -- all from the repository itself.
 
-This step takes you out of the feedback path. Once `fwauto` has written the config, the loop can close on itself for the first time: build -> flash -> read the board back -> find the mismatch -> know which target to rebuild and where to reflash -> run again.
+This step takes you out of the feedback path. Once FWAuto has written the config, the loop can close on itself for the first time: build, flash, read the board back, find the mismatch, know which target to rebuild and where to reflash, and run again.
 
-## Prompt fwauto to generate the workflow
+## Prompt FWAuto to generate the workflow
 
-To leverage `fwauto`'s inspection capabilities, provide it with a prompt that describes the task:
+To use FWAuto's inspection capabilities, provide it with a prompt that describes the task:
 
 ```text
 Inspect this repository and generate the firmware update workflow for the Alif SLM project. The configuration file is currently empty. Determine which configuration values need to be updated, explain why each value is needed, and generate the commands required to prepare and deploy the firmware. Use the current repository structure as the source of truth.
@@ -211,19 +201,19 @@ Inspect this repository and generate the firmware update workflow for the Alif S
 
 This prompt is effective because:
 
-- It tells `fwauto` that the `.fwauto/config.toml` file is initially empty, so it generates a full configuration rather than assuming one already exists.
-- It asks `fwauto` to inspect the current repository, preventing assumptions about external or predefined project structures.
-- It tells `fwauto` to use the local repository as the definitive source for project details.
-- It asks `fwauto` to explain why each configuration value is needed, which helps you understand the project before executing anything.
-- It directs `fwauto` to generate executable commands for building and deploying the firmware.
+- It tells FWAuto that the `.fwauto/config.toml` file is initially empty, so it generates a full configuration rather than assuming one already exists.
+- It asks FWAuto to inspect the current repository, preventing assumptions about external or predefined project structures.
+- It tells FWAuto to use the local repository as the definitive source for project details.
+- It asks FWAuto to explain why each configuration value is needed, which helps you understand the project before executing anything.
+- It directs FWAuto to generate executable commands for building and deploying the firmware.
 
 {{% notice Note %}}
-The configuration file is intentionally empty at the start of this workflow. This makes it easier to show how `fwauto` discovers the required updates instead of relying on pre-filled settings.
+The configuration file is intentionally empty at the start of this workflow. This makes it easier to show how FWAuto discovers the required updates instead of relying on pre-filled settings.
 {{% /notice %}}
 
 ## Review the generated configuration updates
 
-After `fwauto` inspects the project and processes your prompt, it generates proposed configuration updates for the `.fwauto/config.toml` file, along with the corresponding build and deploy commands.
+After FWAuto inspects the project and processes your prompt, it generates proposed configuration updates for the `.fwauto/config.toml` file, along with the corresponding build and deploy commands.
 
 Review these generated outputs before executing them. Confirm that:
 
@@ -232,11 +222,11 @@ Review these generated outputs before executing them. Confirm that:
 - The deploy script path and arguments are correct
 - The serial port matches your hardware setup
 
-This review step ensures that `fwauto` has correctly interpreted the project structure and that the generated workflow is safe to execute.
+This review step ensures that FWAuto has correctly interpreted the project structure and that the generated workflow is safe to execute.
 
-## Deploy the firmware with fwauto
+## Deploy the firmware with FWAuto
 
-Once you have reviewed and confirmed the `fwauto` configuration, you can use slash commands to build and flash. From the project root, start FWAuto in chat mode:
+Once you have reviewed and confirmed the FWAuto configuration, you can use slash commands to build and flash. From the project root, start FWAuto in chat mode:
 
 ```bash
 fwauto
@@ -248,100 +238,18 @@ Then run the build command:
 /build
 ```
 
-`/build` runs the same CMake command shown in the manual section. It is configured in `.fwauto/config.toml`.
+`/build` runs the same CMake command shown in the manual workflow. You should see the same compiler output and MRAM usage report.
 
-After the build completes, run the deploy command:
+After the build succeeds, flash the firmware:
 
 ```bash
 /deploy
 ```
 
-`/deploy` runs the same `deploy_setools.py` script.
+`/deploy` runs the deploy script, enters SE maintenance mode, and writes the firmware to MRAM. You should see the same SETOOLS output as the manual workflow.
 
-The build output is identical to the manual CMake build:
+## What you've accomplished and what's next
 
-```output
-Building project...
-Running: cmd /c "cd .../alif_vscode-template && cmake --build tmp --target stories260k_runner.debug+E8-HE"
+You've now built the SLM firmware from source and flashed it to the Alif E8 DevKit, either through manual commands or through FWAuto's `/build` and `/deploy` slash commands. The board is running the stories260K inference engine and is ready to accept prompts.
 
-[0/6] Performing build step for 'stories260k_runner.debug+E8-HE'
-
-[1/40] Building C object .../llm_infer.c.obj
-...
-[40/40] Linking C executable stories260k_runner.elf
-
-MRAM: 1149296 B / 2 MB (54.80%)
-
-Build succeeded
-```
-
-The deploy output is identical to the manual `deploy_setools.py` run:
-
-```output
-Deploying firmware...
-
-[PREP] Source: .../stories260k_runner.bin (1149296 bytes)
-
-[PREP] ATOC OK.
-
-[MAINT] Soft Maintenance Mode ACTIVE.
-
-[FLASH] Completed (rc=0).
-
-  DEPLOY SUCCESSFUL
-```
-
-After flashing, the board reboots automatically and runs the new firmware.
-
-## Verify the deployment
-
-After deploying the firmware, verify that it is running by opening a serial terminal to the board.
-
-On Linux:
-
-```bash
-screen /dev/ttyACM0 115200
-```
-
-On macOS:
-
-```bash
-screen /dev/cu.usbmodem1101 115200
-```
-
-On Windows (PowerShell):
-
-```bash
-powershell -Command "$p = New-Object System.IO.Ports.SerialPort('COM3',115200,'None',8,'One'); $p.ReadTimeout=5000; $p.Open(); Start-Sleep -Seconds 3; $d=$p.ReadExisting(); $p.Close(); Write-Host $d"
-```
-
-If the firmware is running correctly, you should see the `READY>` prompt, confirming that the model has loaded and is waiting for input.
-
-## Compare manual and fwauto workflows
-
-The following table summarizes the differences between a manual firmware deployment workflow and one automated with `fwauto`.
-
-| Step | Manual workflow | fwauto workflow |
-|------|----------------|-----------------|
-| Inspect project files | The user checks files manually | `fwauto` scans the project |
-| Update configuration | The user edits values by hand | `fwauto` suggests required updates |
-| Build firmware | User runs cmake commands manually | `/build` runs the configured build |
-| Flash firmware | User runs deploy script with correct arguments | `/deploy` runs the configured deploy |
-| Risk | Missing or inconsistent settings | Lower risk because changes are generated from project context |
-
-## Troubleshooting
-
-Use the following table to resolve common issues you might encounter during the build and deployment process.
-
-| Issue | Why it happens | How to fix it |
-|------|----------------|---------------|
-| Build fails with "target not found" | Wrong build directory or target name | Verify you are in `alif_vscode-template/` and the target name is `stories260k_runner.debug+E8-HE` |
-| Deploy fails with "serial port not found" | Board not connected or wrong port | Check your serial port: `COM3` on Windows, `/dev/ttyACM0` on Linux, `/dev/cu.usbmodem1101` on macOS |
-| Board shows garbled output | Wrong firmware binary flashed | Ensure you built from `alif_vscode-template/`, not `workshop-ethos-u/` |
-| fwauto build fails | `.fwauto/config.toml` is missing or misconfigured | Run `fwauto build` from the project root to re-run the setup wizard |
-
-{{% notice Note %}}
-If the build fails, FWAuto reads the error output and suggests a fix. You can also type `/log` to analyze UART output if the board does not respond correctly after flashing.
-{{% /notice %}}
-
-With the firmware deployed and verified, you are ready to start the web server and interact with the model from your browser.
+Next, you start the Flask web server and interact with the model through the browser dashboard.

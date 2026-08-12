@@ -1,24 +1,25 @@
 ---
 title: Overview and install dependencies
+description: Learn how the stories260K language model runs on the Alif E8 DevKit and install Python, Node.js, uv, SEGGER J-Link, CMake, Ninja, and the Arm GNU Toolchain.
 weight: 2
 layout: "learningpathall"
 ---
 
 ## Overview
 
-In this Learning Path, you deploy a small language model (SLM) on the [Alif E8 Development Kit](https://alifsemi.com/support/kits/ensemble-e8devkit/) and interact with it through a web browser.
+You deploy a small language model (SLM) on the [Alif E8 Development Kit](https://alifsemi.com/support/kits/ensemble-e8devkit/) and interact with it through a web browser.
 
 The Alif E8 DevKit contains an [Arm Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) microcontroller with enough memory to run a tiny 260,000-parameter language model. You install all required tools, build and flash the firmware, then start a web server to send prompts from your browser.
 
-### What is stories260K?
+### What stories260K is
 
-[stories260K](https://github.com/karpathy/llama2.c) is a tiny language model created by Andrej Karpathy as part of the llama2.c project. It has 260,000 parameters, 5 transformer layers, and a 512-token vocabulary. It is trained on simple children's stories, so it generates short, coherent text continuations.
+[stories260K](https://github.com/karpathy/llama2.c) is a tiny language model created by Andrej Karpathy as part of the llama2.c project. It has 260,000 parameters, five transformer layers, and a 512-token vocabulary. It is trained on children's stories, so it generates short, coherent text continuations.
 
 The model is small enough to run entirely on the Cortex-M55 HE core of the Alif E8. The KV cache sits in SRAM and the model weights sit in MRAM.
 
 ### Architecture
 
-The system connects a browser dashboard to the Alif E8 board through a [Flask](https://flask.palletsprojects.com/) web server. The web GUI provides a user-friendly interface where you type prompts and view model-generated responses in real time, without needing a serial terminal.
+The system connects a browser dashboard to the Alif E8 board through a [Flask](https://flask.palletsprojects.com/) web server. The web GUI provides an interface where you type prompts and view model-generated responses in real time, without a serial terminal.
 
 ```console
   Browser (localhost:5000)
@@ -40,22 +41,22 @@ The browser connects to the Flask server via [Server-Sent Events (SSE)](https://
 
 ## Install Python
 
-[FWAuto](https://fwauto.ai/) requires [Python](https://www.python.org/) 3.10 or later.
+[FWAuto](https://fwauto.ai/) needs [Python](https://www.python.org/) 3.10 or later.
 
-On Linux (Debian or Ubuntu):
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
 sudo apt update
 sudo apt install python3 python3-pip
-```
+  {{< /tab >}}
 
-On macOS, use Homebrew:
+  {{< tab header="Windows" language="text" >}}
+Download the installer from python.org/downloads. Check **"Add Python to PATH"** during installation.
+  {{< /tab >}}
+{{< /tabpane >}}
 
-```bash
-brew install python
-```
-
-On Windows, download the installer from [python.org/downloads](https://www.python.org/downloads/). Make sure to check **"Add Python to PATH"** during installation.
+{{% notice Note %}}
+On macOS, you can also use `brew install python` if you have Homebrew installed.
+{{% /notice %}}
 
 Verify:
 
@@ -71,26 +72,22 @@ Python 3.12.4
 
 ## Install Node.js
 
-FWAuto requires [Node.js](https://nodejs.org/) 20 or later.
+FWAuto needs [Node.js](https://nodejs.org/) 20 or later.
 
-On Linux (Debian or Ubuntu):
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
-```
+  {{< /tab >}}
 
-On macOS, use Homebrew:
-
-```bash
-brew install node@20
-```
-
-On Windows, use winget:
-
-```bash
+  {{< tab header="Windows" language="powershell" >}}
 winget install OpenJS.NodeJS.LTS
-```
+  {{< /tab >}}
+{{< /tabpane >}}
+
+{{% notice Note %}}
+On macOS, you can also use `brew install node@20` if you have Homebrew installed.
+{{% /notice %}}
 
 Verify:
 
@@ -108,17 +105,15 @@ v20.15.0
 
 [uv](https://docs.astral.sh/uv/) is a Python package manager that FWAuto uses.
 
-On Linux and macOS:
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+  {{< /tab >}}
 
-On Windows (PowerShell):
-
-```bash
+  {{< tab header="Windows (PowerShell)" language="powershell" >}}
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
+  {{< /tab >}}
+{{< /tabpane >}}
 
 Close and reopen your terminal after installation. Verify:
 
@@ -136,9 +131,9 @@ uv 0.4.0
 
 The [SEGGER J-Link](https://www.segger.com/downloads/jlink/) software provides the debug probe driver and tools for communicating with the Alif E8 board.
 
-1. Go to [segger.com/downloads/jlink](https://www.segger.com/downloads/jlink/)
-2. Download the **J-Link Software and Documentation Pack** for your operating system
-3. Run the installer with default settings
+1. Go to [segger.com/downloads/jlink](https://www.segger.com/downloads/jlink/).
+2. Download the **J-Link Software and Documentation Pack** for your operating system.
+3. Run the installer with default settings.
 
 Verify:
 
@@ -148,47 +143,43 @@ JLinkExe --version
 
 ## Install build tools
 
-The firmware build requires [CMake](https://cmake.org/), [Ninja](https://ninja-build.org/), and the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/gnu-rm).
+The firmware build needs [CMake](https://cmake.org/), [Ninja](https://ninja-build.org/), and the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/gnu-rm).
 
-Install CMake:
+**Install CMake:**
 
-On Linux (Debian or Ubuntu):
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
 sudo apt install cmake
-```
+  {{< /tab >}}
 
-On macOS, use Homebrew:
+  {{< tab header="Windows" language="text" >}}
+Download from cmake.org/download and select **"Add CMake to the system PATH"** during installation.
+  {{< /tab >}}
+{{< /tabpane >}}
 
-```bash
-brew install cmake
-```
+{{% notice Note %}}
+On macOS, you can also use `brew install cmake` if you have Homebrew installed.
+{{% /notice %}}
 
-On Windows, download from [cmake.org/download](https://cmake.org/download/) and select "Add CMake to the system PATH" during installation.
+**Install Ninja:**
 
-Install Ninja:
-
-On Linux (Debian or Ubuntu):
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
 sudo apt install ninja-build
-```
+  {{< /tab >}}
 
-On macOS, use Homebrew:
-
-```bash
-brew install ninja
-```
-
-On Windows, use winget:
-
-```bash
+  {{< tab header="Windows" language="powershell" >}}
 winget install Ninja-build.Ninja
-```
+  {{< /tab >}}
+{{< /tabpane >}}
 
-Install the Arm GNU Toolchain:
+{{% notice Note %}}
+On macOS, you can also use `brew install ninja` if you have Homebrew installed.
+{{% /notice %}}
 
-Go to [developer.arm.com/downloads](https://developer.arm.com/downloads/-/gnu-rm) and download the installer for your operating system. On Windows, make sure "Add to PATH" is selected during installation. On Linux and macOS, extract the archive and add the `bin` directory to your `PATH`.
+**Install the Arm GNU Toolchain:**
+
+Go to [developer.arm.com/downloads](https://developer.arm.com/downloads/-/gnu-rm) and download the installer for your operating system. On Windows, select **"Add to PATH"** during installation. On Linux and macOS, extract the archive and add the `bin` directory to your `PATH`.
 
 Verify all three tools:
 
@@ -218,7 +209,14 @@ You should see output similar to:
 Python 3.12.4
 v20.15.0
 uv 0.4.0
-and so on
+cmake version 3.28.0
+1.11.1
+arm-none-eabi-gcc (GNU Arm Embedded Toolchain) 14.2.1
+J-Link Commander V7.94
 ```
 
-With all dependencies installed, you are ready to set up FWAuto and prepare the hardware.
+## What you've learned and what's next
+
+You've now learned how the stories260K model runs on the Alif E8 DevKit and installed all required dependencies: Python, Node.js, uv, SEGGER J-Link, CMake, Ninja, and the Arm GNU Toolchain.
+
+Next, you set up the hardware and FWAuto development environment.

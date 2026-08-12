@@ -1,29 +1,36 @@
 ---
-title: Verify in web
+title: Verify the deployment in the browser
+description: Start the Flask web server, open the browser dashboard, send prompts to the stories260K model on the Alif E8 DevKit, and view real-time inference results.
 weight: 5
 layout: "learningpathall"
 ---
 
 ## Start the web GUI and interact with the model
 
-In the previous sections you built and flashed the SLM firmware. In this section you start the [Flask](https://flask.palletsprojects.com/) web server and use the browser dashboard to send prompts to the model. The web GUI provides a user-friendly interface for interacting with the model -- you type prompts in a browser and see responses streamed in real time, without needing a serial terminal.
+In the previous sections you built and flashed the SLM firmware. Now you start the [Flask](https://flask.palletsprojects.com/) web server and use the browser dashboard to send prompts to the model. The web GUI provides an interface for interacting with the model -- you type prompts in a browser and see responses streamed in real time, without a serial terminal.
 
 ## Start the web server
 
 Open a terminal, navigate to the project root, and start the server:
 
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS" language="bash" >}}
+cd alif_slm_r
+python web_demo_server.py --serial-port /dev/cu.usbmodem1101 --no-reset
+  {{< /tab >}}
+
+  {{< tab header="Linux" language="bash" >}}
+cd alif_slm_r
+python web_demo_server.py --serial-port /dev/ttyACM0 --no-reset
+  {{< /tab >}}
+
+  {{< tab header="Windows" language="powershell" >}}
 cd alif_slm_r
 python web_demo_server.py --serial-port COM3 --no-reset
-```
+  {{< /tab >}}
+{{< /tabpane >}}
 
-Replace `COM3` with your actual serial port:
-
-| Operating system | Serial port format | Example |
-|---|---|---|
-| Windows | `COMn` | `COM3` |
-| Linux | `/dev/ttyACMn` | `/dev/ttyACM0` |
-| macOS | `/dev/cu.usbmodemn` | `/dev/cu.usbmodem1101` |
+Replace the serial port value with the one assigned to your board.
 
 The `--no-reset` flag tells the server not to toggle DTR/RTS on the serial port. The J-Link CDC UART does not support hardware reset via DTR/RTS.
 
@@ -51,13 +58,13 @@ The SLM dashboard shows:
 - **Custom text input** for any prompt
 - **Real-time terminal** showing the board's serial output
 - **Result cards** showing model output, timing, and timestamps
-- **Model info** (260K parameters, 5 layers, dim=64, BPE tokenizer)
+- **Model info** (260K parameters, five layers, dim=64, BPE tokenizer)
 
-![The SLM web dashboard running in a browser, showing quick-prompt buttons, a real-time terminal panel, and model output result cards.](WebDemopic.png)
+![The SLM web dashboard running in a browser, showing quick-prompt buttons, a real-time terminal panel, and model output result cards](WebDemopic.png "SLM web dashboard with quick-prompt buttons, terminal panel, and result cards")
 
 ## Send your first prompt
 
-1. Click the **cat** quick-prompt button, or type `cat` in the text input field and press Enter.
+1. Select the **cat** quick-prompt button, or type `cat` in the text input field and press Enter.
 
 2. The dashboard shows:
    - The prompt is sent to the board over [UART](https://developer.mozilla.org/en-US/docs/Glossary/UART)
@@ -82,17 +89,17 @@ The SLM dashboard shows:
 
 ## Try more prompts
 
-The stories260K model is very small (260,000 parameters). It was trained on children's stories, so it generates simple, story-like text continuations.
+The stories260K model has 260,000 parameters. It was trained on children's stories, so it generates story-like text continuations.
 
 | Prompt | Expected behavior |
 |---|---|
-| `cat` | Short text continuation (~1.5s) |
-| `dog` | Short text continuation (~1.5s) |
-| `apple` | Longer text continuation (~3.5s) |
+| `cat` | Short text continuation (~1.5 s) |
+| `dog` | Short text continuation (~1.5 s) |
+| `apple` | Longer text continuation (~3.5 s) |
 | `the boy went to` | Story-like continuation |
 
 {{% notice Note %}}
-The model generates text continuations, not factual answers. The output is based on patterns learned from simple children's stories. This is expected behavior for a 260K-parameter model running on a microcontroller.
+The model generates text continuations, not factual answers. The output is based on patterns learned from children's stories. This is expected behavior for a 260K-parameter model running on a microcontroller.
 {{% /notice %}}
 
 ## Understanding the dashboard
@@ -144,12 +151,12 @@ This simulates board responses with realistic timing. It is useful for UI develo
 
 **Server starts but shows IDLE state**
 
-- The server may have connected after the board printed `READY>`. It sends a probe newline after 3 seconds and detects the state automatically.
-- If it stays in IDLE, click the **Reset Board** button on the dashboard.
+- The server may have connected after the board printed `READY>`. It sends a probe newline after three seconds and detects the state automatically.
+- If it stays in IDLE, select the **Reset Board** button on the dashboard.
 
 **Port access denied**
 
-- Make sure no other terminal program is using the serial port
+- Make sure no other terminal program is using the serial port.
 - On Linux, you may need to add your user to the `dialout` group:
 
 ```bash
@@ -158,14 +165,6 @@ sudo usermod -aG dialout $USER
 
 Log out and log back in for the group change to take effect.
 
-## Summary
+## What you've accomplished
 
-You have successfully:
-
-1. Installed all required tools (Python, Node.js, uv, FWAuto, J-Link, CMake, Ninja, Arm GCC)
-2. Set up the Alif E8 DevKit hardware and FWAuto development environment
-3. Built the SLM firmware from source
-4. Flashed the firmware to the Alif E8 board
-5. Started a Flask web server connected to the board
-6. Opened a browser dashboard and sent prompts to the model
-7. Viewed real-time model-generated text in the dashboard
+You've now started the Flask web server, opened the browser dashboard, and sent prompts to the stories260K model running on the Alif E8 DevKit. The full stack -- firmware, UART, web server, and browser -- is working end to end, with real-time model-generated text streamed to the dashboard over SSE.

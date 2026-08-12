@@ -1,5 +1,6 @@
 ---
 title: Set up the developer flow
+description: Connect the Alif E8 DevKit hardware, understand FWAuto's capabilities, install and authenticate FWAuto, and clone the project repository.
 weight: 3
 layout: "learningpathall"
 ---
@@ -8,35 +9,41 @@ layout: "learningpathall"
 
 Before installing FWAuto, prepare the [Alif E8 DevKit](https://alifsemi.com/support/kits/ensemble-e8devkit/) hardware.
 
-1. Connect the Alif E8 DevKit to your computer using the USB cable.
+The Alif E8 DevKit features an [Arm Cortex-M55](https://developer.arm.com/Processors/Cortex-M55) microcontroller with integrated MRAM and SRAM. The board exposes a JLINK USB port for programming and debugging, and an EN/DIS switch for power control.
 
-2. Use the port labeled **JLINK**. This provides both J-Link debug and a virtual COM port.
+![Alif E8 DevKit board with annotations showing the Cortex-M55 HE, MRAM, SRAM, JLINK USB port, and EN/DIS switch#center](e8_image.jpg "Alif E8 DevKit board overview with key components annotated")
+
+1. Connect a USB cable from your computer to the port labeled **JLINK** on the Alif E8 DevKit. This port provides both J-Link debug and a virtual COM port.
+
+![USB cable connected to the JLINK port on the Alif E8 DevKit#center](prg_usb.jpg "USB cable connected to the JLINK port")
+
+2. Locate the **EN/DIS switch** on the board. Set it to **EN**.
+
+   Leave this switch in the EN position at all times. The flashing process enters SE maintenance mode automatically through software -- you never change this switch.
 
 3. Verify the board is detected:
 
-On Linux:
-
-```bash
-ls /dev/ttyACM*
-```
-
-You should see a device such as `/dev/ttyACM0`.
-
-On macOS:
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS" language="bash" >}}
 ls /dev/cu.usbmodem*
-```
+  {{< /tab >}}
 
-You should see a device such as `/dev/cu.usbmodem1101`.
+  {{< tab header="Linux" language="bash" >}}
+ls /dev/ttyACM*
+  {{< /tab >}}
 
-On Windows, open **Device Manager** and verify you see:
-   - **J-Link CDC UART** under Ports (COM & LPT) -- note the COM port number (usually COM3)
-   - **SEGGER J-Link** under USB devices
+  {{< tab header="Windows" language="powershell" >}}
+Get-CimInstance Win32_SerialPort | Select-Object DeviceID,Name,Description
+  {{< /tab >}}
+{{< /tabpane >}}
 
-4. Locate the **EN/DIS switch** on the board. Set it to **EN**.
+You should see a SEGGER J-Link device. On Linux you should see a device such as `/dev/ttyACM0`. On macOS you should see a device such as `/dev/cu.usbmodem1101`.
 
-   This switch stays in the EN position at all times. The flashing process enters SE maintenance mode automatically through software -- you never need to change this switch.
+![Windows Device Manager showing J-Link CDC UART listed under Ports (COM & LPT) as COM3#center](windows-device-manager-com-port.png "Windows Device Manager showing the J-Link CDC UART COM port")
+
+{{% notice Important %}}
+Close any terminal application connected to the board, such as PuTTY, minicom, or screen, before you use FWAuto. The DevKit exposes only one SEUART interface, so the deploy script can't access the port if another application is already using it.
+{{% /notice %}}
 
 ## Understanding FWAuto
 
@@ -75,15 +82,15 @@ Because FWAuto carries project context, verifies its own output, and runs the lo
 
 A traditional workflow is manual at every step:
 
-![Manual firmware workflow: Requirement, Datasheet, SDK, Code, Build, Flash, Debug, Fix](manual_workflow.jpg)
+![Manual firmware workflow showing Requirement, Datasheet, SDK, Code, Build, Flash, Debug, and Fix stages connected in sequence](manual_workflow.jpg "Manual firmware development workflow")
 
 FWAuto automates the loop and closes it with root-cause analysis:
 
-![Automated firmware workflow: Requirement, FWAuto, Code, Build, Flash, Debug, Root cause, Fix](automated_workflow.jpg)
+![Automated firmware workflow showing Requirement feeding into FWAuto, which handles Code, Build, Flash, Debug, Root cause analysis, and Fix in a closed loop](automated_workflow.jpg "FWAuto automated firmware workflow")
 
 For a failure, it connects evidence the way an experienced FAE does, rather than giving generic advice:
 
-![Failure analysis workflow: Log, Symbol, SDK API, Register, Datasheet, Root cause](fail_analysis.jpg)
+![Failure analysis workflow showing Log, Symbol, SDK API, Register, and Datasheet evidence converging to Root cause](fail_analysis.jpg "FWAuto failure analysis workflow")
 
 ### How FWAuto understands your project
 
@@ -106,17 +113,15 @@ Both methods produce the same result. Slash commands are shorter; natural langua
 
 Install FWAuto using the official install script.
 
-On Linux and macOS:
-
-```bash
+{{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
 curl -fsSL https://fwauto.ai/install.sh | sh
-```
+  {{< /tab >}}
 
-On Windows (PowerShell):
-
-```bash
+  {{< tab header="Windows (PowerShell)" language="powershell" >}}
 powershell -ExecutionPolicy ByPass -c "irm https://fwauto.ai/install.ps1 | iex"
-```
+  {{< /tab >}}
+{{< /tabpane >}}
 
 The script installs the `fwauto` CLI and the AI CLI tools. Verify:
 
@@ -198,15 +203,19 @@ If the wizard does not appear, check that you are inside the `alif_slm_r` direct
 
 Before proceeding, verify that:
 
-- [ ] Alif E8 board is connected via USB (JLINK port)
-- [ ] Board is detected (COM port on Windows, `/dev/ttyACM*` on Linux, `/dev/cu.usbmodem*` on macOS)
-- [ ] EN/DIS switch is set to EN
-- [ ] Python 3.10+ is installed and on PATH
-- [ ] Node.js 20+ is installed and on PATH
-- [ ] uv is installed
-- [ ] FWAuto is installed and authenticated
-- [ ] J-Link software is installed
-- [ ] CMake, Ninja, and Arm GCC are installed
-- [ ] Project repository is cloned
+- Alif E8 board is connected via USB (JLINK port)
+- Board is detected (COM port on Windows, `/dev/ttyACM*` on Linux, `/dev/cu.usbmodem*` on macOS)
+- EN/DIS switch is set to EN
+- Python 3.10 or later is installed and on PATH
+- Node.js 20 or later is installed and on PATH
+- uv is installed
+- FWAuto is installed and authenticated
+- J-Link software is installed
+- CMake, Ninja, and Arm GCC are installed
+- Project repository is cloned
 
-With the hardware connected and FWAuto configured, you are ready to build and flash the firmware.
+## What you've accomplished and what's next
+
+You've now connected the Alif E8 DevKit to your computer, understood how FWAuto automates the firmware workflow, installed and authenticated FWAuto, and cloned the project repository.
+
+Next, you build and flash the SLM firmware to the board.

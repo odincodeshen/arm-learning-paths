@@ -1,11 +1,10 @@
 ---
 title: Deploy a Small Language Model on Alif E8 with an Interactive Web GUI
+description: Deploy the stories260K language model on the Alif E8 DevKit (Arm Cortex-M55 HE core), build firmware with FWAuto, flash it via SETOOLS, and interact with it through a real-time web GUI.
 
 minutes_to_complete: 45
 
 who_is_this_for: This Learning Path is for embedded software developers who want to deploy a small language model on an Alif E8 DevKit and interact with it through a browser-based dashboard.
-
-description: Deploy the stories260K language model on the Alif E8 DevKit (Arm Cortex-M55 HE core), build firmware with FWAuto, flash it via SETOOLS, and interact with it through a real-time web GUI.
 
 learning_objectives:
     - Set up the Alif E8 DevKit and FWAuto development environment on Windows
@@ -18,6 +17,8 @@ prerequisites:
     - A Windows PC (Windows 10 or 11)
     - Internet connection for downloading tools
     - A [FWAuto](https://fwauto.ai/) account (free registration)
+
+author_primary: Mason Kuo
 
 author:
     - Mason Kuo
@@ -45,7 +46,7 @@ operatingsystems:
 
 further_reading:
     - resource:
-        title: Alif E8 DevKit Documentation
+        title: Alif E8 DevKit documentation
         link: https://alifsemi.com/support/kits/ensemble-e8devkit/
         type: website
     - resource:
@@ -53,7 +54,7 @@ further_reading:
         link: https://github.com/karpathy/llama2.c
         type: github
     - resource:
-        title: FWAuto Documentation
+        title: FWAuto documentation
         link: https://fwauto.ai/
         type: website
     - resource:
