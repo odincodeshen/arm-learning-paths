@@ -15,17 +15,10 @@ The `.fwauto/config.toml` configuration file is pre-configured in the repository
 
 Open a terminal, navigate to the firmware directory, and build:
 
-{{< tabpane code=true >}}
-  {{< tab header="macOS and Linux" language="bash" >}}
+```bash
 cd alif_slm_r/alif_vscode-template
 cmake --build tmp --target stories260k_runner.debug+E8-HE
-  {{< /tab >}}
-
-  {{< tab header="Windows (PowerShell)" language="powershell" >}}
-cd alif_slm_r/alif_vscode-template
-cmake --build tmp --target stories260k_runner.debug+E8-HE
-  {{< /tab >}}
-{{< /tabpane >}}
+```
 
 {{% notice Note %}}
 The `tmp` directory is the CMake build tree. It is created by the project's build system when you first run the build command shown above. If the build fails because `tmp` does not exist, check that you have run `git clone --recursive` so the CMSIS board-library submodule is present.

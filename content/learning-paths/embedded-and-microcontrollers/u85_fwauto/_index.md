@@ -14,7 +14,7 @@ learning_objectives:
 
 prerequisites:
     - An [Alif E8 Development Kit](https://alifsemi.com/support/kits/ensemble-e8devkit/) with USB cable
-    - A Windows PC (Windows 10 or 11)
+    - A Windows, macOS, or Linux PC
     - Internet connection for downloading tools
     - A [FWAuto](https://fwauto.ai/) account (free registration)
 
@@ -58,6 +58,8 @@ tools_software_languages:
 
 operatingsystems:
     - Windows
+    - macOS
+    - Linux
 
 further_reading:
     - resource:

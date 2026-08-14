@@ -114,7 +114,11 @@ Both methods produce the same result. Slash commands are shorter; natural langua
 Install FWAuto using the official install script.
 
 {{< tabpane code=true >}}
-  {{< tab header="macOS and Linux" language="bash" >}}
+  {{< tab header="macOS" language="bash" >}}
+curl -fsSL https://fwauto.ai/install.sh | sh
+  {{< /tab >}}
+
+  {{< tab header="Linux" language="bash" >}}
 curl -fsSL https://fwauto.ai/install.sh | sh
   {{< /tab >}}
 
