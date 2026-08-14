@@ -188,6 +188,12 @@ The [CMSIS-Toolbox](https://github.com/Open-CMSIS-Pack/cmsis-toolbox) manages CM
 Add the `bin` directory to your `PATH` and register the compiler:
 
 {{< tabpane code=true >}}
+  {{< tab header="macOS and Linux" language="bash" >}}
+export PATH=~/cmsis-toolbox/bin:$PATH
+export GCC_TOOLCHAIN_14_2_1=/opt/gcc-arm-none-eabi/bin
+cpackget init https://www.keil.com/pack/index.pidx
+  {{< /tab >}}
+
   {{< tab header="Windows (PowerShell)" language="powershell" >}}
 # Add CMSIS-Toolbox to PATH (current session)
 $env:PATH += ";C:\cmsis-toolbox\bin"
@@ -196,12 +202,6 @@ $env:PATH += ";C:\cmsis-toolbox\bin"
 $env:GCC_TOOLCHAIN_14_2_1 = "C:\Program Files\Arm GNU Toolchain arm-none-eabi\14.2\bin"
 
 # Initialize the pack index
-cpackget init https://www.keil.com/pack/index.pidx
-  {{< /tab >}}
-
-  {{< tab header="macOS and Linux" language="bash" >}}
-export PATH=~/cmsis-toolbox/bin:$PATH
-export GCC_TOOLCHAIN_14_2_1=/opt/gcc-arm-none-eabi/bin
 cpackget init https://www.keil.com/pack/index.pidx
   {{< /tab >}}
 {{< /tabpane >}}

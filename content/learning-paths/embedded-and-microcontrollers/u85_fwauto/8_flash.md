@@ -22,7 +22,7 @@ python deploy_setools.py "alif_vscode-template/out/stories260k_runner/E8-HE/debu
 
   {{< tab header="Windows (PowerShell)" language="powershell" >}}
 cd ..
-python deploy_setools.py "alif_vscode-template/out/stories260k_runner/E8-HE/debug/stories260k_runner.bin" --com COM3
+python deploy_setools.py "alif_vscode-template\out\stories260k_runner\E8-HE\debug\stories260k_runner.bin" --com COM3
   {{< /tab >}}
 {{< /tabpane >}}
 
