@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 270" width="1000" height="270" font-family="Lato, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333e48"/>
+    </marker>
+    <style>
+      .panel { fill: #f7f9fa; stroke: #c6ced4; stroke-width: 1.5; }
+      .dev   { fill: #ffffff; stroke: #333e48; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .node  { fill: #ffffff; stroke: #0091bd; stroke-width: 2; }
+      .hw    { fill: #fff7e6; stroke: #d98c00; stroke-width: 2; }
+      .net   { fill: #eef2f5; stroke: #7d8b96; stroke-width: 1.5; }
+      .tb    { font-size: 15px; fill: #1d262d; font-weight: 700; }
+      .ts    { font-size: 12.5px; fill: #44525d; }
+      .th    { font-size: 18px; fill: #1d262d; font-weight: 700; }
+      .line  { stroke: #333e48; stroke-width: 1.8; fill: none; marker-end: url(#arr); }
+    </style>
+  </defs>
+
+  <rect class="panel" x="10" y="10" width="980" height="250" rx="10"/>
+  <text class="th" x="30" y="40">A. Stream a USB camera to a Raspberry Pi</text>
+
+  <rect class="hw" x="30" y="95" width="120" height="70" rx="8"/>
+  <text class="tb" x="90" y="124" text-anchor="middle">USB camera</text>
+  <text class="ts" x="90" y="145" text-anchor="middle">MJPEG (UVC)</text>
+
+  <rect class="dev" x="185" y="60" width="300" height="175" rx="10"/>
+  <text class="tb" x="200" y="82">RDK X5 (Arm Cortex-A55)</text>
+  <rect class="node" x="210" y="100" width="250" height="60" rx="8"/>
+  <text class="tb" x="335" y="125" text-anchor="middle">hobot_usb_cam</text>
+  <text class="ts" x="335" y="145" text-anchor="middle">forwards JPEG without decoding</text>
+  <text class="ts" x="210" y="185">/image · CompressedImage</text>
+  <text class="ts" x="210" y="203">RELIABLE publisher</text>
+
+  <rect class="net" x="525" y="95" width="170" height="70" rx="35"/>
+  <text class="tb" x="610" y="124" text-anchor="middle">Network</text>
+  <text class="ts" x="610" y="145" text-anchor="middle">Fast DDS / UDP</text>
+
+  <rect class="dev" x="735" y="60" width="240" height="175" rx="10"/>
+  <text class="tb" x="750" y="82">Raspberry Pi 5</text>
+  <rect class="node" x="755" y="100" width="200" height="60" rx="8"/>
+  <text class="tb" x="855" y="125" text-anchor="middle">image_counter.py</text>
+  <text class="ts" x="855" y="145" text-anchor="middle">standard ROS 2 subscriber</text>
+  <text class="ts" x="755" y="185">ROS 2 Humble in a container</text>
+  <text class="ts" x="755" y="203">BEST_EFFORT subscriber</text>
+  <text class="ts" x="755" y="221">counts received messages</text>
+
+  <path class="line" d="M150,130 L208,130"/>
+  <path class="line" d="M460,130 L523,130"/>
+  <path class="line" d="M695,130 L753,130"/>
+</svg>
