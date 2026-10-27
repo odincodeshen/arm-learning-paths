@@ -1,6 +1,6 @@
 ---
-title: Prepare and verify the RDK X5 and Raspberry Pi environments
-description: Record the RDK X5 software baseline, run ROS 2 Humble in a container on a Raspberry Pi, and verify ROS 2 discovery between the two devices.
+title: Prepare TogetheROS and a ROS 2 image receiver
+description: Record the RDK X5 TogetheROS.Bot baseline, prepare a Raspberry Pi to receive the camera topic, and verify ROS 2 discovery before streaming images.
 weight: 3
 
 layout: "learningpathall"
@@ -8,14 +8,14 @@ layout: "learningpathall"
 
 ## Before you begin
 
-You need two devices on the same network:
+The RDK X5 runs both TogetheROS vision examples. For the USB camera example, a Raspberry Pi acts as a ROS 2 receiver so you can verify that the published image topic reaches another device. Put both devices on the same network:
 
 | Role | Device used in this Learning Path |
 | --- | --- |
-| Publisher | D-Robotics RDK X5 V1.0 (6.9 GiB memory visible to Linux), RDK OS 3.5.0 (Ubuntu 22.04.5), kernel 6.1.83 |
-| Standard subscriber | Raspberry Pi 5 Model B, 8 GB, Raspberry Pi OS based on Debian 13 (trixie) |
+| TogetheROS host | D-Robotics RDK X5 V1.0 (6.9 GiB memory visible to Linux), RDK OS 3.5.0 (Ubuntu 22.04.5), kernel 6.1.83 |
+| Camera-topic receiver | Raspberry Pi 5 Model B, 8 GB, Raspberry Pi OS based on Debian 13 (trixie) |
 
-Each command block in this Learning Path names the device it runs on. Open one terminal on each device.
+Each command block names the device it runs on. Begin on the RDK X5; you will prepare the Pi before checking the network camera topic.
 
 ## Record the RDK X5 baseline
 
@@ -64,7 +64,7 @@ tros-humble-hobot-shm 0.0.1-jammy.20241225.030528
 tros-humble-hobot-usb-cam 2.3.0-jammy.20250425.110259
 ```
 
-The `tros-humble` 2.5.2 meta package is the TogetheROS.Bot release for RDK OS 3.5. Its individual packages have their own version numbers, so `dnn_node` 2.6.1 is part of the 2.5.2 release. The middleware is Fast DDS 2.6.10 with `rmw_fastrtps_cpp` 6.2.8.
+The `tros-humble` 2.5.2 meta package is the TogetheROS.Bot release for RDK OS 3.5. Its individual packages have their own version numbers, so `dnn_node` 2.6.1 is part of the 2.5.2 release. The middleware is Fast DDS 2.6.10 with `rmw_fastrtps_cpp` 6.2.8. With these packages confirmed, load the TogetheROS environment before running any nodes.
 
 {{% notice Note %}}
 This Learning Path was tested with the TogetheROS.Bot 2.5.2 release for RDK OS 3.5. Don't run a general `apt upgrade` to "get the latest" before you follow it. Newer packages can change launch arguments and default behavior.
@@ -93,7 +93,7 @@ middleware name    : rmw_fastrtps_cpp
 
 ## Prepare ROS 2 on the Raspberry Pi
 
-ROS 2 Humble packages are built for Ubuntu 22.04, while the Raspberry Pi OS image used here is based on Debian 13. Instead of building ROS 2 from source, run the official `ros:humble-ros-base` container on the Pi. Install Docker first if needed; see the [Docker install guide](/install-guides/docker/).
+The Pi needs ROS 2 Humble only to receive the camera topic. ROS 2 Humble packages are built for Ubuntu 22.04, while the Raspberry Pi OS image used here is based on Debian 13. Run the official `ros:humble-ros-base` container on the Pi. Install Docker first if needed; see the [Docker install guide](/install-guides/docker/).
 
 On the **Raspberry Pi**, pull the image:
 
@@ -129,7 +129,7 @@ The `--net=host` option is required. It puts the container on the Pi's own netwo
 
 ## Verify discovery between the devices
 
-Before you send any images, confirm that the two devices can find each other.
+Before you send images from `hobot_usb_cam`, confirm that its future receiver can discover ROS 2 topics from the RDK X5. Use a small text message for this check.
 
 On the **RDK X5**, publish a small test message twice per second:
 
@@ -152,7 +152,7 @@ data: hello-from-x5
 ---
 ```
 
-Stop the publisher with Ctrl+C. Then repeat the test in the other direction: publish from the Pi container and run `ros2 topic echo --once` on the RDK X5. Discovery must work in both directions before you continue.
+Stop the publisher with Ctrl+C. Then repeat the test in the other direction: publish from the Pi container and run `ros2 topic echo --once` on the RDK X5. Once discovery works in both directions, check the network route that will carry the larger camera images.
 
 ## Troubleshooting discovery
 
@@ -209,4 +209,4 @@ Reconnect it when you finish:
 sudo nmcli dev connect wlan0
 ```
 
-The next page shows how the network and the subscriber's QoS setting affect how many frames reach the Pi.
+The environment is ready. On the next page, configure `hobot_usb_cam`, inspect its image topic on the RDK X5, and use the Pi receiver to check delivery.

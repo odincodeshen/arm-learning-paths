@@ -1,6 +1,6 @@
 ---
-title: Stream a USB camera from the RDK X5 to a Raspberry Pi
-description: Publish a USB camera stream with the TogetheROS hobot_usb_cam node on the RDK X5, receive it on a Raspberry Pi, and measure rate, CPU, and memory.
+title: Publish and verify a USB camera stream with TogetheROS
+description: Configure TogetheROS `hobot_usb_cam` on the RDK X5, inspect the JPEG image topic, verify delivery to a ROS 2 receiver, and measure camera-node resource use.
 weight: 4
 
 layout: "learningpathall"
@@ -8,7 +8,7 @@ layout: "learningpathall"
 
 ## Overview
 
-In path A, start the TogetheROS USB camera node on the RDK X5. On the Raspberry Pi, receive its image topic with a standard ROS 2 subscriber. Then check what the pipeline delivers to the Pi and what the camera node costs on the RDK X5.
+With TogetheROS and ROS 2 discovery ready, start `hobot_usb_cam` on the RDK X5. First confirm the camera mode and inspect the image topic locally. Then use the Raspberry Pi as a receiver to check delivered frames and measure the camera node's CPU and memory use on the RDK X5.
 
 ![Path A: the RDK X5 forwards USB camera images to a standard ROS 2 subscriber on the Raspberry Pi.#center](images/path-a-camera.svg)
 
@@ -21,7 +21,7 @@ The results on this page were measured with this network:
 
 The camera stream is MJPEG at 1920x1080 and 30 frames per second, with JPEG frames of about 190 to 230 KB. Frame size depends on the scene and the camera, and it has a large effect on network behavior.
 
-The subscriber's QoS setting has a large effect on how many frames reach the Pi over this network. An optional section at the end of this page shows the measurements.
+The subscriber's QoS setting affects delivery over this network. The main steps use BEST_EFFORT to receive the live camera stream; an optional troubleshooting section at the end of the page shows the observed difference.
 
 ## Find the camera device and its modes
 
@@ -84,7 +84,7 @@ Hobot shm pkg sets RMW_FASTRTPS_USE_QOS_FROM_XML: 1
 [hobot_usb_cam-1] [WARN] [...] [hobot_usb_cam]: Camera calibration file: [...] does not exist!
 ```
 
-The calibration warning is expected. The node still publishes images. The two `Hobot shm` lines show that the launch file also loads the TogetheROS shared-memory configuration for Fast DDS. You look at that configuration on the next page.
+The calibration warning is expected. The node still publishes images. The two `Hobot shm` lines show that the launch file loads a TogetheROS Fast DDS profile. On the next page, you inspect that profile and verify data sharing in a local image-processing example. These log lines alone don't establish which transport this camera topic uses.
 
 {{% notice Note %}}
 The launch file defaults to `/dev/video8` and 960x480. Always pass `usb_video_device`, `usb_image_width`, and `usb_image_height` to match your camera.
@@ -227,7 +227,7 @@ if __name__ == '__main__':
 EOF
 ```
 
-The script uses only standard ROS 2 packages (`rclpy` and `sensor_msgs`). It doesn't use any TogetheROS component.
+The receiver uses `rclpy` and `sensor_msgs`, so it can subscribe to the camera topic without installing TogetheROS on the Pi.
 
 In the **Pi** container from the previous page, with ROS 2 sourced, run the subscriber for 60 seconds:
 
@@ -247,7 +247,7 @@ The Pi receives 1,800 messages in 60 seconds, about 30 per second. The count sho
 
 Without the `--reliable` option, `image_counter.py` subscribes with BEST_EFFORT reliability, VOLATILE durability, and KEEP_LAST history with a depth of 5. A BEST_EFFORT subscriber can receive from the RELIABLE publisher. This QoS suits live previews and processing that should use the newest frame and can tolerate dropped frames. If your application needs every frame, test reliable delivery, back pressure, and storage separately.
 
-This choice matters on this network. With a RELIABLE subscriber and the default TogetheROS settings, the Pi received only about 1 frame per second of the same 1920x1080 stream. That result applies to this network, this frame size, and these software versions. It isn't a general measure of RELIABLE performance. For camera streams to another device, use a BEST_EFFORT subscriber. If you need RELIABLE delivery, test it with your image size and network first. The optional section at the end of this page shows the measurements.
+On the tested network, a RELIABLE subscriber received far fewer 1920x1080 frames than the BEST_EFFORT subscriber. This is an observation of the camera stream, receiver settings, and network used here. For a live stream that can tolerate dropped frames, start with BEST_EFFORT. If your application needs RELIABLE delivery, test it with your image size and network. The optional section below gives the measured counts.
 
 ## Measure CPU and memory on the RDK X5
 
@@ -275,55 +275,22 @@ The RDK X5 camera node forwards the camera's JPEG bytes without decoding them, a
 | Launch fails or the image size isn't what you set | The device, width, height, and format must match a mode listed by `v4l2-ctl --list-formats-ext` |
 | `/image` doesn't appear on the RDK X5 | Check the launch output for errors, and check that `ROS_DOMAIN_ID` matches in both terminals |
 | `/image` is listed on the Pi but nothing arrives | Run the subscriber with `--type compressed`, because the topic carries `CompressedImage`, not `Image`. A subscriber with the wrong type never matches the publisher. |
-| Pi receives far fewer frames than the RDK X5 publishes | Run the subscriber with BEST_EFFORT, which is the default for `image_counter.py`. Check the IP reassembly counters described in the optional section below. If the RDK X5 uses Wi-Fi, try a wired connection. |
+| Receiver gets far fewer frames than the RDK X5 publishes | Run the subscriber with BEST_EFFORT, which is the default for `image_counter.py`. Check the network route described on the preparation page. If the RDK X5 uses Wi-Fi, try a wired connection. |
 
-## Optional: why subscriber reliability matters
+## Optional: troubleshoot a low receive rate
 
 {{% notice Note %}}
-This section is optional. It shows the measurements behind the BEST_EFFORT recommendation. You can skip it if you only need a working camera stream.
+This section shows the measurements behind the BEST_EFFORT setting used above. You can skip it when the camera stream is working at the rate your application needs.
 {{% /notice %}}
 
-The first version of this test used a RELIABLE subscriber to match the publisher. At 1920x1080, the Pi then received only about 1 frame per second. To find out why, the test was repeated with two changes, each tested separately:
+With the default TogetheROS Fast DDS profile, the tested 1920x1080 camera stream gave these receiver counts over the RDK X5 Ethernet to Pi 2.4 GHz Wi-Fi link. Each value is a 60-second run:
 
-- **Subscriber reliability:** RELIABLE or BEST_EFFORT.
-- **Fast DDS message size on the RDK X5:** the TogetheROS default, which sends UDP datagrams of up to 64 KB, or a profile that limits each datagram to 1,400 bytes. A 64 KB datagram is split into about 45 IP fragments on a standard 1,500-byte network. A 1,400-byte datagram fits in one packet without IP fragmentation. The 1,400-byte profile is a diagnostic comparison, not a fix. It splits each image into more RTPS fragments and adds packet-processing work.
+| Subscriber reliability | Messages received in three runs |
+| --- | --- |
+| BEST_EFFORT | 1,800 / 1,800 / 1,800 (about 30 per second) |
+| RELIABLE | 61 / 61 / 84 (about 1.0 to 1.4 per second) |
 
-The 1,400-byte results below are the author's supplementary measurements. The exact Fast DDS XML used for that arm isn't included in this Learning Path, so this arm isn't a reader exercise and its numerical results aren't independently reproducible from the steps here. The default-profile BEST_EFFORT stream above is the tested reader workflow.
-
-You can watch IP fragmentation on the Pi with the kernel's reassembly counters. Read them before and after a run, and compare the differences:
-
-```bash
-awk '/^Ip:/{getline; print "ReasmReqds="$15, "ReasmOKs="$16, "ReasmFails="$17, "ReasmTimeout="$14}' /proc/net/snmp
-```
-
-`ReasmReqds` counts IP fragments that needed reassembly. `ReasmOKs` counts datagrams that were reassembled. `ReasmFails` counts failures that the reassembly code detected. The counters measure different things, so compare each counter between runs, not one counter against another.
-
-Messages received on the Pi in three 60-second runs at 1920x1080, with the same network as above:
-
-| RDK X5 Fast DDS message size | RELIABLE subscriber | BEST_EFFORT subscriber |
-| --- | --- | --- |
-| Default, up to 64 KB (IP fragmentation) | 61, 61, 84 (1.0 to 1.4 Hz) | 1,800 in each run (30.0 Hz) |
-| Limited to 1,400 bytes (no IP fragmentation) | 215, 288, 232 (3.6 to 4.8 Hz) | 1,790, 1,800, 1,800 (29.9 to 30.0 Hz) |
-
-The counter differences on the Pi for each 60-second run:
-
-| Configuration | `ReasmReqds` | `ReasmOKs` | `ReasmFails` | `ReasmTimeout` |
-| --- | --- | --- | --- | --- |
-| Default size, RELIABLE | 262,000 to 302,000 | 320 to 399 | 244,000 to 283,000 | 110 to 361 |
-| Default size, BEST_EFFORT | about 240,000 | 5,400 to 5,560 | 0 | 0 |
-| 1,400 bytes, either reliability | 0 | 0 | 0 | 0 |
-
-What these measurements show:
-
-- The network can carry this 1080p30 stream. With a BEST_EFFORT subscriber, about 30 messages per second arrive, with or without IP fragmentation.
-- IP fragmentation alone doesn't cause the loss. With BEST_EFFORT, about 240,000 fragments per run were reassembled with no failures.
-- The drop happens only with a RELIABLE subscriber. With the default message size, the Pi recorded many IP reassembly failures. The 1,400-byte arm avoided IP reassembly, but the Pi still received fewer than five messages per second with a RELIABLE subscriber. In that arm, the Pi received about eight times more UDP datagrams per delivered message than with BEST_EFFORT. On the RDK X5, the camera process also used more CPU: about 25% with the default size and about 70% with 1,400-byte messages, compared with about 19% with the default size and BEST_EFFORT. With 1,400-byte messages and BEST_EFFORT, it used 34% to 42%, which shows the extra packet-processing cost of smaller messages.
-
-What these measurements don't show is the exact mechanism inside Fast DDS reliable delivery that causes this behavior for large fragmented samples over this link. RTPS retransmissions weren't recorded. Results also depend on frame size: in a separate test with smaller JPEG frames over 5 GHz Wi-Fi, D-Robotics didn't see this drop with RELIABLE subscribers.
-
-As a baseline, the test was repeated with both devices on wired Gigabit Ethernet and Wi-Fi disconnected on both. The camera view had changed, so JPEG frames were larger, about 310 to 320 KB. In three 60-second runs for each setting, both RELIABLE and BEST_EFFORT subscribers received 1,800 or 1,801 messages, about 30 per second. The Pi reassembled about 390,000 to 440,000 IP fragments per run with no `ReasmFails`. The drop with RELIABLE subscribers is therefore specific to the path that includes the Pi's 2.4 GHz Wi-Fi link.
-
-In three earlier runs each on this network, RELIABLE subscribers received the full 30 frames per second at 1280x720 (about 80 KB per frame) and at 640x480 (about 30 KB per frame). In an earlier single run with the RDK X5 also on Wi-Fi, a BEST_EFFORT subscriber received about 5 frames per second at 1920x1080. That suggests the RDK X5's own Wi-Fi link was also a limit in that setup.
+If your receiver sees a low rate, check its message type and QoS first, then check the network route described on the preparation page. The reason for the RELIABLE result on this link wasn't established. It doesn't predict RELIABLE delivery on other networks or with smaller images.
 
 ## What you have learned
 
@@ -331,6 +298,6 @@ You have:
 
 - Started the TogetheROS `hobot_usb_cam` node with an explicit device, resolution, and format.
 - Received its `CompressedImage` topic on a Raspberry Pi with a standard `rclpy` subscriber.
-- Measured the delivered rate on the Raspberry Pi and the camera node's CPU and memory on the RDK X5, and saw how subscriber reliability affects delivery of large images over the network.
+- Checked delivered image rate with a ROS 2 receiver and measured the camera node's CPU and memory on the RDK X5.
 
-On the next page, you run the TogetheROS shared-memory example locally on the RDK X5.
+You have now captured and published live camera images with TogetheROS. Next, use a separate stored-image example to inspect local image sharing and object detection on the RDK X5.

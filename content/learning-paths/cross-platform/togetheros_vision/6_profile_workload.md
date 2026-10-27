@@ -1,6 +1,6 @@
 ---
-title: Profile the robotics workload on the RDK X5
-description: Use Arm Performix to observe system utilization and system calls on the RDK X5, then use perf to find CPU hotspots and memory copies in a ROS 2 vision pipeline.
+title: Profile CPU work in the TogetheROS vision pipeline
+description: Observe the local TogetheROS image-processing example with Arm Performix, then use perf to find CPU hotspots and image copies on the RDK X5.
 weight: 7
 
 layout: "learningpathall"
@@ -8,7 +8,7 @@ layout: "learningpathall"
 
 ## Overview
 
-The earlier pages measured how much CPU each process uses. On this page you look at the workload in more detail. You first use Arm Performix to observe system utilization and system calls while the pipeline runs. Then you use Linux `perf` to locate the CPU hotspots in the inference node, and to see where each transport mode copies image data.
+The local vision pipeline is running, and you have measured CPU and memory for its two message configurations. Now find out which work uses the Arm CPU. Use Arm Performix to observe system utilization and the inference node's system calls, then use Linux `perf` to locate CPU hotspots and image copies.
 
 ## Profile with Arm Performix
 
@@ -320,7 +320,7 @@ The thread shares agree with the CPU measurements on the previous page. The publ
 Use your results from all pages to answer these questions:
 
 - **Capture:** The camera produces JPEG frames, and `hobot_usb_cam` publishes them without decoding. Which measurement on the camera streaming page tells you how much CPU the camera node itself uses?
-- **Network:** At 1920x1080, which subscriber setting sustained about 30 received messages per second on the Pi, and how did the IP reassembly counters differ between the settings?
+- **Image delivery:** At 1920x1080, which subscriber setting received about 30 camera images per second over the tested network?
 - **Local transport:** Which copies did the profile show in the Image-message arm that don't appear in the data-sharing arm?
 - **Subscriber work:** Why does the inference node use more CPU than the publisher, even though the model runs on the accelerator?
 - **Hardware acceleration:** Which stages of the shared-memory pipeline run on dedicated hardware, and why doesn't their work appear in `pidstat` or `perf`?
@@ -334,3 +334,5 @@ You have:
 - Connected Arm Performix to the RDK X5, observed system utilization and the inference node's system calls while the pipeline ran, and found that Code Hotspots can't run on the tested RDK OS 3.5.0 image because the kernel has no tracefs.
 - Used `perf` to find the main CPU hotspot in the inference node: FCOS postprocessing on the Arm CPU.
 - Attributed memory copies to their callers, and saw which copies appear only in the Image-message arm and which remain in both arms.
+
+You can use the same sequence with another TogetheROS vision workload: verify image delivery, inspect the local data path, measure process resources, and profile the CPU work that remains after hardware-accelerated stages.

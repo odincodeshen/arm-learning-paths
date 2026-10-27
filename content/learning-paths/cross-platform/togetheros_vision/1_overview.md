@@ -1,6 +1,6 @@
 ---
-title: Understand the RDK X5 and TogetheROS for robotics vision
-description: Learn what the D-Robotics RDK X5 provides for robotics vision, how TogetheROS.Bot extends ROS 2 on it, and which work runs on the Arm CPU and which runs on dedicated hardware.
+title: Understand the TogetheROS vision workflow on the RDK X5
+description: See how TogetheROS.Bot publishes camera images and shares images with a local inference node, and identify the RDK X5 hardware used by each step.
 weight: 2
 
 layout: "learningpathall"
@@ -8,21 +8,21 @@ layout: "learningpathall"
 
 ## What you will run
 
-You will use the D-Robotics RDK X5 in two ROS 2 vision experiments. In path A, a USB camera feeds `hobot_usb_cam` from [TogetheROS.Bot](https://developer.d-robotics.cc/rdk_doc/en/Robot_development/tros/). The node publishes JPEG images over the network to a standard ROS 2 subscriber on a Raspberry Pi.
+You will run two [TogetheROS.Bot](https://developer.d-robotics.cc/rdk_doc/en/Robot_development/tros/) vision examples on the D-Robotics RDK X5. First, you configure `hobot_usb_cam` to publish JPEG images from a USB camera. A ROS 2 subscriber on a Raspberry Pi confirms that another device can receive the topic.
 
 ![Path A: a USB camera streams images from the RDK X5 to a standard ROS 2 subscriber on a Raspberry Pi.#center](images/path-a-camera.svg)
 
-In path B, `hobot_image_pub` sends a stored image to `dnn_node_example` on the X5. You inspect their Fast DDS data-sharing path.
+Next, you run a local image-processing example: `hobot_image_pub` sends a stored image to `dnn_node_example` for object detection. You inspect how Fast DDS data sharing moves the image between these processes on the RDK X5.
 
 ![Path B: a stored image passes between two nodes on the RDK X5 through Fast DDS data sharing, then reaches image processing and inference stages.#center](images/path-b-data-sharing.svg)
 
-Fast DDS data sharing is verified between the local publisher and subscriber. The nodes still copy image data while preparing and processing it. Later, you run the same X5 nodes with a standard Image message for a local comparison, measure resource use, and profile where the inference node spends CPU time.
+The examples use different image sources: the first uses a live USB camera, and the second replays `target.jpg`. They show two integration points of a TogetheROS vision workflow. After verifying the local data-sharing step, you measure the image-processing example in two message configurations and profile its CPU work.
 
 ## About the RDK X5
 
 The RDK X5 is part of the D-Robotics RDK (Robot Developer Kit) family. It's a developer board built on the D-Robotics Sunrise 5 chip, with an 8-core Arm Cortex-A55 processor and dedicated hardware for tasks such as neural network inference and image processing. Together with the TogetheROS.Bot robot software stack, the RDK boards are intended for building and evaluating robot prototypes.
 
-The board features that this Learning Path uses:
+These board features support the TogetheROS examples:
 
 | RDK X5 feature | How this Learning Path uses it |
 | --- | --- |
@@ -30,12 +30,12 @@ The board features that this Learning Path uses:
 | Neural network accelerator | Runs the object detection model that serves as a downstream workload in the shared-memory example |
 | Image processing hardware | Resizes images for the model, through `hobot_cv` |
 | 4 USB 3.0 ports | Connect the USB camera |
-| Gigabit Ethernet | Carries the camera stream to the Raspberry Pi |
+| Gigabit Ethernet | Carries the camera topic to the ROS 2 receiver |
 | RDK OS 3.5 with TogetheROS.Bot 2.5.2 | Provides Ubuntu 22.04, ROS 2 Humble, and the TogetheROS packages |
 
-The board has other interfaces that this Learning Path doesn't use, including two MIPI camera ports that also support stereo cameras, Wi-Fi, HDMI, CAN FD, and a 40-pin GPIO header. For the full hardware description, see the [RDK X5 hardware introduction](https://developer.d-robotics.cc/rdk_x_doc/en/Quick_start/hardware_introduction/rdk_x5) and the [RDK documentation](https://developer.d-robotics.cc/rdk_x_doc/en/).
+For other hardware interfaces, see the [RDK X5 hardware introduction](https://developer.d-robotics.cc/rdk_x_doc/en/Quick_start/hardware_introduction/rdk_x5) and the [RDK documentation](https://developer.d-robotics.cc/rdk_x_doc/en/).
 
-## ROS 2 building blocks used here
+## ROS 2 interfaces used in the examples
 
 If you have used ROS 2 before, the concepts are familiar:
 
@@ -68,16 +68,17 @@ The RDK X5 combines Arm CPU cores with dedicated hardware: a neural network acce
 - **Accelerator work:** neural network inference in `dnn_node_example`.
 - **Media hardware work:** hardware codec or image processing, when a pipeline uses it.
 
-TogetheROS packages are built for D-Robotics RDK boards such as the RDK X5. Their API compatibility with ROS 2 does not mean that every package runs on every Arm system. In this Learning Path the Raspberry Pi runs only standard ROS 2 Humble packages.
+TogetheROS packages are built for D-Robotics RDK boards such as the RDK X5. The camera topic uses a standard ROS 2 message, so the receiver needs ROS 2 Humble without the TogetheROS packages.
 
-## What the experiments measure
+## How you will verify each step
 
-Path A measures delivery across devices, including the network. Path B examines communication between processes on the X5. The local comparison in path B uses the same image source, payload, and subscriber workload in both runs, but the message type and QoS differ. Read its CPU and delay results as observations of these two configurations, not as a transport-only speedup.
+For the camera example, you inspect the published topic and check that a ROS 2 receiver gets its images. For the local image-processing example, you confirm that the inference node receives frames and that the processes map the same image buffer. You then measure CPU, memory, and delay. The two local message configurations use different message types and QoS settings, so their results describe those complete configurations rather than an isolated transport change.
 
 ## Summary
 
-- The RDK X5 is a developer board with an 8-core Arm Cortex-A55 processor.
-- TogetheROS.Bot builds on ROS 2 Humble and adds RDK-specific packages, such as the USB camera node and shared-memory support.
-- The first experiment streams a USB camera from the RDK X5 to a standard ROS 2 subscriber on a Raspberry Pi over the network.
-- The second experiment runs on the RDK X5 only and shares images between processes through Fast DDS data sharing.
-- CPU numbers in this Learning Path describe Arm CPU work only. Work on dedicated hardware isn't included.
+- TogetheROS.Bot provides the camera, image-publishing, and image-processing nodes used in these ROS 2 examples.
+- The USB camera example publishes JPEG images that another ROS 2 device can receive.
+- The local example feeds stored images to an inference node through Fast DDS data sharing; its publisher and subscribers share the image buffer between processes.
+- The RDK X5 Arm CPU runs the ROS 2 software, while dedicated hardware handles parts of image processing and inference.
+
+Start by recording the TogetheROS software baseline and preparing the ROS 2 receiver for the camera example.

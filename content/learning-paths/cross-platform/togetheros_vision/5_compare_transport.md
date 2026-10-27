@@ -1,6 +1,6 @@
 ---
-title: Compare TogetheROS data sharing with standard image messages on the RDK X5
-description: Compare the TogetheROS data-sharing mode with standard ROS 2 image messages on the RDK X5 under controlled conditions, and report what the comparison can and cannot show.
+title: Measure the TogetheROS local vision pipeline
+description: Run the local image-processing example with TogetheROS data sharing and standard ROS 2 image messages, then interpret its CPU, memory, and delivery measurements.
 weight: 6
 
 layout: "learningpathall"
@@ -8,11 +8,11 @@ layout: "learningpathall"
 
 ## Overview
 
-This page extends path B. After confirming that the publisher and inference node map the same buffer, run the X5 pipeline twice: first with TogetheROS data sharing, then with a standard `sensor_msgs/msg/Image` message. Compare CPU, memory, and delivery delay.
+You have a working stored-image publisher and inference node, and you verified their shared image buffer. Now run that local TogetheROS vision workflow at 5 and 30 frames per second. Use the nodes' two message configurations to observe delivery, CPU, memory, and delay under a known workload.
 
-Both arms use shared memory in some form. The data-sharing arm lets subscribers read the publisher's buffer directly. The Image-message arm uses the Fast DDS shared-memory transport, which serializes each message and copies it through shared segments. This page compares the two configurations as TogetheROS ships them.
+Both configurations use shared memory in some form. The data-sharing arm lets subscribers read the publisher's buffer directly. The Image-message arm uses the Fast DDS shared-memory transport, which serializes each message and copies it through shared segments. These are the configurations exposed by the TogetheROS example.
 
-A comparison only tells you about transport if everything except the transport is the same. Most of this page is about controlling and checking those conditions.
+Keep the image, rate, subscriber work, and CPU frequency aligned so the observations are useful. The nodes also change message type and QoS when you switch configurations, which limits what the measurements can attribute to transport.
 
 ## Design the two arms
 
@@ -28,7 +28,7 @@ Both arms use the same two nodes. You change only the two TogetheROS shared-memo
 | Fast DDS environment | TogetheROS `shm_fastdds.xml` profile | Same |
 | Transport path | Fast DDS data sharing: subscribers map the publisher's pool | Fast DDS shared-memory transport: serialize, fragment, copy, reassemble, deserialize |
 
-Using the inference node as the subscriber in both arms means both arms do the same work after they receive a frame.
+The inference node performs the same downstream vision work after it receives a frame in either configuration.
 
 ## Prepare the RDK X5
 
@@ -300,4 +300,4 @@ You have:
 - Checked which conditions match, and found two that don't: message type and QoS reliability.
 - Measured CPU, memory, and delivery delay at two rates, and reported the differences together with what limits their interpretation.
 
-On the next page, you profile the CPU work in this pipeline and see where each arm copies image data.
+These measurements show how the two TogetheROS message configurations behave with the same local vision workload. On the next page, profile the inference node to find where its Arm CPU time goes and where image copies remain.

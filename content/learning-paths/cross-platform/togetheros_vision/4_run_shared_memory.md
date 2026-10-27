@@ -1,6 +1,6 @@
 ---
-title: Run TogetheROS shared-memory image transport on the RDK X5
-description: Run a TogetheROS shared-memory image pipeline on the RDK X5 and verify which processes share the image buffer.
+title: Run a local TogetheROS image-processing pipeline
+description: Run a stored-image publisher and object detection node on the RDK X5, then verify their Fast DDS data-sharing step.
 weight: 5
 
 layout: "learningpathall"
@@ -8,7 +8,7 @@ layout: "learningpathall"
 
 ## Overview
 
-Path B runs entirely on the RDK X5. A TogetheROS image publisher sends a stored image to an object detection node through Fast DDS data sharing. The detection node is a realistic downstream workload; this page focuses on how the images reach it.
+The previous page used TogetheROS to publish live camera images over ROS 2. Now run a local vision example on the RDK X5: a TogetheROS publisher repeatedly sends a stored image to an object detection node. The stored input lets you inspect the data-sharing step between local processes while inference continues downstream.
 
 ![Path B: the RDK X5 image publisher shares a stored image with a local object detection node through Fast DDS data sharing.#center](images/path-b-data-sharing.svg)
 
@@ -18,11 +18,11 @@ You then collect three kinds of evidence and check which claims each one support
 2. **Configuration:** the nodes ask for shared memory.
 3. **Transport:** the publisher and subscribers actually map the same shared-memory buffer.
 
-The Raspberry Pi isn't used in path B.
+The example runs entirely on the RDK X5. The image source is `target.jpg`, so the following checks apply to this local example rather than to the live camera stream.
 
 ## How TogetheROS enables shared memory
 
-The `hobot_shm` package configures Fast DDS for shared memory. The camera launch file on the previous page included it, and so does the launch file on this page. It sets these environment variables for the nodes in the launch:
+The `hobot_shm` package configures Fast DDS for shared memory. You saw its setup messages when the camera node started; the local example also loads it. The package sets these environment variables for nodes in the launch:
 
 | Variable | Value | Effect |
 | --- | --- | --- |
@@ -256,7 +256,7 @@ The averages measured for this Learning Path at 5 frames per second, with 640x64
 
 The detection node uses the most CPU, but the neural network itself runs on the accelerator, so that part of the work isn't Arm CPU time. The CPU time in this node comes from preprocessing, from postprocessing that decodes the model output into boxes, and from ROS 2 work. You confirm this with a profiler on the last page.
 
-These numbers describe this example only. The publisher runs at 5 frames per second from a stored image, and the subscriber runs inference. The camera path on the previous page has a different source, rate, and workload, so you can't compare these numbers with the camera path's numbers to measure the benefit of shared memory.
+These numbers describe this stored-image publisher running at 5 frames per second with inference downstream.
 
 ## Stop the example
 
@@ -281,7 +281,7 @@ kill <PID>
 You have:
 
 - Seen how `hobot_shm` enables Fast DDS data sharing for TogetheROS nodes.
-- Run a shared-memory image pipeline that feeds an object detection node on the RDK X5.
+- Run a stored-image pipeline that feeds an object detection node on the RDK X5.
 - Collected delivery, configuration, and transport evidence, and stated which steps use shared memory.
 
-On the next page, you compare this data-sharing mode with standard `sensor_msgs/msg/Image` messages on the RDK X5.
+With the local pipeline working and its data-sharing step verified, you can measure how it behaves when the publisher and subscriber use either TogetheROS data sharing or standard `sensor_msgs/msg/Image` messages.
