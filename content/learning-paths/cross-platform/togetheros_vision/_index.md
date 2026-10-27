@@ -60,7 +60,7 @@ further_reading:
         link: https://developer.d-robotics.cc/rdk_doc/en/Robot_development/tros/
         type: documentation
     - resource:
-        title: Install Docker
+        title: Install ROS 2
         link: /install-guides/ros2/
         type: documentation
     - resource:
