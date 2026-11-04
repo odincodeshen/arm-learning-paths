@@ -101,7 +101,9 @@ On the **Raspberry Pi**, pull the image:
 docker pull ros:humble-ros-base
 ```
 
-Record the image digest with your results. The tag can change over time; the digest identifies the image you pulled:
+{{% notice Note %}}
+This Learning Path was tested with the arm64 image pulled on October 15, 2026, with digest `sha256:860e53793ccf575e5369b5e9a19939de2bfcfb46a299954d06f54f2af54fed19`. If your results differ and you want to use the same image, replace `ros:humble-ros-base` with `ros:humble-ros-base@sha256:860e53793ccf575e5369b5e9a19939de2bfcfb46a299954d06f54f2af54fed19` in the `docker pull` and `docker run` commands.
+{{% /notice %}}
 
 ```bash
 docker image inspect ros:humble-ros-base --format '{{json .RepoDigests}}'
