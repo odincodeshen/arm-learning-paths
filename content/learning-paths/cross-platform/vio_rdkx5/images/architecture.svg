@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#52514e"/>
+    </marker>
+    <marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a3a29c"/>
+    </marker>
+    <style>
+      .t { font-size: 15px; fill: #0b0b0b; font-weight: bold; }
+      .s { font-size: 13px; fill: #52514e; }
+      .m { font-size: 12px; fill: #52514e; font-family: Menlo, Consolas, monospace; }
+      .h { font-size: 13px; fill: #52514e; font-weight: bold; letter-spacing: 0.04em; }
+      .d { font-size: 15px; fill: #8a8984; font-weight: bold; }
+      .ds { font-size: 13px; fill: #a3a29c; }
+      .n { fill: #f6f6f4; stroke: #8a8984; stroke-width: 1.5; }
+      .cpu { fill: #eaf2fc; stroke: #2a78d6; stroke-width: 2; }
+      .cpuin { fill: #ffffff; stroke: #2a78d6; stroke-width: 1; }
+      .bpu { fill: #fdeee7; stroke: #eb6834; stroke-width: 2; stroke-dasharray: 6 4; }
+      .dn { fill: #ffffff; stroke: #a3a29c; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .dcpu { fill: #ffffff; stroke: #2a78d6; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .ar { stroke: #52514e; stroke-width: 1.8; fill: none; marker-end: url(#a); }
+      .ard { stroke: #a3a29c; stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; marker-end: url(#ad); }
+    </style>
+  </defs>
+  <rect width="1200" height="700" fill="#ffffff"/>
+
+  <!-- Column frames -->
+  <rect x="16" y="16" width="250" height="410" rx="10" fill="none" stroke="#d4d3cd" stroke-width="1.5"/>
+  <text x="30" y="42" class="h">WORKSTATION</text>
+  <rect x="296" y="16" width="608" height="668" rx="10" fill="none" stroke="#52514e" stroke-width="1.5"/>
+  <text x="310" y="42" class="h">RDK X5 (8x Arm Cortex-A55, BPU)</text>
+  <rect x="934" y="16" width="250" height="410" rx="10" fill="none" stroke="#d4d3cd" stroke-width="1.5"/>
+  <text x="948" y="42" class="h">WORKSTATION</text>
+
+  <!-- Workstation: data preparation -->
+  <rect x="36" y="64" width="210" height="76" rx="8" class="n"/>
+  <text x="50" y="90" class="t">TUM-VI room1</text>
+  <text x="50" y="110" class="s">512x512 stereo, 20 Hz</text>
+  <text x="50" y="128" class="s">IMU 200 Hz, motion capture</text>
+  <path d="M141,140 V172" class="ar"/>
+  <rect x="36" y="176" width="210" height="62" rx="8" class="n"/>
+  <text x="50" y="202" class="t">Convert (Python)</text>
+  <text x="50" y="222" class="s">rosbags, 16-bit to mono8</text>
+  <path d="M141,238 V270" class="ar"/>
+  <rect x="36" y="274" width="210" height="62" rx="8" class="n"/>
+  <text x="50" y="300" class="t">ROS 2 bag</text>
+  <text x="50" y="320" class="s">left image on top, IMU</text>
+  <path d="M246,305 H322" class="ar"/>
+  <text x="258" y="297" class="s">scp</text>
+
+  <!-- X5: replay -->
+  <rect x="326" y="250" width="160" height="110" rx="8" class="n"/>
+  <text x="340" y="276" class="t">Replay</text>
+  <text x="340" y="298" class="m">ros2 bag play</text>
+  <text x="340" y="314" class="m">  --clock</text>
+  <text x="340" y="334" class="s">or the node reads</text>
+  <text x="340" y="350" class="s">the bag itself (offline)</text>
+
+  <path d="M486,305 H632" class="ar"/>
+  <text x="494" y="270" class="m">/sub_image_</text>
+  <text x="494" y="284" class="m">  combine_raw</text>
+  <text x="494" y="326" class="m">/drobotics_imu/</text>
+  <text x="494" y="340" class="m">  bmi08x_imu</text>
+
+  <!-- X5: VIO on CPU -->
+  <rect x="636" y="140" width="250" height="250" rx="10" class="cpu"/>
+  <text x="652" y="168" class="t">drobotics_vio</text>
+  <text x="652" y="187" class="s">based on OpenVINS, Arm CPU only</text>
+  <rect x="652" y="202" width="218" height="74" rx="6" class="cpuin"/>
+  <text x="664" y="225" class="t" style="font-size:14px">Front end</text>
+  <text x="664" y="244" class="s">feature detection and</text>
+  <text x="664" y="262" class="s">KLT tracking (OpenCV)</text>
+  <path d="M761,276 V296" class="ar"/>
+  <rect x="652" y="300" width="218" height="74" rx="6" class="cpuin"/>
+  <text x="664" y="323" class="t" style="font-size:14px">Back end</text>
+  <text x="664" y="342" class="s">IMU propagation and</text>
+  <text x="664" y="360" class="s">MSCKF update (Eigen)</text>
+  <text x="652" y="410" class="s">Measured with pidstat and perf</text>
+
+  <!-- Outputs to workstation -->
+  <path d="M886,200 C915,200 920,128 950,128" class="ar"/>
+  <path d="M886,320 C915,320 920,300 950,300" class="ar"/>
+  <rect x="954" y="80" width="210" height="96" rx="8" class="n"/>
+  <text x="968" y="106" class="t">Foxglove</text>
+  <text x="968" y="126" class="m">pathimu</text>
+  <text x="968" y="144" class="m">trackhist</text>
+  <text x="968" y="164" class="s">through foxglove_bridge</text>
+  <rect x="954" y="252" width="210" height="96" rx="8" class="n"/>
+  <text x="968" y="278" class="t">Trajectory error</text>
+  <text x="968" y="298" class="m">poseimu</text>
+  <text x="968" y="318" class="s">compared with the motion</text>
+  <text x="968" y="336" class="s">capture ground truth</text>
+
+  <!-- Camera path, not used -->
+  <line x1="16" y1="462" x2="1184" y2="462" stroke="#d4d3cd" stroke-width="1" stroke-dasharray="2 4"/>
+  <text x="30" y="490" class="h" style="fill:#8a8984">CAMERA PATH IN VIMS</text>
+  <text x="30" y="508" class="h" style="fill:#8a8984">NOT USED HERE</text>
+
+  <rect x="36" y="530" width="210" height="76" rx="8" class="dn"/>
+  <text x="50" y="558" class="d">GS130WI camera</text>
+  <text x="50" y="578" class="ds">stereo images and IMU</text>
+  <text x="50" y="596" class="ds">over two MIPI cables</text>
+  <path d="M246,568 H322" class="ard"/>
+
+  <rect x="326" y="530" width="160" height="76" rx="8" class="dn"/>
+  <text x="340" y="558" class="d">mipi_cam</text>
+  <text x="340" y="578" class="ds">camera driver</text>
+  <path d="M456,530 V420 H615 V316" class="ard"/>
+  <text x="470" y="412" class="ds">publishes the same topics</text>
+
+  <path d="M486,568 H532" class="ard"/>
+  <rect x="536" y="530" width="150" height="76" rx="8" class="bpu"/>
+  <text x="550" y="558" class="d" style="fill:#c4501f">StereoNet</text>
+  <text x="550" y="578" class="ds">depth network</text>
+  <text x="550" y="596" class="ds">on the BPU</text>
+
+  <path d="M686,568 H732" class="ard"/>
+  <rect x="736" y="530" width="150" height="76" rx="8" class="dcpu"/>
+  <text x="750" y="558" class="d">RTAB-Map</text>
+  <text x="750" y="578" class="ds">mapping</text>
+  <text x="750" y="596" class="ds">on the Arm CPU</text>
+  <path d="M860,390 V526" class="ard"/>
+  <text x="868" y="452" class="ds">poses</text>
+
+  <path d="M886,568 H950" class="ard"/>
+  <rect x="954" y="530" width="210" height="76" rx="8" class="dn"/>
+  <text x="968" y="558" class="d">3D map</text>
+  <text x="968" y="578" class="ds">point cloud and</text>
+  <text x="968" y="596" class="ds">map database</text>
+
+  <!-- Legend -->
+  <rect x="326" y="640" width="22" height="16" rx="3" class="cpu"/>
+  <text x="356" y="653" class="s">Runs on the Arm CPU</text>
+  <rect x="520" y="640" width="22" height="16" rx="3" class="bpu"/>
+  <text x="550" y="653" class="s">Runs on the BPU</text>
+  <line x1="690" y1="648" x2="730" y2="648" stroke="#a3a29c" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="740" y="653" class="s">Not used in this Learning Path</text>
+</svg>
