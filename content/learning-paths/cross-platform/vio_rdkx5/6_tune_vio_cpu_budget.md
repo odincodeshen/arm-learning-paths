@@ -29,7 +29,7 @@ T3 num_pts), one run per setting; offline mode is deterministic (run-20261025-01
 
 ## Overview
 
-On the previous page, you found that the VIO node needs about 130 milliseconds of processing for each frame, while the dataset delivers a new frame every 50 milliseconds. The node uses about 1.9 of the 8 Cortex-A55 cores, drops about half of the frames, and gives a different trajectory error in every real-time run. Most of its CPU time goes to the image-processing front end.
+On the previous page, you found that the VIO node needs about 115 milliseconds of processing for each frame on average, while the dataset delivers a new frame every 50 milliseconds. The node uses about 1.9 of the 8 Cortex-A55 cores, drops about half of the frames, and gives a different trajectory error in every real-time run. Most of its CPU time goes to the image-processing front end.
 
 On this page, you change the workload so that it fits the CPU, without changes to the VIMS software. D-Robotics recommends a method for this: fix a baseline, then change one parameter at a time, and record the processing speed, the dropped frames, and the trajectory error for each change. You do this for two settings:
 
@@ -173,6 +173,8 @@ frame time: mean=74.8 ms p50=87.0 ms p95=134.9 ms
 
 The last command counts the frames that the node dropped from its image queue. Each dropped frame logs a line such as `drop image: ..., que size: 3`. Compute the error of the recorded `vio_out` bag on your workstation as before.
 
+The `frame time` line is the sampled value. To get the average over all frames, which the tables below use, run the command from the profiling page on `~/vio_runs/rt_s3_np100/vio.log`. For this run, it gives 68.8 ms.
+
 When you finish all runs, restore the governor as described on the profiling page.
 
 ## Results: input frame rate
@@ -200,13 +202,13 @@ The result agrees with the VIMS parameter reference, which uses 6 frames per sec
 
 The table shows the 6.7 Hz bag, the only frame rate at which the baseline keeps up, with five values of `num_pts`. The row for 200 is from the previous table:
 
-| `num_pts` | Offline: time per frame | Offline: ATE | Real-time: time per frame (mean) | Real-time: VIO CPU | Real-time: dropped frames | Real-time: ATE |
+| `num_pts` | Offline: time per frame | Offline: ATE | Real-time: time per frame (all-frames mean) | Real-time: VIO CPU | Real-time: dropped frames | Real-time: ATE |
 | --- | --- | --- | --- | --- | --- | --- |
-| 100 | about 75 ms | 0.304 m | 77 ms | 94% | 0 | 0.304 m |
-| 150 | about 111 ms | 0.436 m | 117 ms | 140% | 0 | 0.437 m |
-| 200 | about 138 ms | 0.736 m | 143 ms | 178% | 3 | 0.732 m |
-| 250 | about 167 ms | 0.828 m | 176 ms | 187% | 100 | 0.637 m |
-| 300 | about 190 ms | 0.903 m | 197 ms | 186% | 195 | 1.080 m |
+| 100 | about 75 ms | 0.304 m | 69 ms | 94% | 0 | 0.304 m |
+| 150 | about 111 ms | 0.436 m | 106 ms | 140% | 0 | 0.437 m |
+| 200 | about 138 ms | 0.736 m | 136 ms | 178% | 3 | 0.732 m |
+| 250 | about 167 ms | 0.828 m | 166 ms | 187% | 100 | 0.637 m |
+| 300 | about 190 ms | 0.903 m | 192 ms | 186% | 195 | 1.080 m |
 
 The processing time per frame grows almost in proportion to the number of features. This matches the profile on the previous page, where the feature tracking front end used most of the CPU time.
 

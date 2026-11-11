@@ -273,7 +273,7 @@ In seven real-time runs for this Learning Path, the results were:
 | ATE (RMSE) | 0.274 m in every run | 0.35 to 0.57 m |
 | Wall-clock time for the sequence | about 254 s | 141 s |
 
-The node needs about 130 milliseconds for a frame in real-time replay, while a new frame arrives every 50 milliseconds. When frames pile up in its image queue, the node drops the older ones, so it processes about every second frame. Which frames it drops depends on timing, so the error is different in every run. The next page measures where this time goes.
+The node needs about 115 milliseconds for a frame on average in real-time replay, while a new frame arrives every 50 milliseconds. When frames pile up in its image queue, the node drops the older ones, so it processes about every second frame. Which frames it drops depends on timing, so the error is different in every run. The next page measures where this time goes.
 
 {{% notice Note %}}
 If you combine the two images side by side instead of one above the other, the node still runs and publishes poses, but the error is much larger. In one run with a side-by-side image, the ATE was 1.23 m. The node expects the left image on top.

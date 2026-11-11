@@ -50,7 +50,7 @@ The script below runs one real-time replay and measures the VIO node. It starts 
 - The BPU load with `hrut_somstatus`, every few seconds
 - The VIO output, with `ros2 bag record`
 
-It also saves the processing time that the node logs for each frame.
+It also summarizes the processing times that the node logs for a sample of the frames.
 
 On the **RDK X5**, save the script:
 
@@ -89,7 +89,7 @@ EOF
 chmod +x ~/vio_measure.sh
 ```
 
-The `pidstat` columns used are `%CPU` (field 9) and `RSS` in KB (field 14). 100% CPU is one full core, so the RDK X5 has 800% in total. The frame time is the `total` value of the `[TIME]` lines that the node logs about twice per second, each for its latest frame, without the first 20 lines. It is a sample of the frames, not every frame.
+The `pidstat` columns used are `%CPU` (field 9) and `RSS` in KB (field 14). 100% CPU is one full core, so the RDK X5 has 800% in total. The frame time is the `total` value of the `[TIME]` lines that the node logs about twice per second, each for its latest frame, without the first 20 lines. It is a sample of the frames, not every frame, and its mean is higher than the average over all frames, as the results below show.
 
 Run three repetitions, and keep other work off the RDK X5 while they run. Each run takes about 3 minutes:
 
@@ -108,13 +108,27 @@ frame time: mean=133.8 ms p50=143.6 ms p95=183.0 ms
 
 `hrut_somstatus` also tries to read some files that only `root` can read, so the script discards its error messages.
 
-To get the pose output rate, count the recorded poses on your workstation, or run `ros2 bag info ~/vio_runs/r1/vio_out` on the RDK X5 and divide the pose count by the duration.
+To get the pose output rate of the whole replay, count the recorded poses on your workstation, or run `ros2 bag info ~/vio_runs/r1/vio_out` on the RDK X5 and divide the pose count by the duration.
+
+Each `[TIME]` line also reports the running average over all frames so far, `avg(excl zupt)`, and the number of frames, `img count`. To get the average over all frames after the first 20 lines, run this on the **RDK X5**:
+
+```bash
+grep '\[TIME\]' ~/vio_runs/r1/vio.log | tail -n +20 | \
+  sed -E 's/.*avg\(excl zupt\): ([0-9.]+)ms.*img count: ([0-9]+),.*/\1 \2/' | \
+  awk 'NR==1{a=$1;n=$2} END{printf "frames=%d mean=%.1f ms\n", $2-n, ($1*$2-a*n)/($2-n)}'
+```
+
+The output is similar to:
+
+```output
+frames=1112 mean=114.8 ms
+```
 
 ## Results
 
-The table shows three real-time runs, each with a 100-second window after a 20-second warm-up, with the CPU fixed at 1.5 GHz:
+The table shows three real-time runs with the CPU fixed at 1.5 GHz. CPU and memory are from the 100-second window after the 20-second warm-up. Frame time and pose rate cover the whole replay:
 
-| Run | VIO CPU | VIO RSS | VIO PSS | Frame time (mean / p50 / p95) | Pose output rate |
+| Run | VIO CPU | VIO RSS | VIO PSS | Sampled frame time (mean / p50 / p95) | Pose rate, whole replay |
 | --- | --- | --- | --- | --- | --- |
 | 1 | 188.7% | 85.0 MB | 72.2 MB | 133.8 / 143.6 / 183.0 ms | 9.25 Hz |
 | 2 | 188.4% | 85.3 MB | 72.8 MB | 135.1 / 144.6 / 180.5 ms | 9.26 Hz |
@@ -122,9 +136,16 @@ The table shows three real-time runs, each with a 100-second window after a 20-s
 
 The BPU load was 0% in every sample. This shows only that the VIO node doesn't use the BPU. Other VIMS modules, such as StereoNet depth estimation, do run on the BPU. The bag player, which stands in for the camera, used about 9% CPU and 107 MB RSS. That is the cost of the input, not of the VIO node.
 
-In an earlier set of runs that alternated the `performance` and default `schedutil` governors, both governors gave the same results: 189.7 to 190.3% CPU and 9.09 to 9.27 Hz. Under this load, `schedutil` also kept the cores at 1.5 GHz.
+In an earlier set of six runs with the same configuration, which alternated the `performance` and default `schedutil` governors, both governors gave the same results: 189.7 to 190.3% CPU and 9.09 to 9.27 Hz. With both governors, the frequency read 1.5 GHz at the end of each run. It wasn't sampled during the runs.
 
-For comparison, in offline bag mode the node processed all 2,821 frames in about 254 seconds, about 11 frames per second. In three runs it used 147.2 to 147.4% CPU and 81 to 83 MB RSS.
+The same six runs show two things that the table hides:
+
+- **The average over all frames is about 115 ms** (113 to 116 ms), lower than the sampled mean of 130 to 138 ms in those runs. Frames that take longer are probably more likely to be the one that the node logs, but this Learning Path doesn't verify the cause. At about 8.4 frames per second, 115 ms adds up to about one second of processing per second, which fits a node that handles one frame at a time and is always busy.
+- **The pose rate isn't constant.** It's about 17 Hz in the first 12 seconds, and 8.3 to 8.4 Hz between 20 and 120 seconds. The whole-replay rate of about 9 Hz is the average of both.
+
+The frame time is processing time. It doesn't include the time that a frame waits in the queue, so it isn't the end-to-end latency.
+
+For comparison, in offline bag mode the node processed all 2,821 frames in about 254 seconds, about 11 frames per second. In three runs, measured over a 30-second window, it used 147.2 to 147.4% CPU and 81 to 83 MB RSS.
 
 ## Profile the VIO node with perf
 
@@ -183,11 +204,11 @@ The VIMS VIO node is based on OpenVINS, an open-source filter-based VIO. Its wor
 - **The front end** finds features in the left and right images and tracks them from frame to frame with the Kanade-Lucas-Tomasi (KLT) method. This is the `TrackKLT` code, and most of its work happens in OpenCV image functions such as optical flow, corner refinement (`cornerSubPix`), and feature detection.
 - **The back end** propagates the state with the IMU measurements and updates it with the tracked features in a multi-state constraint Kalman filter (MSCKF). This is the `do_feature_propagate_update` and `UpdaterMSCKF` code, mostly matrix operations with Eigen.
 
-The profile shows that the front end dominates. About three quarters of the cycles are in OpenCV, and the filter update takes less than a tenth. The node uses about 1.9 cores, and with this load it needs about 130 milliseconds for a frame, while frames arrive every 50 milliseconds.
+The profile shows that the front end dominates. About three quarters of the cycles are in OpenCV, and the filter update takes about a tenth (8.6 to 10.4% in four profiles). The node uses about 1.9 cores, and with this load it needs about 115 milliseconds for a frame on average, while frames arrive every 50 milliseconds.
 
 The measurements also tell you what doesn't change the result here:
 
-- The CPU governor made no difference in this workload, because the cores already ran at their maximum frequency with both governors. With other workloads the governor can matter, so keep it fixed when you measure.
+- The CPU governor made no measurable difference in this workload. The frequency read 1.5 GHz at the end of each run with both governors, which suggests that the cores ran at their maximum, but it wasn't sampled during the runs. With other workloads the governor can matter, so keep it fixed when you measure.
 - The BPU doesn't take part in VIO, so it can't speed up this node without changes to the software.
 
 To process every frame in real time, the node needs less work per frame or fewer frames, for example fewer features, a lower input frame rate, or smaller images. Those changes affect accuracy. Keep this measurement as the baseline: on the next page, you change one parameter at a time and record the processing speed, the dropped frames, and the trajectory error for each change.
