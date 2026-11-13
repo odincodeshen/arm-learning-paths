@@ -6,23 +6,6 @@ weight: 4
 layout: "learningpathall"
 ---
 
-<!--
-DRAFT (2026-10-30). Not reviewed.
-Basis: evidence/run-20261024-02 (first conversion), run-20261024-03 (X5 reads the bag), run-20261026-01 (pages 4-5),
-D-ROBOTICS_LP2_REPLY_v1.md (left image on top, mono8 for VIO, modified configuration may be shown with its changes,
-GPL v3 parts handled per GPL v3).
-The scripts on this page are shortened versions of scripts/tumvi_to_ros2bag.py and scripts/make_vims_tumvi_config.py.
-2026-10-30 (evidence/run-20261030-01): every workstation command on this page was run as written on macOS
-(Python 3.9.6; rosbags 0.9.23, numpy 2.0.2, opencv-python-headless 5.0.0.93, ruamel.yaml 0.19.1). The X5 was off,
-so the scp of the VIMS template was replaced by the identical local copy taken from the X5 on 2026-10-24. The bag
-(.db3 md5 cf667806...) and the three configuration files are identical to the ones used on pages 4 and 5.
-Open items before publishing:
-- 2026-10-31: the RDK X5 steps (template scp, copy, ros2 bag info) were run as written too; outputs match.
-- GPL v3: the estimator_config.yaml template comes from VIMS (OpenVINS-based, GPL v3). Confirm how to present it once
-  D-Robotics publishes the drobotics_vio source.
-- Tested on macOS with Python 3.9.6; check on a Linux workstation.
--->
-
 ## Overview
 
 The VIO node in VIMS needs synchronized stereo images, IMU data, and a calibration that describes the cameras and the IMU. On this page, you prepare all three from a public dataset, so you can run VIO on the RDK X5 without a camera:

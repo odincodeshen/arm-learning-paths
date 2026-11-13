@@ -6,25 +6,6 @@ weight: 3
 layout: "learningpathall"
 ---
 
-<!--
-DRAFT (2026-10-30). Not reviewed. 2026-10-31: the author ran this page as written on a freshly flashed card (user report);
-Claude has not compared those outputs with the sample outputs on this page. Replace the sample outputs and the timing
-from that run if they differ.
-Basis: evidence/run-20261023-01 (image variant), run-20261024-01 (L1-1 to L1-10: the installation done step by step,
-with an interrupted apt upgrade that had to be repaired), VIMS manual section 4 (snapshot in
-evidence/run-20261016-01/web/vims-index.txt), D-ROBOTICS_LP2_REPLY_v1.md section 8 and 9.
-Open items before publishing:
-- Done by the author 2026-10-31 (experiment B): compare that run with the sample outputs and record the time.
-- D-Robotics reply v2 section 4 (2026-11-04): stay on RDK OS 3.5.0, TROS 2.5.2, VIMS 0.0.6 and record the build
-  numbers. With use_local_imu false, the dataset line doesn't need the camera driver update, kernel headers, or a
-  whole-system apt upgrade. A minimal install without those steps has NOT been tested; the author decided on
-  2026-11-04 to keep the tested path, and the page says so. Kernel commit order checked with the GitHub compare API (6e685bd ahead of c642eab by 4).
-  Package versions from apt depend on the date of the run.
-- D-Robotics asks not to describe the failed services as normal (reply section 8); cause still unknown (reply v2).
-- The commands use sudo from the sunrise user; the VIMS manual says to log in as root. Equivalent for installation;
-  confirm the wording with D-Robotics.
--->
-
 ## Overview
 
 On this page, you prepare an RDK X5 for VIMS:

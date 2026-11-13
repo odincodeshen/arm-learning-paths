@@ -6,29 +6,6 @@ weight: 5
 layout: "learningpathall"
 ---
 
-<!--
-DRAFT (2026-10-30). Not reviewed. Commands and outputs come from evidence/run-20261024-03 (real-time replay),
-evidence/run-20261025-01 (offline_bag_path E-offline-full1/2; real-time A-rep*; Foxglove D-foxglove) and
-evidence/run-20261030-01 (Foxglove section, real-time replay, 2026-10-31),
-evidence/run-20261026-01 (every command on this page run as written; <x5-address> = X5 IP; ~/tumvi/venv and
-~/tumvi/dataset-room1_512_16 were symlinks standing in for page 3; Foxglove GUI step not run).
-D-Robotics reply (D-ROBOTICS_LP2_REPLY_v1.md, 2026-10-30) settles: dataset replay main line, left-on-top layout,
-mono8 for VIO, offline_bag_path, publishing commands/config/output with source, version and conditions.
-Open items before publishing:
-- D-Robotics reply v2 (2026-11-04): pin VIMS 0.0.6, no release date, keep the 10800 s note, no promise to remove
-  it; drobotics_vio source isn't public, don't label the docs repo as source.
-- Offline mode publishes no /clock (0 messages in E-offline-full1). use_sim_time:=False tested 2026-10-31
-  (run-20261030-01 F-offline-simfalse): no poses at all. Cause from D-Robotics reply v2 section 2 (IMU age filter),
-  not checked by us; the page states it as a limit of the current implementation.
-- Page 3 must create ~/tumvi/ (workstation) and ~/lp2-tumvi/room1_512_vertical, ~/lp2-tumvi/config/tumvi_512/ (X5).
-- Foxglove screenshot taken 2026-10-31 (run-20261030-01 G-foxglove) in real-time replay. In offline mode, pathimu
-  carries stamp 0 (header and every pose); Foxglove showing it in offline mode is not verified, so the page uses
-  real-time replay. images/foxglove-trackhist.png (offline mode, trackhist only) is kept for page 1 or 5.
-- images/vio-vs-ground-truth.png: scripts/plot_vio_vs_mocap.py on evidence/run-20261030-01/F-offline-full3/vio_out
-  (same pairing and alignment as the page script; 2742 matched, RMSE 0.274 m, max 0.586 m). Rendered from the SVG
-  with headless Chrome. The "drift" sentence is a general VIO statement, not measured here.
--->
-
 ## Overview
 
 On the previous page, you converted the TUM-VI `room1` sequence into a ROS 2 bag and a VIMS configuration, and copied both to the RDK X5. On this page, you run the VIMS visual-inertial odometry (VIO) node with that bag as its input. You record the estimated trajectory, view it on your workstation, and compare it with the ground truth that comes with the dataset.

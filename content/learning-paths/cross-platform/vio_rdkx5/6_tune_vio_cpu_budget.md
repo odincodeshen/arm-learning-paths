@@ -6,27 +6,6 @@ weight: 7
 layout: "learningpathall"
 ---
 
-<!--
-DRAFT (2026-10-31). Not reviewed. Run as written 2026-10-31 (evidence/run-20261031-01/P6-verify) for the commands
-shown (6.7 Hz with 100 features): the conversion gave bags with the same md5 as the experiment bags (and frame-step 1
-the same as page 3); the np* configs differ from tumvi_512 only in num_pts; offline real 70.6 s, 934 poses, ATE
-0.304 m; real-time 93.2% CPU, frame time mean 74.8 ms, 0 drops, 935 poses, ATE 0.304 m. Not done as written: the scp
-of the bags (identical bags already on the X5, md5 checked). The table numbers come from the experiment scripts
-(scripts/x5_vio_replay_measure.sh, scripts/x5_vio_offline_bag.sh, scripts/tumvi_to_ros2bag_step.py), which do the
-same steps. Evidence: evidence/run-20261031-01 (T1 track_frequency, T1b frame rate,
-T3 num_pts), one run per setting; offline mode is deterministic (run-20261025-01, run-20261030-01).
-- D-Robotics guidance quoted in substance: reply section 6 (fix a baseline, then change one parameter at a time;
-  record speed, dropped frames and trajectory error). Reply v2 section 3 corrects the tracking frequency part;
-  VIMS params.md: mipi_image_framerate 6.0, "X5 建议 6.0 平衡算力；提高需降分辨率". Link only to the manual root
-  until the params page URL is confirmed.
-- track_frequency: no effect with the combined stereo callback (T1); cause from reply v2 section 3, not checked by us.
-- 5 Hz: "Detect Image lost, ts diff: 0.20" on every frame. Reply v2: warning only, gap > 0.19 s, hard-coded; it
-  doesn't drop frames or stop initialization. The cause of the failed initialization is unknown.
-- Inference, labeled on the page: cost per frame rises at lower frame rates because of larger motion between frames.
-- Not measured: image resolution (downsample_cameras), 10 Hz with 100 features, num_opencv_threads, CPU affinity.
-- Offline per-frame time = wall time of the launch (including a few seconds of startup) / frames in the bag.
--->
-
 ## Overview
 
 On the previous page, you found that the VIO node needs about 115 milliseconds of processing for each frame on average, while the dataset delivers a new frame every 50 milliseconds. The node uses about 1.9 of the 8 Cortex-A55 cores, drops about half of the frames, and gives a different trajectory error in every real-time run. Most of its CPU time goes to the image-processing front end.

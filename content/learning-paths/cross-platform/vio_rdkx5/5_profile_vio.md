@@ -6,20 +6,6 @@ weight: 6
 layout: "learningpathall"
 ---
 
-<!--
-DRAFT (2026-10-30). Not reviewed. Numbers: evidence/run-20261026-01 (this page run as written: 3 runs, perf),
-evidence/run-20261025-01 (performance/schedutil interleaved A-rep*, perf A-perf-rep*, offline E-offline-full*).
-D-Robotics reply (D-ROBOTICS_LP2_REPLY_v1.md): results can be published with source, version and conditions;
-keep the cycles:u and BPU notes; don't compare with "1.5 CPU @8fps"; don't infer the VIO input rate from 6 fps.
-Open items before publishing:
-- Offline bag mode CPU: 3 runs (30 s windows) 147.2 / 147.3 / 147.4% CPU, 81.3-82.5 MB RSS (run-20261030-01 F-offline-full3).
-- OpenCV in the image has no symbols; decide whether to show the hex entries or only the DSO table.
-- 2026-10-31: vio_measure.sh takes BAG and CFG from the environment (defaults unchanged) for page 6. Run as written
-  with BAG/CFG set on 2026-10-31 (run-20261031-01 P6-verify); not re-run with the defaults after this change.
-- Arm Performix System Utilization not re-run on the VIMS kernel (#2 May 12 2026); Code Hotspots unavailable
-  (no CONFIG_FTRACE, checked in L1-8).
--->
-
 ## Overview
 
 On the previous page, you ran the VIMS VIO node with a replayed dataset and saw that it can't process every frame at the camera rate. On this page, you measure what the node costs on the RDK X5 and where its CPU time goes:
