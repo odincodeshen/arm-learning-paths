@@ -1,7 +1,7 @@
 ---
 title: Run ROS 2 vision pipelines on the RDK X5 with TogetheROS
 
-description: Use TogetheROS.Bot on the D-Robotics RDK X5 to publish USB camera images, run a local image-processing example, verify data sharing, and profile CPU work.
+description: Use TogetheROS.Bot on the D-Robotics RDK X5 to publish USB camera images, run a local image-processing example, verify data sharing, and observe resource use.
 
 minutes_to_complete: 120
 
@@ -9,20 +9,21 @@ who_is_this_for: This is an introductory topic for ROS 2 developers, robotics so
 
 learning_objectives:
     - Identify the TogetheROS.Bot packages and RDK X5 components used to capture, publish, share, and process images.
-    - Configure `hobot_usb_cam` to publish a USB camera topic and verify that a ROS 2 receiver on a Raspberry Pi receives the images.
+    - Publish a USB camera stream from the RDK X5, receive it on a Raspberry Pi, and view the live video in a browser.
     - Run a local TogetheROS image-processing example and verify the Fast DDS data-sharing step between its publisher and subscribers.
-    - Measure frame rate, CPU, and memory for the local example in two message configurations, and explain the limits of that comparison.
-    - Use Arm Performix to observe system utilization and system calls, and use perf to locate CPU hotspots in the vision workload.
+    - Use Arm Performix to observe CPU, memory, disk, and network use while the local vision pipeline runs.
 
 prerequisites:
     - A D-Robotics RDK X5 running RDK OS 3.5 (Ubuntu 22.04) with [TogetheROS.Bot](https://developer.d-robotics.cc/rdk_doc/en/Robot_development/tros/) 2.5.2 for ROS 2 Humble.
-    - A UVC USB camera (this Learning Path uses a Lenovo USB camera).
-    - A Raspberry Pi (this Learning Path uses a Raspberry Pi 5) with Docker installed, on the same network as the RDK X5. It runs a ROS 2 Humble container to receive the camera stream.
-    - A wired Ethernet connection for the RDK X5 is recommended for the camera streaming steps.
-    - Basic familiarity with Linux and ROS 2 nodes, topics, and messages. If you need to install ROS 2, see the [ROS 2 install guide](/install-guides/ros2/).
+    - A USB camera.
+    - A Raspberry Pi with Docker installed, on the same network as the RDK X5.
+    - A computer with an SSH client and a web browser to view the stream served by the Pi.
+    - Basic familiarity with Linux and ROS 2 nodes, topics, and messages.
 
 author:
     - Odin Shen
+    - Kwashie Andoh
+    - Habib Ogunbanwo
 
 generate_summary_faq: false
 rerun_summary: false
@@ -42,7 +43,6 @@ tools_software_languages:
     - ROS 2
     - TogetheROS.Bot
     - Arm Performix
-    - perf
 operatingsystems:
     - Linux
 
