@@ -1,6 +1,6 @@
 ---
-title: Prepare TogetheROS and a ROS 2 image receiver
-description: Record the RDK X5 TogetheROS.Bot baseline, prepare a Raspberry Pi to receive the camera topic, and verify ROS 2 discovery before streaming images.
+title: Prepare the RDK X5 and the Raspberry Pi
+description: Check the RDK X5 software versions, prepare a Raspberry Pi to receive the camera topic, and verify ROS 2 discovery before streaming images.
 weight: 3
 
 layout: "learningpathall"
@@ -8,67 +8,28 @@ layout: "learningpathall"
 
 ## Before you begin
 
-The RDK X5 runs both TogetheROS vision examples. For the USB camera example, a Raspberry Pi acts as a ROS 2 receiver so you can verify that the published image topic reaches another device. Put both devices on the same network:
+Ensure that both devices are on the same network. This Learning Path uses the following hardware:
 
-| Role | Device used in this Learning Path |
-| --- | --- |
-| TogetheROS host | D-Robotics RDK X5 V1.0 (6.9 GiB memory visible to Linux), RDK OS 3.5.0 (Ubuntu 22.04.5), kernel 6.1.83 |
-| Camera-topic receiver | Raspberry Pi 5 Model B, 8 GB, Raspberry Pi OS based on Debian 13 (trixie) |
+- D-Robotics RDK X5
+- Raspberry Pi 5
 
-Each command block names the device it runs on. Begin on the RDK X5; you will prepare the Pi before checking the network camera topic.
+TogetheROS.Bot comes preinstalled in the official RDK OS 3.5 images for the RDK X5. This Learning Path was tested with RDK OS 3.5.0 and TogetheROS.Bot 2.5.2.
 
-## Record the RDK X5 baseline
-
-Every later result depends on the software baseline, so record it first. On the **RDK X5**, run:
+On the **RDK X5**, check your installed versions:
 
 ```bash
-uname -m; uname -r
 cat /etc/version
-grep PRETTY_NAME /etc/os-release
-lscpu | grep -E "Model name|^CPU\(s\)|CPU max MHz"
+dpkg-query -W -f='${Package} ${Version}\n' tros-humble
 ```
 
-The output is similar to:
+The output on the tested setup was:
 
 ```output
-aarch64
-6.1.83
 3.5.0
-PRETTY_NAME="Ubuntu 22.04.5 LTS"
-CPU(s):                               8
-Model name:                           Cortex-A55
-CPU max MHz:                          1500.0000
-```
-
-Check the installed TogetheROS.Bot release, the packages used in this Learning Path, and the ROS 2 middleware packages. Record the full Debian versions, because they identify the exact builds:
-
-```bash
-dpkg-query -W -f='${Package} ${Version}\n' tros-humble tros-humble-hobot-usb-cam \
-  tros-humble-hobot-shm tros-humble-hbm-img-msgs tros-humble-hobot-image-publisher \
-  tros-humble-dnn-node tros-humble-dnn-node-example tros-humble-hobot-cv tros-humble-hobot-codec \
-  ros-humble-rmw-fastrtps-cpp ros-humble-fastrtps ros-humble-fastcdr
-```
-
-```output
-ros-humble-fastcdr 1.0.24-2jammy.20250701.013706
-ros-humble-fastrtps 2.6.10-1jammy.20250719.003736
-ros-humble-rmw-fastrtps-cpp 6.2.8-1jammy.20250719.091658
 tros-humble 2.5.2-jammy.20260313.064039
-tros-humble-dnn-node 2.6.1-jammy.20260312.094112
-tros-humble-dnn-node-example 2.6.1-jammy.20260312.112442
-tros-humble-hbm-img-msgs 2.0.0-jammy.20241225.031409
-tros-humble-hobot-codec 2.3.5-jammy.20260312.111803
-tros-humble-hobot-cv 2.3.7-jammy.20260401.124358
-tros-humble-hobot-image-publisher 2.2.1-jammy.20250425.114211
-tros-humble-hobot-shm 0.0.1-jammy.20241225.030528
-tros-humble-hobot-usb-cam 2.3.0-jammy.20250425.110259
 ```
 
-The `tros-humble` 2.5.2 meta package is the TogetheROS.Bot release for RDK OS 3.5. Its individual packages have their own version numbers, so `dnn_node` 2.6.1 is part of the 2.5.2 release. The middleware is Fast DDS 2.6.10 with `rmw_fastrtps_cpp` 6.2.8. With these packages confirmed, load the TogetheROS environment before running any nodes.
-
-{{% notice Note %}}
-This Learning Path was tested with the TogetheROS.Bot 2.5.2 release for RDK OS 3.5. Don't run a general `apt upgrade` to "get the latest" before you follow it. Newer packages can change launch arguments and default behavior.
-{{% /notice %}}
+Different software versions may change launch arguments or default behavior.
 
 ## Source the TogetheROS environment on the RDK X5
 
@@ -93,7 +54,7 @@ middleware name    : rmw_fastrtps_cpp
 
 ## Prepare ROS 2 on the Raspberry Pi
 
-The Pi needs ROS 2 Humble only to receive the camera topic. ROS 2 Humble packages are built for Ubuntu 22.04, while the Raspberry Pi OS image used here is based on Debian 13. Run the official `ros:humble-ros-base` container on the Pi. Install Docker first if needed; see the [Docker install guide](/install-guides/docker/).
+The Pi needs ROS 2 only to receive the camera topic. ROS 2 Humble packages are built for Ubuntu 22.04, while the Raspberry Pi OS image used here is based on Debian 13. In the following steps, you will pull and run the official `ros:humble-ros-base` container on the Pi. Install Docker first if needed; see the [Docker install guide](/install-guides/docker/).
 
 On the **Raspberry Pi**, pull the image:
 
@@ -109,25 +70,111 @@ This Learning Path was tested with the arm64 image pulled on October 15, 2026, w
 docker image inspect ros:humble-ros-base --format '{{json .RepoDigests}}'
 ```
 
-Create a working folder that you share with the container. Create it as your own user before you start the container. If the folder doesn't exist, Docker creates it as `root`, and you can't save files in it later:
-
-```bash
-mkdir -p ~/ros2
-```
-
 Start a shell in the container:
 
 ```bash
-docker run -it --rm --net=host --ipc=host -e ROS_DOMAIN_ID=42 -v ~/ros2:/ros2 ros:humble-ros-base
+docker run -it --rm --net=host --ipc=host -e ROS_DOMAIN_ID=42 ros:humble-ros-base
+```
+The `--net=host` option gives ROS 2 access to the Pi's network interfaces. It also lets the Pi host reach the browser viewer that you start inside the container on the next page.
+
+### Install the live-view packages
+
+Inside the **Pi container**, install the viewer and its compressed-image transport plugin for the camera example:
+
+```bash
+apt-get update
+apt-get install -y --no-install-recommends ros-humble-web-video-server ros-humble-compressed-image-transport
 ```
 
-Inside the container, source ROS 2:
+`apt-get update` refreshes the package list. The install command downloads the viewer and its required dependencies. Run this installation once per container, then keep the container open for the next page. With `--rm`, exiting removes the container and its installed packages; a new container needs this installation again.
+
+Source ROS 2:
 
 ```bash
 source /opt/ros/humble/setup.bash
 ```
 
-The `--net=host` option is required. It puts the container on the Pi's own network interfaces so that DDS discovery multicast reaches the RDK X5. The `-v ~/ros2:/ros2` option shares a folder for the subscriber script you use on the next page.
+## Test multicast between the devices
+
+Fast DDS uses multicast announcements for discovery by default. However, depending on your network configuration, this may be blocked.
+
+In the **Raspberry Pi container**, start the receiver and leave it waiting:
+
+```bash
+ros2 multicast receive
+```
+
+While the receiver is waiting, run on the **RDK X5**:
+
+```bash
+ros2 multicast send
+```
+
+The Pi should print a message similar to:
+
+```output
+Received from <x5-address>:<port>: 'Hello World!'
+```
+
+If this works, skip the fallback section below and continue to [Verify discovery between the devices](#verify-discovery-between-the-devices). If the Pi receives nothing, stop the receiver with Ctrl+C and use the unicast fallback.
+
+### Fallback: Use unicast discovery when multicast is unavailable
+
+Configure [Fast DDS unicast discovery](https://fast-dds.docs.eprosima.com/en/v2.6.10/fastdds/transport/disabling_multicast.html) with explicit peer addresses. This can work across routed subnets, provided the network allows UDP traffic between the devices.
+
+On **each device's host**, find its IPv4 address. For the Pi, open another SSH session to run this command and leave the container running:
+
+```bash
+ip -br -4 addr
+```
+
+In the block below, replace `RDK_X5_IP` and `PI_IP` with those addresses. Use the connected Ethernet or Wi-Fi address, not `lo` or `docker0`. Run the same block **natively on the X5 and inside the Pi container**, after sourcing the respective ROS environment:
+
+```bash
+export FASTRTPS_DEFAULT_PROFILES_FILE="$(mktemp /tmp/lp1-fastdds-XXXXXX.xml)"
+export FASTDDS_DEFAULT_PROFILES_FILE="$FASTRTPS_DEFAULT_PROFILES_FILE"
+
+cat > "$FASTRTPS_DEFAULT_PROFILES_FILE" <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <transport_descriptors>
+    <transport_descriptor>
+      <transport_id>lp1_udp</transport_id>
+      <type>UDPv4</type>
+      <maxInitialPeersRange>32</maxInitialPeersRange>
+    </transport_descriptor>
+  </transport_descriptors>
+  <participant profile_name="lp1_unicast" is_default_profile="true">
+    <rtps>
+      <builtin>
+        <metatrafficUnicastLocatorList>
+          <locator/>
+        </metatrafficUnicastLocatorList>
+        <initialPeersList>
+          <locator><udpv4><address>RDK_X5_IP</address></udpv4></locator>
+          <locator><udpv4><address>PI_IP</address></udpv4></locator>
+        </initialPeersList>
+      </builtin>
+      <userTransports>
+        <transport_id>lp1_udp</transport_id>
+      </userTransports>
+      <useBuiltinTransports>false</useBuiltinTransports>
+    </rtps>
+  </participant>
+</profiles>
+XML
+
+export ROS_DOMAIN_ID=42
+export ROS_LOCALHOST_ONLY=0
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export RMW_FASTRTPS_USE_QOS_FROM_XML=0
+unset ROS_DISCOVERY_SERVER SKIP_DEFAULT_XML
+ros2 daemon stop
+```
+
+Setting `RMW_FASTRTPS_USE_QOS_FROM_XML=0` keeps ROS 2's history memory policy when the camera launch runs; the XML still configures discovery and transport.
+
+Continue with the text-message test below in these configured shells. For any new ROS terminal or Pi container used for the camera example, source ROS and repeat this fallback setup. Validate camera delivery separately on the next page.
 
 ## Verify discovery between the devices
 
@@ -154,7 +201,7 @@ data: hello-from-x5
 ---
 ```
 
-Stop the publisher with Ctrl+C. Then repeat the test in the other direction: publish from the Pi container and run `ros2 topic echo --once` on the RDK X5. Once discovery works in both directions, check the network route that will carry the larger camera images.
+Stop the publisher with Ctrl+C. Then repeat the test in the other direction: publish from the Pi container and run `ros2 topic echo --once` on the RDK X5. Once discovery works in both directions, you're ready to test the camera stream on the next page.
 
 ## Troubleshooting discovery
 
@@ -168,47 +215,4 @@ If the topic doesn't appear, check these items in order:
 | `ros2: command not found` | You sourced `/opt/tros/humble/setup.bash` (RDK X5) or `/opt/ros/humble/setup.bash` (Pi) in this shell |
 | Firewall enabled | UDP ports 7400 and above are allowed between the devices |
 
-## Plan the network
-
-Discovery works over Wi-Fi, but a 1080p camera stream is about 55 Mbit/s, so the network matters for the next page. This Learning Path was measured with the following network:
-
-| Device | Connection |
-| --- | --- |
-| RDK X5 | Gigabit Ethernet to the router |
-| Raspberry Pi 5 | Wi-Fi, 2.4 GHz band |
-
-If the RDK X5 has both Ethernet and Wi-Fi connected to the same network, check which interface it uses to reach the Pi. Replace `<pi-address>` with the IP address of your Pi:
-
-```bash
-ip route get <pi-address>
-```
-
-```output
-192.168.1.20 dev wlan0 src 192.168.1.10 uid 1000
-```
-
-Your addresses will differ. On the RDK X5 used for this Learning Path, NetworkManager gives the Wi-Fi route a lower metric (600) than the Ethernet route (700). Traffic to the Pi therefore leaves through Wi-Fi even when the cable is connected. In a 15-second check in this state, the Pi received about 16 frames per second of the 1080p stream instead of 30. To make sure image data uses the wired link, disconnect Wi-Fi on the RDK X5 while you measure.
-
-If you work on the RDK X5 over SSH, first make sure that your session uses the wired address. Otherwise the next command disconnects you. Print the address of your current session and compare it with the `eth0` address:
-
-```bash
-echo $SSH_CONNECTION | cut -d' ' -f3
-ip -4 -o addr show eth0
-```
-
-The first command can print an IPv6 address. An address that ends in `%wlan0`, or that matches the `wlan0` address, means that your session uses Wi-Fi. In that case, reconnect over SSH to the IPv4 address that `eth0` shows, for example `ssh sunrise@192.168.1.11`. Then disconnect Wi-Fi:
-
-```bash
-sudo nmcli dev disconnect wlan0
-ip route get <pi-address>
-```
-
-The second command now shows `dev eth0`.
-
-Reconnect it when you finish:
-
-```bash
-sudo nmcli dev connect wlan0
-```
-
-The environment is ready. On the next page, configure `hobot_usb_cam`, inspect its image topic on the RDK X5, and use the Pi receiver to check delivery.
+The environment is ready. On the next page, publish the camera stream from the RDK X5, receive it on the Pi, and view it in your computer's browser.

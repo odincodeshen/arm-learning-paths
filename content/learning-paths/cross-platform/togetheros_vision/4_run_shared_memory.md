@@ -8,65 +8,26 @@ layout: "learningpathall"
 
 ## Overview
 
-The previous page used TogetheROS to publish live camera images over ROS 2. Now run a local vision example on the RDK X5: a TogetheROS publisher repeatedly sends a stored image to an object detection node. The stored input lets you inspect the data-sharing step between local processes while inference continues downstream.
+Passing large data between separate processes on a single device can involve serialization and memory copies, which consume CPU time and memory bandwidth. TogetheROS.Bot uses ROS 2 with Fast DDS to allow local publishers and subscribers to access the same image buffer. This avoids copies during that delivery step.
+
+In this example, a TogetheROS publisher repeatedly sends `target.jpg` to an object detection node on the RDK X5. Using a stored image keeps the input consistent while you check how the two processes share the image data.
 
 ![Path B: the RDK X5 image publisher shares a stored image with a local object detection node through Fast DDS data sharing.#center](images/path-b-data-sharing.svg)
 
-You then collect three kinds of evidence and check which claims each one supports:
+You then collect three kinds of evidence that prove:
 
 1. **Delivery:** the subscriber receives the images.
 2. **Configuration:** the nodes ask for shared memory.
 3. **Transport:** the publisher and subscribers actually map the same shared-memory buffer.
 
-The example runs entirely on the RDK X5. The image source is `target.jpg`, so the following checks apply to this local example rather than to the live camera stream.
-
-## How TogetheROS enables shared memory
-
-The `hobot_shm` package configures Fast DDS for shared memory. You saw its setup messages when the camera node started; the local example also loads it. The package sets these environment variables for nodes in the launch:
-
-| Variable | Value | Effect |
-| --- | --- | --- |
-| `FASTRTPS_DEFAULT_PROFILES_FILE` | `/opt/tros/humble/lib/hobot_shm/config/shm_fastdds.xml` | Loads the Fast DDS profile |
-| `RMW_FASTRTPS_USE_QOS_FROM_XML` | `1` | Lets the XML profile set the history memory policy and the publication mode. QoS policies that a node sets in code, such as reliability and history depth, still take effect unless the node uses `SYSTEM_DEFAULT`. |
-| `ROS_DISABLE_LOANED_MESSAGES` | `0` | Allows loaned messages |
-
-View the profile:
-
-```bash
-cat /opt/tros/humble/lib/hobot_shm/config/shm_fastdds.xml
-```
-
-```output
-<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
-    <data_writer profile_name="default publisher profile" is_default_profile="true">
-        <qos>
-            <publishMode>
-                <kind>ASYNCHRONOUS</kind>
-            </publishMode>
-            <data_sharing>
-                <kind>AUTOMATIC</kind>
-            </data_sharing>
-        </qos>
-        <historyMemoryPolicy>PREALLOCATED_WITH_REALLOC</historyMemoryPolicy>
-    </data_writer>
-    <data_reader profile_name="default subscription profile" is_default_profile="true">
-        <qos>
-            <data_sharing>
-                <kind>AUTOMATIC</kind>
-            </data_sharing>
-        </qos>
-        <historyMemoryPolicy>PREALLOCATED_WITH_REALLOC</historyMemoryPolicy>
-    </data_reader>
-</profiles>
-```
-
-With data sharing set to `AUTOMATIC`, Fast DDS keeps samples in a shared-memory pool owned by the publisher's DataWriter. When a subscriber is in another process on the same host, it reads samples from that pool instead of receiving a serialized copy over a socket. Fast DDS uses data sharing only on the same host, and only for message types with a fixed maximum size.
+This example runs entirely on the RDK X5.
 
 ## Run the example
 
-The main launch file of `dnn_node_example` can use a stored image instead of a camera when you set `CAM_TYPE=fb`. In that mode it starts `hobot_image_publisher` to publish the image continuously. This is different from `dnn_node_example_feedback.launch.py`, which runs inference on a single local image and doesn't publish a topic stream. Run the example from an empty working directory, because the launch file copies its `config` folder into the current directory:
+The main launch file of `dnn_node_example` can use a stored image instead of a camera when you set `CAM_TYPE=fb`. In that mode it starts `hobot_image_publisher` to publish the image continuously. Run the example from an empty working directory on **the RDK X5**:
 
 ```bash
+unset FASTRTPS_DEFAULT_PROFILES_FILE FASTDDS_DEFAULT_PROFILES_FILE RMW_FASTRTPS_USE_QOS_FROM_XML
 mkdir -p ~/lp1_shm && cd ~/lp1_shm
 source /opt/tros/humble/setup.bash
 export ROS_DOMAIN_ID=42
@@ -75,7 +36,7 @@ ros2 launch dnn_node_example dnn_node_example.launch.py \
   dnn_example_config_file:=config/fcosworkconfig.json
 ```
 
-In this mode, the image size comes from `config/target.jpg`, which is 640x640. The launch file's image width and height arguments aren't passed to the image publisher.
+The `unset` command clears any unicast fallback overrides so the launch can load the TogetheROS shared-memory profile.
 
 This launch file starts four nodes:
 
@@ -84,7 +45,7 @@ This launch file starts four nodes:
 | `hobot_image_pub` | Publishes `config/target.jpg` as NV12 to `/hbmem_img`, 5 times per second | `is_shared_mem: True` |
 | `dnn_example_node` | Runs an object detection model on the board's accelerator and publishes the results | `is_shared_mem_sub: 1` |
 | `hobot_codec_encoder_*` | Encodes `/hbmem_img` to JPEG on `/image` for the web view | Input mode `shared_mem` |
-| `websocket` | Serves a web page with the image and detections | Not used here |
+| `websocket` | Serves a web page with the image and detections | Image input mode `mjpeg` |
 
 The log shows the subscriber settings and the loaded model:
 
@@ -97,6 +58,14 @@ The log shows the subscriber settings and the loaded model:
 [hobot_codec_republish-2] [WARN] [...] [hobot_codec_encoder_8139f206]: Enabling zero-copy
 ```
 
+## View the image
+
+The launch also starts a web viewer. Leave the example running and open `http://X5_IP:8000/TogetheROS/` in your computer's browser, replacing `X5_IP` with the RDK X5's IP address.
+
+You should see `target.jpg` with bounding boxes around the detected objects.
+
+![TogetheROS web viewer displaying a living room with detection boxes labeled couch, potted plant, vase, and book.#center](images/object_detection.png "Object detection results for target.jpg on the RDK X5")
+
 {{% notice Note %}}
 The `websocket` launch file starts a separate `nginx` web server that keeps running after you stop the launch with Ctrl+C. When you finish this page, stop only the instance that this example started, as shown at the end of the page.
 {{% /notice %}}
@@ -106,6 +75,8 @@ The `websocket` launch file starts a separate `nginx` web server that keeps runn
 In a second RDK X5 terminal, source the environment, set `ROS_DOMAIN_ID=42`, and list the topics:
 
 ```bash
+source /opt/tros/humble/setup.bash
+export ROS_DOMAIN_ID=42
 ros2 topic list -t
 ```
 
@@ -138,14 +109,29 @@ The inference node also logs each received frame and its processing times:
 
 Each frame is a 640x640 NV12 image of 614,400 bytes. The node receives 5 frames per second and publishes detections at the same rate.
 
-This evidence shows that images reach the subscriber. It doesn't show how they travel.
+This evidence shows that images reach the subscriber.
 
 ## Evidence 2: the configuration asks for shared memory
 
-You've already seen three parts of this evidence:
+The launch uses `hobot_shm` to load the Fast DDS profile. Check its data-sharing settings:
+
+```bash
+grep -A 2 '<data_sharing>' /opt/tros/humble/lib/hobot_shm/config/shm_fastdds.xml
+```
+
+```output
+            <data_sharing>
+                <kind>AUTOMATIC</kind>
+            </data_sharing>
+--
+            <data_sharing>
+                <kind>AUTOMATIC</kind>
+            </data_sharing>
+```
+
+Both publisher and subscriber profiles use `AUTOMATIC`, which allows data sharing when its requirements are met. The launch settings and log also show:
 
 - The publisher runs with `is_shared_mem: True` and the subscriber with `is_shared_mem_sub: 1`.
-- The Fast DDS profile sets data sharing to `AUTOMATIC`.
 - The codec node logs `Enabling zero-copy`.
 
 The last requirement is a fixed-size message type. Check the definition of the message on `/hbmem_img`:
@@ -218,45 +204,9 @@ done
 Read the result:
 
 - The file name contains the publisher's GUID prefix `01.0f.a8.ee.42.75.90.30` and entity `0.0.12.3`, which matches the publisher GID ending in `12.03`. This is the pool of the `/hbmem_img` DataWriter.
-- The pool is 37,327,756 bytes, about six `HbmMsg1080P` samples of 6,220,800 bytes each.
 - The publisher maps the pool read-write (`rw-s`). Both subscribers map the same file read-only (`r--s`).
 
 The subscribers read image samples directly from the publisher's shared pool. The transfer from publisher to subscriber doesn't go through a socket or a serialized copy.
-
-## Where the shared-memory boundary is
-
-The `/dev/shm` evidence covers one step: the hop from the publisher to the subscribers. The other steps in the pipeline still copy image data:
-
-| Step | What happens to the image data | Evidence |
-| --- | --- | --- |
-| Publisher decodes `target.jpg` to NV12 | The publisher keeps the decoded image in its own cache | Not measured |
-| Publisher fills the loaned sample | Copy: the cached image is copied with `memcpy` into a message borrowed with `borrow_loaned_message()`, then published | `hobot_image_publisher` 2.2.1 source code. D-Robotics confirmed that the loaned buffer is in the data-sharing pool. |
-| Publisher to subscribers | Shared: the subscribers read the sample from the publisher's pool, with no copy between the processes | `/dev/shm` mappings on this page |
-| Subscriber resizes the image with `hobot_cv` | Copy into the VSE input buffer, then copy of the VSE output back to a CPU buffer | `hobot_cv` source code, and the profile on the last page |
-| Subscriber builds the model input | Allocates accelerator-accessible memory and copies the Y and UV planes | `dnn_node` source code, and the profile on the last page |
-| Subscribers without the TogetheROS profile, or on another host | Use the normal Fast DDS transports | Fast DDS behavior |
-
-Use the same wording when you describe this example: the publisher and the subscribers share the image buffer through Fast DDS data sharing. Don't describe the whole pipeline as "zero-copy".
-
-## Observe the cost on the CPU
-
-Sample the three processes for 20 seconds:
-
-```bash
-pidstat -h -u -r -p $PUB,$SUB,$ENC 1 20
-```
-
-The averages measured for this Learning Path at 5 frames per second, with 640x640 images and the default `schedutil` CPU governor. This launch file also runs the codec and web nodes, so treat these numbers as a first look. The next page measures the publisher and the inference node alone, under controlled conditions:
-
-| Process | CPU (100% = one core) | RSS |
-| --- | --- | --- |
-| `hobot_image_pub` | 0.8% | 77 MB |
-| `hobot_codec_republish` | 2.2% | 26 MB |
-| `example` (`dnn_example_node`) | 15.4% | 72 MB |
-
-The detection node uses the most CPU, but the neural network itself runs on the accelerator, so that part of the work isn't Arm CPU time. The CPU time in this node comes from preprocessing, from postprocessing that decodes the model output into boxes, and from ROS 2 work. You confirm this with a profiler on the last page.
-
-These numbers describe this stored-image publisher running at 5 frames per second with inference downstream.
 
 ## Stop the example
 
@@ -284,4 +234,4 @@ You have:
 - Run a stored-image pipeline that feeds an object detection node on the RDK X5.
 - Collected delivery, configuration, and transport evidence, and stated which steps use shared memory.
 
-With the local pipeline working and its data-sharing step verified, you can measure how it behaves when the publisher and subscriber use either TogetheROS data sharing or standard `sensor_msgs/msg/Image` messages.
+Next, use [Arm Performix](/learning-paths/cross-platform/togetheros_vision/6_profile_workload/) to observe CPU and memory use while the pipeline runs.

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 270" width="1000" height="270" font-family="Lato, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 410" width="1000" height="410" font-family="Lato, Helvetica, Arial, sans-serif">
   <defs>
     <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#333e48"/>
@@ -16,7 +16,7 @@
     </style>
   </defs>
 
-  <rect class="panel" x="10" y="10" width="980" height="250" rx="10"/>
+  <rect class="panel" x="10" y="10" width="980" height="390" rx="10"/>
   <text class="th" x="30" y="40">A. Stream a USB camera to a Raspberry Pi</text>
 
   <rect class="hw" x="30" y="95" width="120" height="70" rx="8"/>
@@ -38,11 +38,18 @@
   <rect class="dev" x="735" y="60" width="240" height="175" rx="10"/>
   <text class="tb" x="750" y="82">Raspberry Pi 5</text>
   <rect class="node" x="755" y="100" width="200" height="60" rx="8"/>
-  <text class="tb" x="855" y="125" text-anchor="middle">image_counter.py</text>
-  <text class="ts" x="855" y="145" text-anchor="middle">standard ROS 2 subscriber</text>
+  <text class="tb" x="855" y="125" text-anchor="middle">web_video_server</text>
+  <text class="ts" x="855" y="145" text-anchor="middle">ROS 2 subscriber + HTTP server</text>
   <text class="ts" x="755" y="185">ROS 2 Humble in a container</text>
   <text class="ts" x="755" y="203">BEST_EFFORT subscriber</text>
-  <text class="ts" x="755" y="221">counts received messages</text>
+  <text class="ts" x="755" y="221">serves the live video stream</text>
+
+  <rect class="dev" x="420" y="285" width="410" height="100" rx="10"/>
+  <text class="tb" x="440" y="309">Your computer</text>
+  <rect class="node" x="440" y="325" width="370" height="40" rx="8"/>
+  <text class="tb" x="625" y="351" text-anchor="middle">Web browser: live camera view</text>
+  <text class="ts" x="690" y="269">HTTP through an SSH tunnel</text>
+  <path class="line" d="M855,235 L855,345 L812,345"/>
 
   <path class="line" d="M150,130 L208,130"/>
   <path class="line" d="M460,130 L523,130"/>
