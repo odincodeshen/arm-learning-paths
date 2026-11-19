@@ -22,7 +22,7 @@ Next, you will run a local image-processing example on the RDK X5 alone, where `
 
 The RDK X5 is part of the D-Robotics RDK (Robot Developer Kit) family. It's a developer board built on the D-Robotics Sunrise 5 chip, with an 8-core Arm Cortex-A55 processor and dedicated hardware for tasks such as neural network inference and image processing.
 
-<img src="/learning-paths/cross-platform/togetheros_vision/images/IMG_4445.jpg" alt="D-Robotics RDK X5 board used in this Learning Path." width="600" height="450" class="content-uploaded-image centered">
+<img src="/learning-paths/cross-platform/togetheros_vision/images/rdk_x5.jpg" alt="D-Robotics RDK X5 board used in this Learning Path." width="600" height="450" class="content-uploaded-image centered">
 <span class="content-image-caption centered">D-Robotics RDK X5 development board</span>
 
 To help with this Learning Path, the board features the following:
