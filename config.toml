@@ -9,19 +9,16 @@ enableRobotsTXT = true
 
 [deployment]
 [[deployment.targets]]
-name = "internal-existing"
-URL = "s3://armswdev.tk?region=us-east-1"
-cloudFrontDistributionID = "E2VDQ2CYZATMO9"
+name = "dev"
+URL = "s3://arm-learning-paths-dev?region=us-east-1"
+cloudFrontDistributionID = "EAMKPMDBM18II"
+exclude = "{courses/**,insights/**,social-images/manifest.json}"
 
 [[deployment.targets]]
-name = "internal"
-URL = "s3://arm-learning-paths-internal?region=us-west-2"
-cloudFrontDistributionID = "ENN4LK1IZUDIX"
-
-[[deployment.targets]]
-name = "production"
-URL = "s3://arm-learning-paths?region=us-west-2"
-cloudFrontDistributionID = "E2NEF61QWPFRIH"
+name = "prod"
+URL = "s3://arm-learning-paths-prod?region=us-east-1"
+cloudFrontDistributionID = "E2IA2AC83UE2VJ"
+exclude = "{courses/**,insights/**,md/**,social-images/manifest.json}"
 
 [markup]
   [markup.goldmark]
@@ -43,13 +40,13 @@ operatingsystem = "operatingsystems"
 skilllevel = "skilllevels"
 tool_software_language = "tools_software_languages"
 armip = "armips"
-cloud_service_provider = "cloud_service_providers"
+platform = "platforms"
 
 [permalinks]
 tools_software_languages = "/tag/:slug/"
 operatingsystems = "/tag/:slug/"
 subjects = "/tag/:slug/"
-cloud_service_providers = "/tag/:slug/"
+platforms = "/tag/:slug/"
 armips = "/tag/:slug/"
 
 [related]
@@ -58,7 +55,7 @@ includeNewer = true
 toLower = false
 
 [[related.indices]]
-name = "cloud_service_providers"
+name = "platforms"
 weight = 100
 
 [[related.indices]]
@@ -77,6 +74,9 @@ github_project_repo = "https://github.com/ArmDeveloperEcosystem/arm-learning-pat
 # location of assets
 assetsDir = "assets"
 
+# Optionally override the global web components bundle for a specific deployment.
+# global_web_components_url = "https://www.arm.com/arm-global-web-components/devhub/app.js"
+
 # Specify a value here if your content directory is not in your repo's root directory
 # github_subdir = ""
 
@@ -87,7 +87,7 @@ github_branch = "main"
 # For metadata posting on socials
 title = 'Arm Learning Paths'
 description = 'Tutorials with code examples, created by the Arm ecosystem to develop better code faster across all platforms: Servers, phones, laptops, embedded devices, and microcontrollers.'
-social_image = '/img/social-image.png'
+social_image = '/social-images/default.webp'
 twitter_handle = '@ArmSoftwareDev'
 
 math = true
@@ -97,9 +97,14 @@ math = true
 [outputFormats]
   [outputFormats.COVEO]
     mediaType = "application/xml"
-    baseName = "sitemap-COVEO"
+    baseName = "coveo"
+    isPlainText = true
+    notAlternative = true
+  [outputFormats.COVEOINDEX]
+    mediaType = "application/xml"
+    baseName = "sitemap-coveo"
     isPlainText = true
     notAlternative = true
 
 [outputs]
-  home = ["HTML", "COVEO"]
+  home = ["HTML", "COVEO", "COVEOINDEX"]

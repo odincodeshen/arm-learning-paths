@@ -89,6 +89,15 @@ function getEmailClaimValue(claims) {
   return undefined;
 }
 
+function isExpectedAccount(account) {
+  const claims = account?.idTokenClaims;
+  const policy = claims?.tfp ?? claims?.acr;
+
+  return claims?.aud === CLIENT_ID &&
+    typeof policy === "string" &&
+    policy.toLowerCase() === POLICY.toLowerCase();
+}
+
 async function getIdTokenClaimsForAccount(account) {
   if (!account) return null;
 
@@ -109,9 +118,7 @@ async function getIdTokenClaimsForAccount(account) {
 }
 
 async function updateDigitalDataForCurrentUser() {
-  const account =
-    msalInstance.getActiveAccount() ||
-    msalInstance.getAllAccounts()[0];
+  const account = getAccount();
 
   if (!account) {
     clearDigitalDataUser();
@@ -143,7 +150,7 @@ async function initAuth() {
     
         const result = await msalInstance.handleRedirectPromise(); // safe to call every load
     
-        if (result?.account) {
+        if (isExpectedAccount(result?.account)) {
           msalInstance.setActiveAccount(result.account);
         } else {
           getAccount();
@@ -164,12 +171,17 @@ async function initAuth() {
 
 // Helper function
 function getAccount() {
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length) {
-      // Optional: pick a deterministic account if multiple
-      msalInstance.setActiveAccount(accounts[0]);
-      return accounts[0];
+    const activeAccount = msalInstance.getActiveAccount();
+    if (isExpectedAccount(activeAccount)) return activeAccount;
+
+    const matchingAccounts = msalInstance.getAllAccounts().filter(isExpectedAccount);
+    if (matchingAccounts.length === 1) {
+      msalInstance.setActiveAccount(matchingAccounts[0]);
+      return matchingAccounts[0];
     }
+
+    // A missing or ambiguous account requires an explicit sign-in choice.
+    msalInstance.setActiveAccount(null);
     return null;
 }
   
@@ -179,9 +191,7 @@ function getAccount() {
 function getSignedInNavData() {
   if (!msalInstance) return null;
 
-  const account =
-    msalInstance.getActiveAccount() ||
-    msalInstance.getAllAccounts()[0];
+  const account = getAccount();
 
   if (!account) return null;
 
@@ -243,9 +253,6 @@ function renderAuthInTopNav() {
 
 }
 
-
-
-
 // ----------------------------------------------------------------------
 //                 Auth Callback hooks in top nav
 // ----------------------------------------------------------------------
@@ -263,8 +270,10 @@ document.addEventListener('arm-account-signout', (event) => {
     }
 
   clearDigitalDataUser();
-    
+
   const account = getAccount();
+  window.dispatchEvent(new Event('VFAE-logout'));
+
   msalInstance.logoutRedirect({
     account,
     authority: AUTHORITY,
@@ -280,7 +289,7 @@ document.addEventListener('arm-account-signin', (event) => {
 
       const signInButton = shadowRoot.querySelector('.c-utility-navigation-login__sign-in-button');
     if (signInButton) {
-        signInButton.innerHTML = "Redirecting to login...";
+        signInButton.textContent = "Redirecting...";
     }
     else {
         console.log("Sign-in button not found in DOM.");

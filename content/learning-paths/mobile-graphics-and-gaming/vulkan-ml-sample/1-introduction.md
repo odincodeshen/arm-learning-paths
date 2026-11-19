@@ -8,11 +8,17 @@ layout: learningpathall
 
 ## What is neural graphics, and why does it matter for real-time rendering?
 
-Neural graphics combines real-time rendering with the power of machine learning to enhance visual quality and performance. By integrating ML techniques like neural upscaling directly into the GPU pipeline, developers can achieve next-gen fidelity and efficiency. This is especially valuable on mobile and embedded devices, where power efficiency is critical.
+Neural graphics combines real-time rendering with machine learning to improve visual quality and performance. Integrating ML techniques, such as neural upscaling, directly into the GPU pipeline can improve visual fidelity and efficiency. This approach is especially valuable on mobile and embedded devices, where power efficiency is critical.
 
 ## How do ML Extensions for Vulkan support neural graphics workloads?
 
-Vulkan's data graph pipelines, introduced through the `VK_ARM_data_graph` and `VK_ARM_tensors` extensions, bring structured compute graph execution to the Vulkan API by introducing support for processing tensors. These pipelines are designed to execute ML inference workloads efficiently using SPIR-V-defined graphs.
+Vulkan extensions add functionality to the Vulkan API. Arm's ML Extensions for Vulkan introduce support for tensor processing and machine learning data graphs.
+
+To make these extensions available on Vulkan-capable hardware that does not support them natively, Arm provides **ML Emulation Layers for Vulkan**, part of the [ML SDK for Vulkan](https://arm.github.io/ai-ml-sdk-for-vulkan/). A Vulkan layer is a software component that sits between a Vulkan application and the Vulkan driver. The ML Emulation Layers expose Arm's ML extensions and emulate their functionality using existing Vulkan compute capabilities.
+
+The `VK_ARM_tensors` extension introduces support for multidimensional tensor data in Vulkan, while `VK_ARM_data_graph` enables the execution of ML computational graphs using Vulkan data graph pipelines. These pipelines use SPIR-V, Vulkan's intermediate representation for GPU programs, to define and execute ML computational graphs.
+
+![Arm ML Emulation Layers architecture#center](images/ml-emulation-layers.png)
 
 To help developers adopt these features, the Tensor and Data Graph Vulkan Samples offer hands-on demonstrations.
 
@@ -21,21 +27,20 @@ These samples address key challenges in ML integration, such as:
 - **Understanding graph-based compute with Vulkan**: See how compute workloads can be structured using explicit graph topologies.
 - **Demystifying ML inference in real-time rendering**: Learn how ML fits into the graphics pipeline.
 
-Samples range from basic setups to more advanced features like tensor aliasing and compute shader integration.
+The samples range from basic configurations to more advanced features, such as tensor aliasing and compute shader integration.
 
 This Learning Path walks you through setting up and running the first sample, `simple_tensor_and_data_graph`.
 
-
-### Why use ML Extensions for Vulkan for game and graphics development?
+## Why use ML Extensions for Vulkan in game and graphics development?
 
 As a game developer, you've probably noticed the rising demand for smarter, more immersive graphics — but also the increasing strain on GPU resources, especially on mobile. Vulkan's traditional pipelines give you fine-grained control, but finding the right tooling to integrate machine learning has been a challenge. That’s where the new ML extensions for Vulkan come in.
 
-Arm’s `VK_ARM_tensors` and `VK_ARM_data_graph` extensions give you native Vulkan support for executing neural networks on the GPU — using structured tensors and data graph pipelines. Instead of chaining compute shaders to simulate ML models, you can now express them as dataflow graphs in SPIR-V and run them more efficiently. This opens the door to using AI techniques right alongside the graphics pipeline.
+Instead of coordinating individual compute shaders to implement ML workloads, developers can express computations as dataflow graphs in SPIR-V. This provides a more structured approach to integrating machine learning alongside traditional Vulkan graphics workloads and creates opportunities for graph-level optimization.
 
-And while ML has found success in image classification and LLMs, these extensions are designed from the ground up for gaming and graphics workloads — prioritizing predictable execution, GPU compatibility, and memory efficiency. With built-in support for tensor formats and pipeline sessions, the extensions are optimized for developers looking to blend traditional rendering with machine learning on Vulkan.
+Although ML is widely used for image classification and large language models (LLMs), these extensions are particularly useful for game and graphics workloads. They prioritize predictable execution, GPU compatibility, and memory efficiency. Built-in support for tensor formats and pipeline sessions helps you combine traditional Vulkan rendering with machine learning.
 
-Arm provides emulation layers for development on any modern Vulkan-capable hardware, and PyTorch support is available for model conversion workflows.
+## What's next?
 
-For an example of real-time upscaling, see the Learning Path [**Neural Super Sampling with Unreal Engine**](/learning-paths/mobile-graphics-and-gaming/nss-unreal/).
+For an example of neural graphics in practice, see the Learning Path [**Neural Super Sampling with Unreal Engine**](/learning-paths/mobile-graphics-and-gaming/nss-unreal/).
 
-With the Vulkan Samples, you can experiment directly with these ideas. Move on to the next section to set up your machine for running the samples.
+Continue to the next section to install and configure the ML Emulation Layers for Vulkan, then build and run the Vulkan Samples.

@@ -1,5 +1,5 @@
 ---
-title: Deploy a static website to Amazon S3 and integrate with AWS Lambda and DynamoDB using the Serverless Framework
+title: Deploy an S3 site with Lambda and DynamoDB using Serverless Framework
 
 minutes_to_complete: 60
 
@@ -16,15 +16,19 @@ prerequisites:
 
 author: Dawid Borycki
 
+generate_summary_faq: true
+rerun_summary: false
+rerun_faqs: false
+
 ### Tags
 skilllevels: Introductory
 subjects: Web
-cloud_service_providers:
-  - AWS
+platforms:
+  - AWS Graviton
 
 armips:
     - Neoverse
-    
+
 tools_software_languages:
     - Node.js
     - Visual Studio Code
@@ -33,7 +37,6 @@ operatingsystems:
     - Linux
     - Windows
     - macOS
-
 
 further_reading:
     - resource:
@@ -49,10 +52,10 @@ further_reading:
         link: https://aws.amazon.com/lambda/
         type: Documentation
 
-
 ### FIXED, DO NOT MODIFY
 # ================================================================================
 weight: 1                       # _index.md always has weight of 1 to order correctly
 layout: "learningpathall"       # All files under learning paths have this same wrapper
 learning_path_main_page: "yes"  # This should be surfaced when looking for related content. Only set for _index.md of learning path content.
 ---
+

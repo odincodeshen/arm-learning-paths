@@ -49,7 +49,7 @@ You don't need all of these tools immediately. You'll start by using image inspe
 
 ### knowledge_base_search
 
-Searches an Arm knowledge base of learning resources, Arm intrinsics, and software version compatibility using semantic similarity. Given a natural language query, it returns matching resources with URLs, titles, and content snippets ranked by relevance.
+Searches an Arm knowledge base of learning resources, Arm intrinsics, software version compatibility, and guidance for collecting system architecture, CPU, memory, and other host hardware details using semantic similarity, returning matching resources with URLs, titles, and content snippets ranked by relevance.
 
 **Use case:** Finding documentation, tutorials, or version compatibility information for Arm migration.
 
@@ -77,12 +77,6 @@ An assembly code performance analyzer that predicts performance on different CPU
 
 **Use case:** Analyzing and optimizing performance-critical assembly code when migrating between processor types.
 
-### sysreport_instructions
-
-Provides instructions for installing and using sysreport, a tool that obtains system information related to system architecture, CPU, memory, and other hardware details.
-
-**Use case:** Understanding the target Arm system's capabilities before deployment.
-
 ## Setting up the Arm MCP Server
 
 To use the Arm MCP Server with an AI coding assistant, you need to configure the assistant to connect to the MCP server. Connecting your assistant allows it to query Arm-specific tools, documentation, and capabilities exposed through the Model Context Protocol (MCP).
@@ -91,7 +85,7 @@ The required configuration steps vary by AI coding assistant. Refer to the insta
 
 - [GitHub Copilot](/install-guides/github-copilot/)
 - [Claude Code](/install-guides/claude-code/)
-- [Gemini CLI](/install-guides/gemini/)
+- [Antigravity CLI](/install-guides/antigravity/)
 - [Kiro CLI](/install-guides/kiro-cli/)
 - [Codex CLI](/install-guides/codex-cli/)
 

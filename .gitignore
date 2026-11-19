@@ -1,29 +1,39 @@
 /public
-/static/
+/static/*
+!/static/apps/
+/static/apps/*
+!/static/apps/sme-visualisations/
+!/static/social-images/
+/static/social-images/*
+!/static/social-images/default.webp
+/tools/social_card_generation/.social-card-manifest.json*
 __pycache__/
 resources/
+reports/
 node_modules/
 package-lock.json
 .hugo_build.lock
 .vscode
 .env
 startup.sh
-data/
 
 # macOS files
 *.DS_Store
 nohup.out
 
 venv/
+.venv/
 z_local_saved/
 /.idea/
 /tools/.python-version
 /.python-version
 *.iml
 *.xml
+!layouts/index.coveoindex.xml
 
 # CTags symbol index
 tags
 
 # Generated spell check config
 .spellcheck-non-draft.yml
+ai-agent/

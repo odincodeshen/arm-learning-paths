@@ -13,89 +13,109 @@ pinned_learning_paths:
 operatingsystems_filter:
 - Android: 3
 - ChromeOS: 2
-- Linux: 41
-- macOS: 11
-- Windows: 47
+- Linux: 54
+- macOS: 18
+- Windows: 50
 subjects_filter:
+- Agentic AI: 4
+- AI/ML: 16
 - CI-CD: 7
-- Containers and Virtualization: 6
+- Containers and Virtualization: 8
 - Migration to Arm: 30
-- ML: 8
-- Performance and Architecture: 30
+- Performance and Architecture: 34
 subtitle: Build native Windows on Arm applications that are fast and efficient.
 title: Laptops and Desktops
 tools_software_languages_filter:
-- .NET: 13
 - Alacritty: 1
 - Android Studio: 1
 - Arm Development Studio: 1
 - Arm Performance Libraries: 2
 - Arm64EC: 1
-- Assembly: 1
-- Bash: 4
+- Assembly: 2
+- Bash: 7
 - C: 12
-- C#: 6
 - CCA: 1
-- Clang: 13
-- CMake: 4
-- CPP: 12
+- Clang: 14
+- CMake: 6
+- CPP: 13
+- csharp: 6
 - CSS: 1
-- Docker: 9
-- ExecuTorch: 1
+- Docker: 13
+- dotnet: 13
+- ExecuTorch: 2
+- FastAPI: 1
 - FFmpeg: 1
-- GCC: 12
+- GCC: 13
+- Gemma 4: 1
+- Generative AI: 1
 - Git: 1
 - GitHub: 3
 - GitHub Actions: 1
 - GitLab: 2
 - Google Benchmark: 1
 - Google Test: 1
+- Gradio: 1
 - HTML: 2
-- Hugging Face: 2
+- Hugging Face: 4
 - Hyper-V: 1
 - i3: 1
 - Intrinsics: 1
-- IsaacLab: 1
-- IsaacSim: 1
+- IsaacLab: 2
+- IsaacSim: 2
 - JavaScript: 2
 - KleidiCV: 1
 - Kubernetes: 1
 - KVM: 1
+- LeRobot: 2
 - Linux: 1
-- llama.cpp: 3
-- LLM: 1
-- LLVM: 2
+- LiteRT-LM: 1
+- llama-roofline: 1
+- llama.cpp: 6
+- LLM: 2
+- LLVM: 3
 - llvm-mca: 1
 - MCP: 1
+- MediaPipe: 1
 - MSBuild: 1
 - MSVC: 1
 - MTE: 1
+- MuJoCo: 1
 - Neon: 1
 - Neovim: 1
 - Node.js: 3
+- Ollama: 3
 - ONNX Runtime: 1
 - OpenCV: 1
 - perf: 4
 - PGO: 1
 - PowerShell: 1
 - Pytest: 1
-- Python: 14
-- PyTorch: 1
+- Python: 25
+- PyTorch: 3
 - QEMU: 1
 - Qt: 2
+- Raspberry Pi: 3
 - RDP: 1
+- Reachy Mini: 1
 - Remote.It: 1
 - RME: 1
 - Runbook: 17
 - Rust: 2
+- Sherpa-ONNX: 1
 - SME2: 3
+- SmolVLA: 2
+- SSH: 2
+- Supertonic 3: 1
 - SVE: 1
 - SVE2: 1
 - Testcontainers: 1
+- Topo: 2
+- TorchAO: 1
 - Trusted Firmware: 1
 - Ubuntu: 1
 - Visual Studio: 14
-- Visual Studio Code: 13
+- Visual Studio Code: 14
+- vLLM: 1
 - Windows Forms: 1
 - Windows Performance Analyzer: 1
 - Windows Presentation Foundation: 1
@@ -104,14 +124,8 @@ tools_software_languages_filter:
 - WinUI 3: 1
 - WSL: 1
 - Xamarin Forms: 1
+- XNNPACK: 1
 weight: 2
-# auto-generated padding to avoid Hugo YAML alias limit
-# auto-generated padding to avoid Hugo YAML alias limit
-# auto-generated padding to avoid Hugo YAML alias limit
-# auto-generated padding to avoid Hugo YAML alias limit
-# auto-generated padding to avoid Hugo YAML alias limit
-# auto-generated padding to avoid Hugo YAML alias limit
-# auto-generated padding to avoid Hugo YAML alias limit
 # auto-generated padding to avoid Hugo YAML alias limit
 # auto-generated padding to avoid Hugo YAML alias limit
 ---

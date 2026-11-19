@@ -1,7 +1,6 @@
 ---
-
+title: Run Apache Spark SQL with Gluten and Velox on Azure Cobalt 100
 description: Learn how to deploy, configure, and benchmark Apache Spark SQL on Azure Cobalt 100 Arm64 VMs using the Gluten plugin and Velox backend for native query acceleration, with step-by-step setup and performance validation.
-title: Run Apache Spark SQL workloads on Azure Cobalt 100 Arm64 using Gluten and Velox for accelerated analytics
 
 minutes_to_complete: 120
 
@@ -17,14 +16,17 @@ learning_objectives:
 prerequisites:
   - A [Microsoft Azure account](https://azure.microsoft.com/) with access to Cobalt 100 based instances (Dpsv6)
   - Basic understanding of distributed systems and Apache Spark
-
 author: Pareena Verma
+
+generate_summary_faq: true
+rerun_summary: false
+rerun_faqs: false
 
 ### Tags
 skilllevels: Advanced
 subjects: Performance and Architecture
-cloud_service_providers:
-  - Microsoft Azure
+platforms:
+  - Microsoft Azure Cobalt
 
 armips:
     - Neoverse
@@ -35,7 +37,6 @@ tools_software_languages:
   - Hive
   - Gluten
   - Velox
-
 
 operatingsystems:
     - Linux
